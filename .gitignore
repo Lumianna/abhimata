@@ -4,3 +4,13 @@ build/
 bin/
 node_modules/
 vendor/
+
+abhimata-backend/target
+abhimata-backend/classes
+abhimata-backend/checkouts
+pom.xml
+pom.xml.asc
+*.jar
+*.class
+abhimata-backend/.lein-*
+abhimata-backend/.nrepl-port
