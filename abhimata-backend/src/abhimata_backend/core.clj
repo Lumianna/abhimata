@@ -1,6 +1,6 @@
 (ns abhimata-backend.core)
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+(defn hanndler [request]
+  {:status 200
+   :header {"Content-Type" "text/html"}
+   :body "Hello, World!" })
