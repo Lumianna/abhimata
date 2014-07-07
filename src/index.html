@@ -14,5 +14,10 @@
   </head>
   <body ng-controller="AppCtrl">
     <p>{{message}}</p>
+    <button ng-click="getMessage()">Get message</button>
+    <p>{{secretMessage}}</p>
+    <button ng-click="getSecretMessage()">Get secret message</button>
+    <button ng-click="falseLogin()">Authenticate (fails)</button>
+    <button ng-click="login()">Authenticate (succeeds)</button>
   </body>
 </html>

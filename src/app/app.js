@@ -7,14 +7,21 @@ angular.module( 'abhimata', [
 .run( function run () {
 })
 
-.controller( 'AppCtrl', function AppCtrl ( $scope, $location ) {
+.controller( 'AppCtrl', function AppCtrl ( $scope, $location, $http ) {
   $scope.message = "hullo";
-  $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
-    if ( angular.isDefined( toState.data.pageTitle ) ) {
-      $scope.pageTitle = toState.data.pageTitle + ' | ngBoilerplate' ;
-    }
-  });
-})
-
-;
+  $scope.getMessage = function() {
+    $http({method: 'GET', url: 'http://localhost:3000/'})
+      .success(function(data, status) {
+        $scope.message = '' + status + ': ' + data;
+      })
+      .error(function() { console.log('error :(');});
+  };
+  
+  $scope.login = function() {
+    $http.post('/login', {'username': 'admin', 'password': 'clojure'})
+    .success(function(data) {
+      console.log(data);
+    });
+  };
+});
 
