@@ -15,6 +15,7 @@
 
 (defroutes app-routes
   (GET "/" [] "Hello, world!")
+  (GET "/logout" [] (friend/logout* (resp/response "logout ok")))
   (GET "/secret" req
        (friend/authorize #{::admin} "Admin's eyes only!"))
   (route/resources "/")
@@ -34,5 +35,4 @@
    (json/wrap-json-params)
    (json/wrap-json-response {:pretty true})))
 
-(defn start []
-  (jetty/run-jetty (var app) {:port 3000 :join? false}))
+(defonce server (jetty/run-jetty #'app {:port 3000 :join? false}))
