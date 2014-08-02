@@ -2,6 +2,7 @@
 var React = require('react');
 var pkg = require('./package.json');
 
+require('./main.less');
 
 var FormElementSelector = React.createClass({
 
