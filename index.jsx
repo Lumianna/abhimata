@@ -4,41 +4,37 @@ var pkg = require('./package.json');
 
 require('./main.less');
 
+var recognizedFormElements = [
+  { type : "text", 
+    label : "Small textbox"},
+  { type : "textarea", 
+    label : "Big textbox"},
+  { type : "radio", 
+    label : "Radio button" },
+  { type : "checkbox", 
+    label : "Checkbox" }
+  ]; 
+
+
 var FormElementSelector = React.createClass({
 
-  formElements : [
-    { type : "text", label : "Single-line textbox"},
-    { type : "textarea", label : "Multi-line textbox"},
-    //{ type : "radio", label : "Radio button" },
-  ], 
-
-  getInitialState : function() {
-    return {type : "textarea"};
-  },
-
-  handleRadioClick : function(event) {
-    this.setState({type : event.target.value});
-    console.log(event.target.value);
-  },
-
-  addFormElement : function() {
-    this.props.onSelection(this.state.type);
+  addFormElement : function(type) {
+    this.props.onSelection(type);
   },
 
   render : function() {
-    var radioButtons = this.formElements.map(function(elem) {
-      console.log(this);
+    var buttons = this.props.formElements.map(function(elem) {
+      var clickHandler = this.addFormElement.bind(this, elem.type);
       return ( <label> 
-        <input type="radio" name="elementSelector" 
-          value={elem.type} onClick={this.handleRadioClick} />
-        {elem.label}
+        <button onClick={clickHandler}>
+          {elem.label}
+        </button>
         </label>
              );
     }.bind(this));
     return (
       <div className="formElementSelector">
-        {radioButtons}
-        <button onClick={this.addFormElement}> Add form element </button>
+        {buttons}
       </div>
     );
   }
@@ -73,7 +69,8 @@ var EditableForm = React.createClass({
 
     return (
       <div className="editableForm"> 
-        <FormElementSelector onSelection={this.addFormElement}/>
+        <FormElementSelector formElements={recognizedFormElements} 
+                             onSelection={this.addFormElement}/>
         {components}
       </div>
     );
