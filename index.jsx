@@ -6,16 +6,43 @@ require('./main.less');
 
 var recognizedFormElements = [
   { type : "text", 
-    label : "Small textbox"},
+    description : "Small textbox"},
   { type : "textarea", 
-    label : "Big textbox"},
+    description : "Big textbox"},
   { type : "radio", 
-    label : "Radio button" },
+    description : "Radio button" },
   { type : "checkbox", 
-    label : "Checkbox" }
+    description : "Checkbox" }
   ]; 
 
 
+var EditableTextArea = React.createClass({
+  handleChange: function(event) {
+    this.props.onEdit("label", event.target.value);
+  },
+
+  render : function() {
+    var labelIdPreview = "preview" + this.props.key;
+    var labelIdEditable = "editable" + this.props.key;
+    return (
+      <div className="editableTextarea" key={this.props.key}>
+        <div className="preview">
+          <label htmlFor={labelIdPreview}> 
+            {this.props.label} 
+          </label>
+          <textarea id={labelIdPreview} rows="4"/>
+        </div>
+        <div className="editControls">
+      {/* <RequiredControl elemId={this.props.id} /> */}
+          <label htmlFor="labelIdEditable"> Label </label>
+          <input id={labelIdEditable} type="text" onChange={this.handleChange} value={this.props.label}/>
+        </div>
+      </div> );
+  }
+});
+
+
+// Component for selecting a form element to be added.
 var FormElementSelector = React.createClass({
 
   addFormElement : function(type) {
@@ -25,9 +52,9 @@ var FormElementSelector = React.createClass({
   render : function() {
     var buttons = this.props.formElements.map(function(elem) {
       var clickHandler = this.addFormElement.bind(this, elem.type);
-      return ( <label> 
+      return ( <label key={elem.type}> 
         <button onClick={clickHandler}>
-          {elem.label}
+          {elem.description}
         </button>
         </label>
              );
@@ -40,24 +67,45 @@ var FormElementSelector = React.createClass({
   }
 });
 
+var EditableFormElement = function(type) {
+  this.type = type;
+  this.label = "Label";
+  this.required = true;
+  if (type === "radio" || type === "checkbox") {
+    this.alternatives = ["a", "b"]; 
+  }
+}
+
 var EditableForm = React.createClass({
   getInitialState: function() {
     return {
-      elements : []
+      elements : [],
+      nextKey : 0 // to generate keys
     };
   },
 
-  addFormElement : function(elem) {
-    var newElements = this.state.elements;
-    newElements.push(elem);
-    this.setState({elements : newElements});
+  addFormElement : function(type) {
+    var elements = this.state.elements;
+    var newElement = new EditableFormElement(type);
+    newElement.key = this.state.nextKey;
+    elements.push(newElement);
+    console.log(newElement);
+    this.setState({elements : elements, nextKey : this.state.nextKey + 1});
+  },
+  
+  editFormElement : function(key, field, value) {
+    var elements = this.state.elements;
+    elements[key][field] = value;
+    this.setState({elements : elements});
   },
 
   render: function() {
     var components = this.state.elements.map(function(elem) {
-      switch(elem) {
+      switch(elem.type) {
         case  "textarea" :
-          return ( <textarea rows="4" /> );
+var onEdit = this.editFormElement.bind(this, elem.key);
+          return ( <EditableTextArea key={elem.key} label={elem.label} 
+                                     onEdit={onEdit} /> );
         break;
         case  "text" :
           return ( <input type="text" /> );
@@ -65,7 +113,7 @@ var EditableForm = React.createClass({
         default :
           return null;
       }
-    });
+    }.bind(this));;
 
     return (
       <div className="editableForm"> 
