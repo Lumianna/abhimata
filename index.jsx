@@ -16,6 +16,7 @@ var recognizedFormElements = [
   ]; 
 
 
+//Editable textarea element
 var EditableTextArea = React.createClass({
   handleChange: function(event) {
     this.props.onEdit("label", event.target.value);
@@ -25,16 +26,42 @@ var EditableTextArea = React.createClass({
     var labelIdPreview = "preview" + this.props.key;
     var labelIdEditable = "editable" + this.props.key;
     return (
-      <div className="editableTextarea" key={this.props.key}>
+      <div className="editable-textarea editable-form-element" key={this.props.key}>
         <div className="preview">
           <label htmlFor={labelIdPreview}> 
             {this.props.label} 
           </label>
           <textarea id={labelIdPreview} rows="4"/>
         </div>
-        <div className="editControls">
+        <div className="edit-controls">
       {/* <RequiredControl elemId={this.props.id} /> */}
-          <label htmlFor="labelIdEditable"> Label </label>
+          <label htmlFor="labelIdEditable"> Question title </label>
+          <input id={labelIdEditable} type="text" onChange={this.handleChange} value={this.props.label}/>
+        </div>
+      </div> );
+  }
+});
+
+//Editable input type=text element
+var EditableText = React.createClass({
+  handleChange: function(event) {
+    this.props.onEdit("label", event.target.value);
+  },
+
+  render : function() {
+    var labelIdPreview = "preview" + this.props.key;
+    var labelIdEditable = "editable" + this.props.key;
+    return (
+      <div className="editable-text editable-form-element" key={this.props.key}>
+        <div className="preview">
+          <label htmlFor={labelIdPreview}> 
+            {this.props.label} 
+          </label>
+          <input type="text" id={labelIdPreview} />
+        </div>
+        <div className="edit-controls">
+      {/* <RequiredControl elemId={this.props.id} /> */}
+          <label htmlFor="labelIdEditable"> Question title </label>
           <input id={labelIdEditable} type="text" onChange={this.handleChange} value={this.props.label}/>
         </div>
       </div> );
@@ -69,7 +96,7 @@ var FormElementSelector = React.createClass({
 
 var EditableFormElement = function(type) {
   this.type = type;
-  this.label = "Label";
+  this.label = "?";
   this.required = true;
   if (type === "radio" || type === "checkbox") {
     this.alternatives = ["a", "b"]; 
@@ -89,7 +116,6 @@ var EditableForm = React.createClass({
     var newElement = new EditableFormElement(type);
     newElement.key = this.state.nextKey;
     elements.push(newElement);
-    console.log(newElement);
     this.setState({elements : elements, nextKey : this.state.nextKey + 1});
   },
   
@@ -108,7 +134,9 @@ var onEdit = this.editFormElement.bind(this, elem.key);
                                      onEdit={onEdit} /> );
         break;
         case  "text" :
-          return ( <input type="text" /> );
+var onEdit = this.editFormElement.bind(this, elem.key);
+          return ( <EditableText key={elem.key} label={elem.label} 
+                                     onEdit={onEdit} /> );
         break;
         default :
           return null;
