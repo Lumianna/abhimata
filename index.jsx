@@ -94,6 +94,55 @@ var EditableText = React.createClass({
   }
 });
 
+var EditableRadioButton = React.createClass({
+  handleLabelEdit: function(event) {
+    this.props.onEdit("label", event.target.value);
+  },
+  
+  handleAltsEdit: function(event) {
+    var altsString = event.target.value;
+    parsedAlts = altsString.split(",").map(function(x) { return x.trim(); });
+    this.props.onEdit("alternatives", parsedAlts);
+  },
+  
+  render : function() {
+    var labelIdPreview = "preview" + this.props.key;
+    var labelIdTitle = "title" + this.props.key;
+    var labelIdAlts = "alternatives" + this.props.key;
+    var radioName = "radio" + this.props.key;
+    
+    var altsStr = this.props.element.alternatives.join(",");
+    
+    var radioButtons = this.props.element.alternatives.map(
+      function(alternative, index) {
+        return ( 
+          <label> 
+            {alternative} 
+            <input type="radio" value={alternative} 
+                   key={index} name={radioName} /> 
+          </label> );
+      }.bind(this));
+    return (
+      <div className="editable-text editable-form-element" key={this.props.key}>
+        <div className="preview">
+          <label htmlFor={radioName}> 
+            {this.props.element.label} 
+          </label>
+          <div id={radioName}>
+            {radioButtons}
+          </div>
+        </div>
+        <div className="edit-controls">
+      {/* <RequiredControl elemId={this.props.id} /> */}
+          <label htmlFor="labelIdTitle"> Question title </label>
+          <input id={labelIdTitle} type="text" onChange={this.handleLabelEdit} value={this.props.element.label}/>
+          <label htmlFor="labelIdAlts"> Alternatives </label>
+          <input id={labelIdAlts} type="text" onChange={this.handleAltsEdit} value={altsStr}/>
+        </div>
+      </div> );
+  }
+});
+
 
 // Component for selecting a form element to be added.
 var FormElementSelector = React.createClass({
@@ -154,18 +203,22 @@ var EditableForm = React.createClass({
 
   render: function() {
     var components = this.state.elements.map(function(elem) {
+      var onEdit = this.editFormElement.bind(this, elem.key);
       switch(elem.type) {
         case  "textarea" :
-var onEdit = this.editFormElement.bind(this, elem.key);
           return ( <EditableTextArea key={elem.key} element={elem}
                                      onEdit={onEdit} /> );
-        break;
+          break;
         case  "text" :
-var onEdit = this.editFormElement.bind(this, elem.key);
           return ( <EditableText key={elem.key} element={elem} 
-                                     onEdit={onEdit} /> );
-        break;
+                                 onEdit={onEdit} /> );
+          break;
+        case "radio" :
+          return ( <EditableRadioButton key={elem.key} element={elem} 
+                                        onEdit={onEdit} /> );
+          break;
         default :
+          console.log("Warning: unrecognized editable form element");
           return null;
       }
     }.bind(this));;
