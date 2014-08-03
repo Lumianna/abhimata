@@ -144,6 +144,55 @@ var EditableRadioButton = React.createClass({
 });
 
 
+var EditableCheckbox = React.createClass({
+  handleLabelEdit: function(event) {
+    this.props.onEdit("label", event.target.value);
+  },
+  
+  handleAltsEdit: function(event) {
+    var altsString = event.target.value;
+    parsedAlts = altsString.split(",").map(function(x) { return x.trim(); });
+    this.props.onEdit("alternatives", parsedAlts);
+  },
+  
+  render : function() {
+    var labelIdPreview = "preview" + this.props.key;
+    var labelIdTitle = "title" + this.props.key;
+    var labelIdAlts = "alternatives" + this.props.key;
+    var checkboxName = "checkbox" + this.props.key;
+    
+    var altsStr = this.props.element.alternatives.join(",");
+    
+    var checkboxes = this.props.element.alternatives.map(
+      function(alternative, index) {
+        return ( 
+          <label> 
+            {alternative} 
+            <input type="checkbox" value={alternative} 
+                   key={index} name={checkboxName} /> 
+          </label> );
+      }.bind(this));
+    return (
+      <div className="editable-checkbox editable-form-element" key={this.props.key}>
+        <div className="preview">
+          <label htmlFor={checkboxName}> 
+            {this.props.element.label} 
+          </label>
+          <div id={checkboxName}>
+            {checkboxes}
+          </div>
+        </div>
+        <div className="edit-controls">
+      {/* <RequiredControl elemId={this.props.id} /> */}
+          <label htmlFor="labelIdTitle"> Question title </label>
+          <input id={labelIdTitle} type="text" onChange={this.handleLabelEdit} value={this.props.element.label}/>
+          <label htmlFor="labelIdAlts"> Alternatives </label>
+          <input id={labelIdAlts} type="text" onChange={this.handleAltsEdit} value={altsStr}/>
+        </div>
+      </div> );
+  }
+});
+
 // Component for selecting a form element to be added.
 var FormElementSelector = React.createClass({
 
@@ -215,6 +264,9 @@ var EditableForm = React.createClass({
           break;
         case "radio" :
           return ( <EditableRadioButton key={elem.key} element={elem} 
+                                        onEdit={onEdit} /> );
+case "checkbox" :
+          return ( <EditableCheckbox key={elem.key} element={elem} 
                                         onEdit={onEdit} /> );
           break;
         default :
