@@ -2,6 +2,8 @@
 var React = require('react');
 var pkg = require('./package.json');
 
+var $ = require('jquery');
+
 require('./main.less');
 
 var recognizedFormElements = [
@@ -214,6 +216,7 @@ var FormElementSelector = React.createClass({
       <div className="form-element-selector">
         <h2> Add a new question: </h2>
         {buttons}
+        <button onClick={this.props.saveForm}>Save form </button>
       </div>
     );
   }
@@ -249,6 +252,17 @@ var EditableForm = React.createClass({
     elements[key][field] = value;
     this.setState({elements : elements});
   },
+  
+  saveForm : function() {
+    $.ajax({ 
+      type : "POST",
+      url : "/form",
+      data : JSON.stringify({form : this.state.elements}),
+      dataType : "json",
+      success : function(data) { alert(data); },
+      contentType : "application/json; charset=utf-8"
+    });
+  },
 
   render: function() {
     var components = this.state.elements.map(function(elem) {
@@ -265,7 +279,7 @@ var EditableForm = React.createClass({
         case "radio" :
           return ( <EditableRadioButton key={elem.key} element={elem} 
                                         onEdit={onEdit} /> );
-case "checkbox" :
+        case "checkbox" :
           return ( <EditableCheckbox key={elem.key} element={elem} 
                                         onEdit={onEdit} /> );
           break;
@@ -278,7 +292,8 @@ case "checkbox" :
     return (
       <div className="editableForm"> 
         <FormElementSelector formElements={recognizedFormElements} 
-                             onSelection={this.addFormElement}/>
+                             onSelection={this.addFormElement}
+                             saveForm={this.saveForm}/>
         {components}
       </div>
     );

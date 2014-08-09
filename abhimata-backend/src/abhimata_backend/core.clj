@@ -13,11 +13,15 @@
                            :password (creds/hash-bcrypt "clojure")
                            :roles #{::admin}}}))
 
+(def form (atom "initialform"))
+
 (defroutes app-routes
   (GET "/" [] "Hello, world!")
   (GET "/logout" [] (friend/logout* (resp/response "logout ok")))
   (GET "/secret" req
        (friend/authorize #{::admin} "Admin's eyes only!"))
+  (POST "/form" {json :json-params} (swap! form (fn [_] json)))
+  (GET "/form" [] (resp/response @form))
   (route/resources "/")
   (route/not-found "Not Found"))
 
