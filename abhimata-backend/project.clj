@@ -4,6 +4,7 @@
   :license {:name "GPL3" }
   :plugins [[cider/cider-nrepl "0.7.0-SNAPSHOT"]]
   :dependencies [[org.clojure/clojure "1.6.0"]
+                 [org.clojure/data.json "0.2.5"]
                  [org.clojure/java.jdbc "0.3.4"]
                  [postgresql/postgresql "9.1-901.jdbc4"]
                  [com.cemerick/friend "0.2.1"]

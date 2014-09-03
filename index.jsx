@@ -287,7 +287,7 @@ var EditableForm = React.createClass({
           console.log("Warning: unrecognized editable form element");
           return null;
       }
-    }.bind(this));;
+    }.bind(this));
 
     return (
       <div className="editableForm"> 
