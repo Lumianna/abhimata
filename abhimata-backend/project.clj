@@ -12,4 +12,7 @@
                  [ring/ring-json "0.3.1"]
                  [compojure "1.1.8"]
                  [ring/ring-jetty-adapter "1.3.0"]]
-  :main abhimata_backend.core)
+  :aot [abhimata_backend.core]
+  :main abhimata_backend.core
+  :target-path "target/%s"
+  :profiles {:uberjar {:aot :all}})
