@@ -1,6 +1,5 @@
-(ns abhimata-backend.core
+(ns abhimata_backend.core
   (:gen-class)
-  (:import org.postgresql.util.PGobject)
   (:require [cemerick.friend :as friend :as friend]
             (cemerick.friend [workflows :as workflows]
                              [credentials :as creds])
@@ -12,35 +11,7 @@
             [clojure.data.json :as json]
             [ring.util.response :as resp]
             (compojure [handler :as handler]
-                       [route :as route]))
-  )
-
-;Extend jdbc to support PostgreSQL's json data type, as per
-;http://hiim.tv/clojure/2014/05/15/clojure-postgres-json/
-
-(defn value-to-json-pgobject [value]
-  (doto (PGobject.)
-    (.setType "json")
-    (.setValue (json/write-str value))))
-
-(defn extend-jdbc-psql-protocols []
-  (do
-    (extend-protocol jdbc/ISQLValue
-      clojure.lang.IPersistentMap
-      (sql-value [value] (value-to-json-pgobject value))
-
-      clojure.lang.IPersistentVector
-      (sql-value [value] (value-to-json-pgobject value)))
-
-    (extend-protocol jdbc/IResultSetReadColumn
-      PGobject
-      (result-set-read-column [pgobj metadata idx]
-        (let [type (.getType pgobj)
-              value (.getValue pgobj)]
-          (case type
-            "json" (json/read-str value :key-fn keyword)
-            :else value))))))
-
+                       [route :as route])))
 
 
 (def users (atom {"admin" { :username "admin"
@@ -58,7 +29,7 @@
     (swap! form (fn [_] json-form))
     (jdbc/update! db-spec :abhimata_event
                   {:title "Test event",
-                   :signup_form json-form }
+                   :signup_form (json/write-str json-form) }
                   ["event_id = ?" 1])))
 
 (defn load-form []
@@ -67,7 +38,8 @@
                     ["select * from abhimata_event where event_id = 1"])]
     (-> event-db-entry
         first
-        :signup_form)))
+        :signup_form
+        json/read-str)))
 
 
 (defroutes app-routes
@@ -97,10 +69,8 @@
 
 #_(defonce server
  (do
- (extend-jdbc-psql-protocols)
  (jetty/run-jetty #'app {:port 3000 :join? false})))
 
 (defn -main [port]
   (do
-    (extend-jdbc-psql-protocols)
     (jetty/run-jetty #'app {:port (Integer. port) :join? false})))
