@@ -256,7 +256,7 @@ var EditableForm = React.createClass({
   saveForm : function() {
     $.ajax({ 
       type : "POST",
-      url : "/form",
+      url : "form",
       data : JSON.stringify({form : this.state.elements}),
       dataType : "json",
       success : function(data) { alert(data); },
