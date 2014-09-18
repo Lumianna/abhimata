@@ -10,6 +10,8 @@ var DefaultRoute = Router.DefaultRoute;
 var Routes = Router.Routes;
 var Link = Router.Link;
 
+var appState = require('./appState.js');
+
 
 var RetreatList = React.createClass({
   render : function() {
@@ -44,5 +46,27 @@ var routes = (
   </Routes>
 );
 
+var AppWithLogin = React.createClass({
+  getInitialState : function() {
+    return { userIsAuthenticated : false };
+  },
+  
+  login : function() {
+    this.setState( { userIsAuthenticated : true });
+  },
 
-React.renderComponent(routes, document.body);
+  render : function() {
+    if(this.state.userIsAuthenticated) {
+      return routes;
+    }
+    else {
+      return <button onClick={this.login}> LOGIN </button>
+    }
+  }
+});
+       
+
+React.renderComponent(
+<AppWithLogin userIsAuthenticated={appState.userIsAuthenticated()} 
+              login={appState.login}/>
+, document.body);
