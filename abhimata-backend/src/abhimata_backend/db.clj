@@ -25,3 +25,9 @@
         first
         :signup_form
         json/read-str)))
+
+(defn get-events []
+  (jdbc/query db-spec ["select * from abhimata_event"]))
+
+(defn get-event [id]
+  (jdbc/query db-spec ["select * from abhimata_event where event_id = ?" id]))

@@ -6,7 +6,7 @@
    (cemerick.friend [workflows :as workflows]
                     [credentials :as creds])
    [compojure.core :as compojure
-    :refer (GET POST ANY defroutes)]
+    :refer (GET POST ANY defroutes context)]
    [clojure.java.jdbc :as jdbc]
    [ring.adapter.jetty :as jetty]
    [ring.middleware.json :as ringjson]
@@ -23,15 +23,25 @@
 
 
 (defroutes app-routes
-  (GET "/" [] "Hello, world!")
+  (GET "/welcome" [] "Hi there")
   (GET "/logout" [] (friend/logout* (resp/response "logout ok")))
   (GET "/secret" req
        (friend/authorize #{::admin} "Admin's eyes only!"))
   (POST "/form" {json-form :json-params} (db/save-form json-form) )
   (GET "/form" [] (resp/response @db/form))
   (GET "/dbform" [] (resp/response (db/load-form)))
+    (context "/events" []
+      (GET "/" [] (resp/response (db/get-events)))
+      (POST "/" [] (resp/response (db/get-events)))
+      (context "/:id" [id] 
+        (GET "/" [] (resp/response (db/get-event id) ))
+        ;;(GET "/registrants")
+        ))
   (route/files "/" {:root (str (System/getProperty "user.dir") "/static/public")} )
   (route/not-found "Not Found"))
+
+(defn failed-login-handler [ & _]
+  (resp/status (resp/response "") 401))
 
 (def app
   (->
@@ -39,7 +49,8 @@
                          {:allow-anon? true
                           :redirect-on-auth? false
                           :login-uri "/login"
-                          :default-landing-uri "/"
+                          :default-landing-uri "/welcome"
+                          :login-failure-handler failed-login-handler
                           ; :unauthorized-handler #(-> (h/html5 [:h2 "You do not have sufficient privileges to access " (:uri %)]) resp/response (resp/status 401))
                           :credential-fn #(creds/bcrypt-credential-fn @users %)
                           :workflows [(workflows/interactive-form)]})

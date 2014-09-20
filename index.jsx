@@ -1,5 +1,6 @@
 /** @jsx React.DOM */
 var React = require('react');
+var $ = require('jquery');
 var pkg = require('./package.json');
 
 var EditableForm = require('./editableform.jsx');
@@ -9,8 +10,6 @@ var Route = Router.Route;
 var DefaultRoute = Router.DefaultRoute;
 var Routes = Router.Routes;
 var Link = Router.Link;
-
-var appState = require('./appState.js');
 
 
 var RetreatList = React.createClass({
@@ -52,7 +51,23 @@ var AppWithLogin = React.createClass({
   },
   
   login : function() {
-    this.setState( { userIsAuthenticated : true });
+    $.ajax({ 
+      type : "POST",
+      url : "login",
+      data : JSON.stringify(
+        {username : 'admin',
+         password : 'clojure'}),
+      success : function(data) { 
+        this.setState( {userIsAuthenticated : true});
+        alert(data); 
+      }.bind(this),
+      error : function(data, textStatus) { 
+        console.log(data); 
+        console.log(textStatus); 
+        alert("wrong user name or password");
+      },
+      contentType : "application/json; charset=utf-8"
+    });
   },
 
   render : function() {
@@ -67,6 +82,5 @@ var AppWithLogin = React.createClass({
        
 
 React.renderComponent(
-<AppWithLogin userIsAuthenticated={appState.userIsAuthenticated()} 
-              login={appState.login}/>
+<AppWithLogin/>
 , document.body);
