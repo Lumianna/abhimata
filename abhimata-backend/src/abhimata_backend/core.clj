@@ -37,7 +37,8 @@
         (GET "/" [] (resp/response (db/get-event id) ))
         ;;(GET "/registrants")
         ))
-  (route/files "/" {:root (str (System/getProperty "user.dir") "/static/public")} )
+  (route/files "/" 
+               {:root (str (System/getProperty "user.dir") "/static/public")} )
   (route/not-found "Not Found"))
 
 (defn failed-login-handler [ & _]

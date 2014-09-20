@@ -47,7 +47,10 @@ var routes = (
 
 var AppWithLogin = React.createClass({
   getInitialState : function() {
-    return { userIsAuthenticated : false };
+    return { userIsAuthenticated : false, 
+             username : "", 
+             password : "",
+             error : null };
   },
   
   login : function() {
@@ -55,19 +58,26 @@ var AppWithLogin = React.createClass({
       type : "POST",
       url : "login",
       data : JSON.stringify(
-        {username : 'admin',
-         password : 'clojure'}),
+        { username : this.state.username,
+          password : this.state.password }),
       success : function(data) { 
-        this.setState( {userIsAuthenticated : true});
-        alert(data); 
+        this.setState( {userIsAuthenticated : true, 
+                        error : null});
       }.bind(this),
       error : function(data, textStatus) { 
-        console.log(data); 
-        console.log(textStatus); 
-        alert("wrong user name or password");
-      },
+        this.setState({ error : "Invalid user name or password."});
+      }.bind(this),
       contentType : "application/json; charset=utf-8"
     });
+    this.setState({password : ""});
+  },
+  
+  updateUsername : function(event) {
+    this.setState({username : event.target.value});
+  },
+
+  updatePassword : function(event) {
+    this.setState({password : event.target.value});
   },
 
   render : function() {
@@ -75,7 +85,20 @@ var AppWithLogin = React.createClass({
       return routes;
     }
     else {
-      return <button onClick={this.login}> LOGIN </button>
+      var errorMessage = null;
+      if(this.state.error) {
+        errorMessage = <p className="error-message">{this.state.error}</p>
+      }
+        
+      return (
+      <form>
+        {errorMessage}
+        <input type="text" placeholder="Username" 
+               value={this.state.username} onChange={this.updateUsername}/>
+        <input type="password" placeholder="Password" 
+               value={this.state.password} onChange={this.updatePassword}/>
+        <button type="submit" onClick={this.login}>Log in</button> 
+      </form> );
     }
   }
 });
