@@ -6,6 +6,13 @@ create table abhimata_event
   constraint event_pk primary key (event_id)
 );
 
+create table abhimata_admin
+(
+  username varchar(50) not null unique,
+  password char(60) not null,
+  constraint admin_pk primary key (username)
+);
+
 create table abhimata_registration
 (
   registration_id serial,

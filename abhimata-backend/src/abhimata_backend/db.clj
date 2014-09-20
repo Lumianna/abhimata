@@ -31,3 +31,15 @@
 
 (defn get-event [id]
   (jdbc/query db-spec ["select * from abhimata_event where event_id = ?" id]))
+
+(defn fetch-admin-credentials [username]
+  "Fetches admin credentials in the form expected by friend's
+   bcrypt-credential-fn"
+  (let [query-results (jdbc/query db-spec 
+                       ["select * from abhimata_admin where username = ?" 
+                        username])]
+    (if (empty? query-results) 
+      nil
+      (assoc (into {} query-results) :roles #{:admin}))))
+  
+

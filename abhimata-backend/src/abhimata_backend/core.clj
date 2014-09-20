@@ -26,7 +26,7 @@
   (GET "/welcome" [] "Hi there")
   (GET "/logout" [] (friend/logout* (resp/response "logout ok")))
   (GET "/secret" req
-       (friend/authorize #{::admin} "Admin's eyes only!"))
+       (friend/authorize #{:admin} "Admin's eyes only!"))
   (POST "/form" {json-form :json-params} (db/save-form json-form) )
   (GET "/form" [] (resp/response @db/form))
   (GET "/dbform" [] (resp/response (db/load-form)))
@@ -53,7 +53,8 @@
                           :default-landing-uri "/welcome"
                           :login-failure-handler failed-login-handler
                           ; :unauthorized-handler #(-> (h/html5 [:h2 "You do not have sufficient privileges to access " (:uri %)]) resp/response (resp/status 401))
-                          :credential-fn #(creds/bcrypt-credential-fn @users %)
+                          :credential-fn #(creds/bcrypt-credential-fn 
+                                           db/fetch-admin-credentials %)
                           :workflows [(workflows/interactive-form)]})
     (handler/site)
     (ringjson/wrap-json-params)
