@@ -12,9 +12,42 @@ var Routes = Router.Routes;
 var Link = Router.Link;
 
 
-var RetreatList = React.createClass({
+var EventList = React.createClass({
+  getInitialState : function() {
+    return { events : [] };
+  },
+  
+  componentDidMount : function() {
+    this.fetchEvents();
+  },
+  
+  fetchEvents : function() {
+    $.ajax({ 
+      type : "GET",
+      url : "events",
+      success : function(data) { 
+        console.log(data);
+        this.setState( {events : data} );
+      }.bind(this),
+      error : function(data, textStatus) { 
+        console.log(data);
+        console.log(textStatus);
+        //this.setState({ error : "Invalid user name or password."});
+      }.bind(this),
+      dataType : "json"
+    });
+  },
+
   render : function() {
-    return ( <p>A list of retreats!</p> );
+    var eventTitles = this.state.events.map(function(event) {
+      return ( <li> {event.title} </li> );
+    });
+    return ( 
+      <div>
+        <h1>Events</h1>
+        <ul>{eventTitles}</ul> 
+        <button>Create new</button>
+      </div>);
   }
 });
 
@@ -24,7 +57,7 @@ var App = React.createClass({
       <div>
         <header>
           <ul>
-            <li> <Link to="retreats">List of retreats </Link> </li>
+            <li> <Link to="events">List of events </Link> </li>
             <li> <Link to="formeditor">Form editor </Link> </li>
           </ul>
         </header>
@@ -37,10 +70,9 @@ var App = React.createClass({
 
 var routes = (
   <Routes location="hash">
-    <Route name="app" path="/" handler={App}>
-      <Route name="retreats" handler={RetreatList}/>
-      <Route name="formeditor" handler={EditableForm}/>
-      <DefaultRoute handler={RetreatList}/>
+    <Route name="eventlist" path="/" handler={EventList}>
+      <Route name="new" handler={EditableForm}/>
+      <DefaultRoute handler={EventList}/>
       </Route>
   </Routes>
 );

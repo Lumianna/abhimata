@@ -32,7 +32,7 @@
   (GET "/dbform" [] (resp/response (db/load-form)))
     (context "/events" []
       (GET "/" [] (resp/response (db/get-events)))
-      (POST "/" [] (resp/response (db/get-events)))
+;      (POST "/" [] (resp/response (db/get-events)))
       (context "/:id" [id] 
         (GET "/" [] (resp/response (db/get-event id) ))
         ;;(GET "/registrants")
