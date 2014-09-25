@@ -32,6 +32,11 @@
 (defn get-event [id]
   (jdbc/query db-spec ["select * from abhimata_event where event_id = ?" id]))
 
+(defn make-event []
+  (jdbc/insert! db-spec :abhimata_event 
+                {:title "New event", 
+                 :signup_form "[]"} ))
+
 (defn fetch-admin-credentials [username]
   "Fetches admin credentials in the form expected by friend's
    bcrypt-credential-fn"

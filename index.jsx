@@ -37,6 +37,22 @@ var EventList = React.createClass({
       dataType : "json"
     });
   },
+  
+  createNewEvent : function() {
+    $.ajax({ 
+      type : "POST",
+      url : "events",
+      data : JSON.stringify(
+        { }),
+      success : function(data) { 
+        this.fetchEvents();
+      }.bind(this),
+      error : function(data, textStatus) { 
+        this.setState({ error : "Could not access database."});
+      }.bind(this),
+      contentType : "application/json; charset=utf-8"
+    });
+  },
 
   render : function() {
     var eventTitles = this.state.events.map(function(event) {
@@ -46,7 +62,7 @@ var EventList = React.createClass({
       <div>
         <h1>Events</h1>
         <ul>{eventTitles}</ul> 
-        <button>Create new</button>
+        <button onClick={this.createNewEvent}>Create new event</button>
       </div>);
   }
 });
