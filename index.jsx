@@ -56,8 +56,15 @@ var EventList = React.createClass({
 
   render : function() {
     var eventTitles = this.state.events.map(function(event) {
-      return ( <li> {event.title} </li> );
+      return ( 
+        <li> 
+          <Link to="event" 
+                params={{eventId : event.event_id}}> 
+          {event.title} 
+          </Link> 
+        </li> );
     });
+
     return ( 
       <div>
         <h1>Events</h1>
@@ -67,33 +74,48 @@ var EventList = React.createClass({
   }
 });
 
-var App = React.createClass({
-  render : function() {
-    return (
-      <div>
-        <header>
-          <ul>
-            <li> <Link to="events">List of events </Link> </li>
-            <li> <Link to="formeditor">Form editor </Link> </li>
-          </ul>
-        </header>
+var EventSettings = React.createClass({
+  getInitialState : function() {
+    return {
+      title : "",
+      signup_form : [],
+    };
+  },
+  
+  componentDidMount : function() {
+    var url = "events/" + this.props.params.eventId;
+    $.ajax({ 
+      type : "GET",
+      url : url,
+      success : function(data) { 
+        this.setState( data );
+      }.bind(this),
+      error : function(data, textStatus) { 
+        console.log(data);
+        console.log(textStatus);
+        //this.setState({ error : "Invalid user name or password."});
+      }.bind(this),
+      dataType : "json"
+    });
 
-        <this.props.activeRouteHandler/>
-      </div>
-    );
+  },
+  
+  render : function() {
+    return (<h1>{this.state.title}</h1>);
   }
 });
 
+
 var routes = (
   <Routes location="hash">
-    <Route name="eventlist" path="/" handler={EventList}>
-      <Route name="new" handler={EditableForm}/>
-      <DefaultRoute handler={EventList}/>
-      </Route>
+    <DefaultRoute handler={EventList}/>
+    <Route name="eventlist" path="/events" handler={EventList}/>
+    <Route name="event" path="/events/:eventId" handler={EventSettings}/>
   </Routes>
 );
 
-var AppWithLogin = React.createClass({
+
+var App = React.createClass({
   getInitialState : function() {
     return { userIsAuthenticated : false, 
              username : "", 
@@ -153,5 +175,5 @@ var AppWithLogin = React.createClass({
        
 
 React.renderComponent(
-<AppWithLogin/>
+<App/>
 , document.body);

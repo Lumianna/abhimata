@@ -30,7 +30,10 @@
   (jdbc/query db-spec ["select * from abhimata_event"]))
 
 (defn get-event [id]
-  (jdbc/query db-spec ["select * from abhimata_event where event_id = ?" id]))
+  (first 
+   (jdbc/query 
+    db-spec ["select * from abhimata_event where event_id = ?" 
+             (Integer. id)])))
 
 (defn make-event []
   (jdbc/insert! db-spec :abhimata_event 
