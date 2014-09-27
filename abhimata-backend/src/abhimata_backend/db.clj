@@ -30,10 +30,14 @@
   (jdbc/query db-spec ["select * from abhimata_event"]))
 
 (defn get-event [id]
-  (first 
-   (jdbc/query 
-    db-spec ["select * from abhimata_event where event_id = ?" 
-             (Integer. id)])))
+  (let [result 
+        (jdbc/query 
+         db-spec ["select * from abhimata_event where event_id = ?" 
+                  (Integer. id)])]
+    (if (empty? result)
+      {:status 404, 
+       :body (str "Event " id " does not exist.")}
+      (first result))))
 
 (defn make-event []
   (jdbc/insert! db-spec :abhimata_event 

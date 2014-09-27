@@ -20,8 +20,6 @@
                            :password (creds/hash-bcrypt "clojure")
                            :roles #{::admin}}}))
 
-
-
 (defroutes app-routes
   (GET "/welcome" [] "Hi there")
   (GET "/logout" [] (friend/logout* (resp/response "logout ok")))
@@ -34,7 +32,7 @@
       (GET "/" [] (resp/response (db/get-events)))
       (POST "/" [] (resp/response (db/make-event)))
       (context "/:id" [id] 
-        (GET "/" [] (resp/response (db/get-event id) ))
+        (GET "/" [] (db/get-event id) )
         ;;(GET "/registrants")
         ))
   (route/files "/" 
