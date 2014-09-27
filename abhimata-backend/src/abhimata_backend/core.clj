@@ -15,19 +15,13 @@
    (compojure [handler :as handler]
               [route :as route])))
 
-
-(def users (atom {"admin" { :username "admin"
-                           :password (creds/hash-bcrypt "clojure")
-                           :roles #{::admin}}}))
-
 (defroutes app-routes
   (GET "/welcome" [] "Hi there")
   (GET "/logout" [] (friend/logout* (resp/response "logout ok")))
   (GET "/secret" req
        (friend/authorize #{:admin} "Admin's eyes only!"))
   (POST "/form" {json-form :json-params} (db/save-form json-form) )
-  (GET "/form" [] (resp/response @db/form))
-  (GET "/dbform" [] (resp/response (db/load-form)))
+  (GET "/form" [] (resp/response (db/load-form)))
     (context "/events" []
       (GET "/" [] (resp/response (db/get-events)))
       (POST "/" [] (resp/response (db/make-event)))

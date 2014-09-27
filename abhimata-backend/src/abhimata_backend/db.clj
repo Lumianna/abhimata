@@ -7,11 +7,8 @@
               :subname "//localhost:5432/knyb",
               :user "knyb"})
 
-(def form (atom "initialform"))
-
 (defn save-form [json-form]
   (do
-    (swap! form (fn [_] json-form))
     (jdbc/update! db-spec :abhimata_event
                   {:title "Test event",
                    :signup_form (json/write-str json-form) }
