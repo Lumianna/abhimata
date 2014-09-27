@@ -3,107 +3,17 @@ var React = require('react');
 var $ = require('jquery');
 var pkg = require('./package.json');
 
-var EditableForm = require('./editableform.jsx');
-
+//react-router
 var Router = require('react-router');
 var Route = Router.Route;
 var DefaultRoute = Router.DefaultRoute;
 var Routes = Router.Routes;
 var Link = Router.Link;
 
-
-var EventList = React.createClass({
-  getInitialState : function() {
-    return { events : [] };
-  },
-  
-  componentDidMount : function() {
-    this.fetchEvents();
-  },
-  
-  fetchEvents : function() {
-    $.ajax({ 
-      type : "GET",
-      url : "events",
-      success : function(data) { 
-        console.log(data);
-        this.setState( {events : data} );
-      }.bind(this),
-      error : function(data, textStatus) { 
-        console.log(data);
-        console.log(textStatus);
-        //this.setState({ error : "Invalid user name or password."});
-      }.bind(this),
-      dataType : "json"
-    });
-  },
-  
-  createNewEvent : function() {
-    $.ajax({ 
-      type : "POST",
-      url : "events",
-      data : JSON.stringify(
-        { }),
-      success : function(data) { 
-        this.fetchEvents();
-      }.bind(this),
-      error : function(data, textStatus) { 
-        this.setState({ error : "Could not access database."});
-      }.bind(this),
-      contentType : "application/json; charset=utf-8"
-    });
-  },
-
-  render : function() {
-    var eventTitles = this.state.events.map(function(event) {
-      return ( 
-        <li> 
-          <Link to="event" 
-                params={{eventId : event.event_id}}> 
-          {event.title} 
-          </Link> 
-        </li> );
-    });
-
-    return ( 
-      <div>
-        <h1>Events</h1>
-        <ul>{eventTitles}</ul> 
-        <button onClick={this.createNewEvent}>Create new event</button>
-      </div>);
-  }
-});
-
-var EventSettings = React.createClass({
-  getInitialState : function() {
-    return {
-      title : "",
-      signup_form : [],
-    };
-  },
-  
-  componentDidMount : function() {
-    var url = "events/" + this.props.params.eventId;
-    $.ajax({ 
-      type : "GET",
-      url : url,
-      success : function(data) { 
-        this.setState( data );
-      }.bind(this),
-      error : function(data, textStatus) { 
-        console.log(data);
-        console.log(textStatus);
-        //this.setState({ error : "Invalid user name or password."});
-      }.bind(this),
-      dataType : "json"
-    });
-
-  },
-  
-  render : function() {
-    return (<h1>{this.state.title}</h1>);
-  }
-});
+//my modules
+var EditableForm = require('./editableform.jsx');
+var EventSettings = require('./eventsettings.jsx');
+var EventList = require('./eventlist.jsx');
 
 
 var routes = (
