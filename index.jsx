@@ -6,21 +6,26 @@ var pkg = require('./package.json');
 //react-router
 var Router = require('react-router');
 var Route = Router.Route;
+var Redirect = Router.Redirect;
 var DefaultRoute = Router.DefaultRoute;
 var Routes = Router.Routes;
 var Link = Router.Link;
 
 //my modules
 var EditableForm = require('./editableform.jsx');
-var EventSettings = require('./eventsettings.jsx');
+var es = require('./eventsettings.jsx');
 var EventList = require('./eventlist.jsx');
 
 
 var routes = (
   <Routes location="hash">
-    <DefaultRoute handler={EventList}/>
-    <Route name="eventlist" path="/events" handler={EventList}/>
-    <Route name="event" path="/events/:eventId" handler={EventSettings}/>
+    <Route path="/events" handler={EventList}/>
+    <Route name="event" path="/events/:eventId" handler={es.EventSettings}>
+      <DefaultRoute handler={es.EventGeneral}/>
+      <Route name="general" path="general" handler={es.EventGeneral}/>
+      {/*<Route name="signupform" path="signupform" handler={es.SignUpForm}/>*/}
+    </Route>
+    <Redirect to="/events"/>
   </Routes>
 );
 

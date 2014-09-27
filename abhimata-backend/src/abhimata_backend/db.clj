@@ -34,7 +34,7 @@
     (if (empty? result)
       {:status 404, 
        :body (str "Event " id " does not exist.")}
-      (first result))))
+      {:status 200, :body (first result)})))
 
 (defn make-event []
   (jdbc/insert! db-spec :abhimata_event 
