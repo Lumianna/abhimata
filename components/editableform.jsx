@@ -2,9 +2,6 @@ var React = require('react');
 
 var $ = require('jquery');
 
-require('./main.less');
-
-
 var recognizedFormElements = [
   { type : "text", 
     description : "Small textbox"},

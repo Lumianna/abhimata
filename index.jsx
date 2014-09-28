@@ -3,6 +3,8 @@ var React = require('react');
 var $ = require('jquery');
 var pkg = require('./package.json');
 
+var events = require('events');
+
 //react-router
 var Router = require('react-router');
 var Route = Router.Route;
@@ -12,9 +14,10 @@ var Routes = Router.Routes;
 var Link = Router.Link;
 
 //my modules
-var EditableForm = require('./editableform.jsx');
-var es = require('./eventsettings.jsx');
-var EventList = require('./eventlist.jsx');
+require('./main.less');
+var EditableForm = require('./components/editableform.jsx');
+var es = require('./components/eventsettings.jsx');
+var EventList = require('./components/eventlist.jsx');
 
 
 var routes = (
