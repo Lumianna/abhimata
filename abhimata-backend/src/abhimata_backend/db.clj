@@ -23,7 +23,7 @@
         :signup_form
         json/read-str)))
 
-(defn get-events []
+(defn get-events-public []
   (jdbc/query db-spec ["select * from abhimata_event"]))
 
 (defn get-event [id]

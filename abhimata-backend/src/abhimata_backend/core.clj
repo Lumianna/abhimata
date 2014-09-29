@@ -15,20 +15,23 @@
    (compojure [handler :as handler]
               [route :as route])))
 
+(defroutes admin-routes
+  (POST "/" [] (resp/response (db/make-event)))
+  (context "/:id" [id] 
+    (GET "/" [] (db/get-event id) )
+    ;;(GET "/registrants")
+    ))
+
 (defroutes app-routes
   (GET "/welcome" [] "Hi there")
   (GET "/logout" [] (friend/logout* (resp/response "logout ok")))
   (GET "/secret" req
-       (friend/authorize #{:admin} "Admin's eyes only!"))
+       (friend/authorize #{:admin} (resp/response "auth ok"))
   (POST "/form" {json-form :json-params} (db/save-form json-form) )
   (GET "/form" [] (resp/response (db/load-form)))
-    (context "/events" []
-      (GET "/" [] (resp/response (db/get-events)))
-      (POST "/" [] (resp/response (db/make-event)))
-      (context "/:id" [id] 
-        (GET "/" [] (db/get-event id) )
-        ;;(GET "/registrants")
-        ))
+  (context "/events" []
+    (GET "/" [] (resp/response (db/get-events-public)))
+    (friend/wrap-authorize admin-routes #{:admin}))
   (route/files "/" 
                {:root (str (System/getProperty "user.dir") "/static/public")} )
   (route/not-found "Not Found"))
