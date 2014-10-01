@@ -4,31 +4,29 @@ var Router = require('react-router');
 var Link = Router.Link;
 
 var $ = require('jquery');
+var eventActionCreators = require('../actions/eventActionCreators.js');
+var eventStore = require('../stores/eventStore.js');
 
 var EventList = React.createClass({
   getInitialState : function() {
-    return { events : [] };
+    return this.getStateFromStores();
   },
   
   componentDidMount : function() {
-    this.fetchEvents();
+    eventStore.addChangeListener(this._onChange);
+    eventActionCreators.requestEventsPublic();
   },
   
-  fetchEvents : function() {
-    $.ajax({ 
-      type : "GET",
-      url : "events",
-      success : function(data) { 
-        console.log(data);
-        this.setState( {events : data} );
-      }.bind(this),
-      error : function(data, textStatus) { 
-        console.log(data);
-        console.log(textStatus);
-        //this.setState({ error : "Invalid user name or password."});
-      }.bind(this),
-      dataType : "json"
-    });
+  getStateFromStores : function() {
+    return { events : eventStore.getEventsPublic() };
+  },
+                                 
+  _onChange : function() {
+    this.setState(this.getStateFromStores());
+  },
+
+  componentWillUnmount : function() {
+    eventStore.removeChangeListener(this._onChange);
   },
   
   createNewEvent : function() {

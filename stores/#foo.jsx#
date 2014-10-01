@@ -1,0 +1,8 @@
+eventStore.dispatchToken = dispatcher.register(function(payload) {
+  switch(payload.action.type) {
+    case actionTypes.FETCH_EVENT_SUCCESS:
+      sdfoioi
+      break;
+  }
+});
+  
