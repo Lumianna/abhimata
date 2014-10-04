@@ -19,6 +19,9 @@ var EditableForm = require('./components/editableform.jsx');
 var es = require('./components/eventsettings.jsx');
 var EventList = require('./components/eventlist.jsx');
 
+var authActions = require('./actions/authActionCreators.js');
+var authStore = require('./stores/authStore.js');
+
 
 var routes = (
   <Routes location="hash">
@@ -35,30 +38,32 @@ var routes = (
 
 var App = React.createClass({
   getInitialState : function() {
-    return { userIsAuthenticated : false, 
+    return { userIsAuthenticated : this.getAuthStatusFromStore(), 
              username : "", 
              password : "",
              error : null };
   },
   
   login : function() {
-    $.ajax({ 
-      type : "POST",
-      url : "login",
-      data : JSON.stringify(
-        { username : this.state.username,
-          password : this.state.password }),
-      success : function(data) { 
-        this.setState( {userIsAuthenticated : true, 
-                        error : null});
-      }.bind(this),
-      error : function(data, textStatus) { 
-        this.setState({ error : "Invalid user name or password."});
-      }.bind(this),
-      contentType : "application/json; charset=utf-8"
-    });
-    this.setState({password : ""});
+    authActions.login(this.state.username, this.state.password);
   },
+  
+  componentDidMount : function() {
+    authStore.addChangeListener(this._onChange);
+  },
+
+  componentWillUnmount : function() {
+    authStore.removeChangeListener(this._onChange);
+  },
+
+  _onChange : function() {
+    this.setState(getAuthStatusFromStore());
+  },
+  
+  getAuthStatusFromStore : function() {
+    return {userIsAuthenticated : authStore.getAuthStatus()};
+  },
+  
   
   updateUsername : function(event) {
     this.setState({username : event.target.value});
