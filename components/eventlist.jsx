@@ -48,7 +48,7 @@ var EventList = React.createClass({
   render : function() {
     var eventTitles = this.state.events.map(function(event) {
       return ( 
-        <li> 
+        <li key={event.event_id}> 
           <Link to="event" 
                 params={{eventId : event.event_id}}> 
           {event.title} 

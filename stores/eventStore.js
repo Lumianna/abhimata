@@ -1,9 +1,7 @@
-var EventEmitter = require('events').EventEmitter;
-var dispatcher = require('../dispatcher/dispatcher.js');
-var merge = require('react/lib/merge');
 var actionTypes = require('../constants/constants.js').actionTypes;
+var createStore = require('../utils/createStore.js');
+var merge = require('react/lib/merge');
 
-var CHANGE_EVENT = 'change';
 
 //Event data that can be obtained without authenticating.
 var _eventsPublic = [];
@@ -11,31 +9,7 @@ var _eventsPublic = [];
 //Event data that requires logging in as an admin.
 var _eventsPrivate = [];
 
-var eventStore = merge(EventEmitter.prototype, {
-  addChangeListener : function(callback) {
-    this.on(CHANGE_EVENT, callback);
-  },
-
-  removeChangeListener : function(callback) {
-    this.removeListener(CHANGE_EVENT, callback);
-  },
-  
-  emitChange : function() {
-    this.emit(CHANGE_EVENT);
-  },
-  
-  getEventsPublic : function() {
-    return _eventsPublic;
-  },
-
-  getEvent : function(event_id) {
-    return merge(_eventsPublic[event_id], 
-                 _eventsPrivate[event_id]);
-  }
-  
-});
-                       
-eventStore.dispatchToken = dispatcher.register(function(payload) {
+var actionHandler = function(payload) {
   switch(payload.action.type) {
   case actionTypes.REQUEST_EVENTS_PUBLIC_SUCCESS:
     _eventsPublic = payload.action.events;
@@ -49,6 +23,17 @@ eventStore.dispatchToken = dispatcher.register(function(payload) {
     //do nothing
     break;
   }
+};
+
+var eventStore = createStore(actionHandler, {
+  getEventsPublic : function() {
+    return _eventsPublic;
+  },
+
+  getEvent : function(event_id) {
+    return merge(_eventsPublic[event_id], 
+                 _eventsPrivate[event_id]);
+  },
 });
 
 module.exports = eventStore;
