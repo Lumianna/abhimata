@@ -7,7 +7,11 @@ var $ = require('jquery');
 var eventActionCreators = require('../actions/eventActionCreators.js');
 var eventStore = require('../stores/eventStore.js');
 
+var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
+
 var EventList = React.createClass({
+  mixins : [AuthenticatedRoute],
+
   getInitialState : function() {
     return this.getStateFromStores();
   },

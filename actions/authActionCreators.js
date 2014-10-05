@@ -1,7 +1,6 @@
 var dispatcher = require('../dispatcher/dispatcher.js');
 var actionTypes = require('../constants/constants.js').actionTypes;
 var $ = require('jquery');
-
 module.exports = {
   
   login : function(username, password) {
@@ -18,7 +17,7 @@ module.exports = {
       },
       error : function() { 
         dispatcher.handleServerAction({ 
-          type : actionTypes.REQUEST_LOGIN_FAILURE });
+          type : actionTypes.REQUEST_LOGIN_FAIL });
       },
       contentType : "application/json; charset=utf-8"
     });

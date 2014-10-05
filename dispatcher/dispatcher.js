@@ -4,6 +4,7 @@ var payloadSources = require('../constants/constants.js').payloadSources;
 
 dispatcher.handleServerAction = function (action) {
   if (!action.type) {
+    console.log(action);
     throw new Error('Empty action.type: you probably mistyped the action.');
   }
   console.log('Dispatching server action ' + action.type);

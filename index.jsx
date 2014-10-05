@@ -18,13 +18,12 @@ require('./main.less');
 var EditableForm = require('./components/editableform.jsx');
 var es = require('./components/eventsettings.jsx');
 var EventList = require('./components/eventlist.jsx');
-
-var authActions = require('./actions/authActionCreators.js');
-var authStore = require('./stores/authStore.js');
+var Login = require('./components/Login.jsx');
 
 
 var routes = (
   <Routes location="hash">
+    <Route path="/login" handler={Login}/>
     <Route path="/events" handler={EventList}/>
     <Route name="event" path="/events/:eventId" handler={es.EventSettings}>
       <DefaultRoute handler={es.EventGeneral}/>
@@ -36,67 +35,6 @@ var routes = (
 );
 
 
-var App = React.createClass({
-  getInitialState : function() {
-    return { userIsAuthenticated : this.getAuthStatusFromStore(), 
-             username : "", 
-             password : "",
-             error : null };
-  },
-  
-  login : function() {
-    authActions.login(this.state.username, this.state.password);
-  },
-  
-  componentDidMount : function() {
-    authStore.addChangeListener(this._onChange);
-  },
-
-  componentWillUnmount : function() {
-    authStore.removeChangeListener(this._onChange);
-  },
-
-  _onChange : function() {
-    this.setState(getAuthStatusFromStore());
-  },
-  
-  getAuthStatusFromStore : function() {
-    return {userIsAuthenticated : authStore.getAuthStatus()};
-  },
-  
-  
-  updateUsername : function(event) {
-    this.setState({username : event.target.value});
-  },
-
-  updatePassword : function(event) {
-    this.setState({password : event.target.value});
-  },
-
-  render : function() {
-    if(this.state.userIsAuthenticated) {
-      return routes;
-    }
-    else {
-      var errorMessage = null;
-      if(this.state.error) {
-        errorMessage = <p className="error-message">{this.state.error}</p>
-      }
-        
-      return (
-      <form>
-        {errorMessage}
-        <input type="text" placeholder="Username" 
-               value={this.state.username} onChange={this.updateUsername}/>
-        <input type="password" placeholder="Password" 
-               value={this.state.password} onChange={this.updatePassword}/>
-        <button type="submit" onClick={this.login}>Log in</button> 
-      </form> );
-    }
-  }
-});
-       
-
 React.renderComponent(
-<App/>
+  routes
 , document.body);

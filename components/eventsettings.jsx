@@ -4,7 +4,11 @@ var $ = require('jquery');
 var Router = require('react-router');
 var Link = Router.Link;
 
+var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
+
 var EventSettings = React.createClass({
+  mixins : [AuthenticatedRoute], 
+
   getInitialState : function() {
     return {
       title : "",
