@@ -34,7 +34,7 @@
     (friend/wrap-authorize admin-routes #{:admin}))
   (route/files "/" 
                {:root (str (System/getProperty "user.dir") "/static/public")} )
-  (route/not-found "Not Found"))
+  (route/not-found "Not Found")))
 
 (defn failed-login-handler [ & _]
   (resp/status (resp/response "") 401))
@@ -47,7 +47,7 @@
                           :login-uri "/login"
                           :default-landing-uri "/welcome"
                           :login-failure-handler failed-login-handler
-                          ; :unauthorized-handler #(-> (h/html5 [:h2 "You do not have sufficient privileges to access " (:uri %)]) resp/response (resp/status 401))
+                          ;:unauthorized-handler #(-> (h/html5 [:h2 "You do not have sufficient privileges to access " (:uri %)]) resp/response (resp/status 401))
                           :credential-fn #(creds/bcrypt-credential-fn 
                                            db/fetch-admin-credentials %)
                           :workflows [(workflows/interactive-form)]})
