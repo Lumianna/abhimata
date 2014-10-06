@@ -26,7 +26,7 @@
   (GET "/welcome" [] "Hi there")
   (GET "/logout" [] (friend/logout* (resp/response "logout ok")))
   (GET "/secret" req
-       (friend/authorize #{:admin} (resp/response "auth ok"))
+       (friend/authorize #{:admin} (resp/response "auth ok")))
   (POST "/form" {json-form :json-params} (db/save-form json-form) )
   (GET "/form" [] (resp/response (db/load-form)))
   (context "/events" []
@@ -34,23 +34,24 @@
     (friend/wrap-authorize admin-routes #{:admin}))
   (route/files "/" 
                {:root (str (System/getProperty "user.dir") "/static/public")} )
-  (route/not-found "Not Found")))
+  (route/not-found "Not Found"))
 
 (defn failed-login-handler [ & _]
   (resp/status (resp/response "") 401))
 
 (def app
   (->
-    (friend/authenticate app-routes
-                         {:allow-anon? true
-                          :redirect-on-auth? false
-                          :login-uri "/login"
-                          :default-landing-uri "/welcome"
-                          :login-failure-handler failed-login-handler
-                          ;:unauthorized-handler #(-> (h/html5 [:h2 "You do not have sufficient privileges to access " (:uri %)]) resp/response (resp/status 401))
-                          :credential-fn #(creds/bcrypt-credential-fn 
-                                           db/fetch-admin-credentials %)
-                          :workflows [(workflows/interactive-form)]})
+    (friend/authenticate 
+     app-routes
+     {:allow-anon? true
+      :redirect-on-auth? false
+      :login-uri "/login"
+      :default-landing-uri "/welcome"
+      :login-failure-handler failed-login-handler
+      :unauthenticated-handler (fn [& args] {:status 401, :body "Login required"})
+      :credential-fn #(creds/bcrypt-credential-fn 
+                       db/fetch-admin-credentials %)
+      :workflows [(workflows/interactive-form)]})
     (handler/site)
     (ringjson/wrap-json-params)
     (ringjson/wrap-json-response {:pretty true})))
