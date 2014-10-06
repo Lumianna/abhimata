@@ -22,4 +22,27 @@ module.exports = {
       dataType : "json"
     });
   },
+  
+  requestEventPrivate : function(event_id) {
+    dispatcher.handleViewAction({type : actionTypes.REQUEST_EVENT_PRIVATE});
+
+    var url = "events/" + event_id;
+    $.ajax({ 
+      type : "GET",
+      url : url,
+      success : function(data) { 
+        console.log(data);
+        dispatcher.handleServerAction(
+          { type : actionTypes.REQUEST_EVENT_PRIVATE_SUCCESS,
+            event : data });
+      },
+      error : function(data, textStatus) { 
+        dispatcher.handleServerAction(
+          { type : actionTypes.REQUEST_EVENT_PRIVATE_FAIL,
+            event : data });
+        console.log(data);
+      },
+      dataType : "json"
+    });
+  },
 }

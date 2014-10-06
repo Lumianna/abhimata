@@ -13,8 +13,12 @@ var skeleton = merge(EventEmitter.prototype, {
     this.removeListener(CHANGE_EVENT, callback);
   },
   
-  emitChange : function() {
-    this.emit(CHANGE_EVENT);
+  emitChange : function(params) {
+    if(params) {
+      this.emit(CHANGE_EVENT, params);
+    } else {
+      this.emit(CHANGE_EVENT);
+    }
   },
 });
 

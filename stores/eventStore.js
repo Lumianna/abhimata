@@ -17,7 +17,7 @@ var actionHandler = function(payload) {
     break;
   case actionTypes.REQUEST_EVENT_PRIVATE_SUCCESS:
     _eventsPrivate[payload.action.event.event_id] = payload.action.event;
-    eventStore.emitChange();
+    eventStore.emitChange(payload.action.event.event_id);
     break;
   default:
     //do nothing
@@ -30,7 +30,7 @@ var eventStore = createStore(actionHandler, {
     return _eventsPublic;
   },
 
-  getEvent : function(event_id) {
+  getEventPrivate : function(event_id) {
     return merge(_eventsPublic[event_id], 
                  _eventsPrivate[event_id]);
   },

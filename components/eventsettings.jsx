@@ -5,6 +5,8 @@ var Router = require('react-router');
 var Link = Router.Link;
 
 var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
+var eventActionCreators = require('../actions/eventActionCreators.js');
+var eventStore = require('../stores/eventStore.js');
 
 var EventSettings = React.createClass({
   mixins : [AuthenticatedRoute], 
@@ -16,26 +18,26 @@ var EventSettings = React.createClass({
     };
   },
   
-  getData : function() {
-    var url = "events/" + this.props.params.eventId;
-    $.ajax({ 
-      type : "GET",
-      url : url,
-      success : function(data) { 
-        data.error = undefined;
-        this.setState( data );
-      }.bind(this),
-      error : function(data, textStatus) { 
-        console.log(data);
-        this.setState( {error : data });
-        //this.setState({ error : "Invalid user name or password."});
-      }.bind(this),
-      dataType : "json"
-    });
+  eventId : function() {
+    return parseInt(this.props.params.eventId);
+  },
+
+  
+  _onChange : function(updated_event_id) {
+    if(updated_event_id === this.eventId())
+    {
+      console.log(eventStore.getEventPrivate(updated_event_id));
+      this.setState(eventStore.getEventPrivate(updated_event_id));
+    }
   },
   
   componentDidMount : function() {
-    this.getData();
+    eventStore.addChangeListener(this._onChange);
+    eventActionCreators.requestEventPrivate(this.props.params.eventId);
+  },
+  
+  componentWillUnmount : function() {
+    eventStore.removeChangeListener(this._onChange);
   },
   
   render : function() {
