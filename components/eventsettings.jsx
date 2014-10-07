@@ -26,7 +26,6 @@ var EventSettings = React.createClass({
   _onChange : function(updated_event_id) {
     if(updated_event_id === this.eventId())
     {
-      console.log(eventStore.getEventPrivate(updated_event_id));
       this.setState(eventStore.getEventPrivate(updated_event_id));
     }
   },

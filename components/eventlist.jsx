@@ -10,51 +10,39 @@ var eventStore = require('../stores/eventStore.js');
 var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
 
 var EventList = React.createClass({
-  mixins : [AuthenticatedRoute],
+  mixins: [AuthenticatedRoute],
 
-  getInitialState : function() {
+  getInitialState: function() {
     return this.getStateFromStores();
   },
   
-  componentDidMount : function() {
+  componentDidMount: function() {
     eventStore.addChangeListener(this._onChange);
     eventActionCreators.requestEventsPublic();
   },
   
-  getStateFromStores : function() {
-    return { events : eventStore.getEventsPublic() };
+  getStateFromStores: function() {
+    return { events: eventStore.getEventsPublic() };
   },
                                  
-  _onChange : function() {
+  _onChange: function() {
     this.setState(this.getStateFromStores());
   },
 
-  componentWillUnmount : function() {
+  componentWillUnmount: function() {
     eventStore.removeChangeListener(this._onChange);
   },
   
-  createNewEvent : function() {
-    $.ajax({ 
-      type : "POST",
-      url : "events",
-      data : JSON.stringify(
-        { }),
-      success : function(data) { 
-        this.fetchEvents();
-      }.bind(this),
-      error : function(data, textStatus) { 
-        this.setState({ error : "Could not access database."});
-      }.bind(this),
-      contentType : "application/json; charset=utf-8"
-    });
+  createNewEvent: function() {
+    eventActionCreators.createEvent();
   },
 
-  render : function() {
+  render: function() {
     var eventTitles = this.state.events.map(function(event) {
       return ( 
         <li key={event.event_id}> 
           <Link to="event" 
-                params={{eventId : event.event_id}}> 
+                params={{eventId: event.event_id}}> 
           {event.title} 
           </Link> 
         </li> );

@@ -10,6 +10,10 @@ module.exports = {
     REQUEST_EVENT_PRIVATE : null,
     REQUEST_EVENT_PRIVATE_SUCCESS : null,
     REQUEST_EVENT_PRIVATE_FAIL : null,
+    //Create events (admin-only)
+    CREATE_EVENT : null,
+    CREATE_EVENT_SUCCESS : null,
+    CREATE_EVENT_FAIL : null,
     //admin authentication 
     REQUEST_LOGIN : null,
     REQUEST_LOGIN_SUCCESS : null,
