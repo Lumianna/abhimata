@@ -65,8 +65,21 @@ function createEvent () {
   });
 }
 
+function updateEventProperty (event_id, propertyName, value) {
+  dispatcher.handleViewAction( 
+    { type: actionTypes.UPDATE_EVENT_PROPERTY,
+      event_id: event_id,
+      property: propertyName,
+      value: value,
+    });
+}
+
+function saveEvent (event_id) {
+}
+
 module.exports = {
   requestEventsPublic: requestEventsPublic,
   requestEventPrivate: requestEventPrivate,
   createEvent: createEvent,
+  updateEventProperty: updateEventProperty,
 }
