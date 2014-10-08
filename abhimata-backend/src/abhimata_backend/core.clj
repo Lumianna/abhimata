@@ -10,6 +10,7 @@
    [clojure.java.jdbc :as jdbc]
    [ring.adapter.jetty :as jetty]
    [ring.middleware.json :as ringjson]
+   [ring.middleware.keyword-params :as keyword-params]
    [clojure.data.json :as json]
    [ring.util.response :as resp]
    (compojure [handler :as handler]
@@ -19,7 +20,7 @@
   (POST "/" [] (resp/response (db/make-event)))
   (context "/:id" [id] 
     (GET "/" [] (db/get-event id) )
-    (POST "/" {event-data :json-params} (db/save-event event-data))
+    (POST "/" {event-data :json-params params :params} (db/save-event event-data params))
     ;;(GET "/registrants")
     ))
 
