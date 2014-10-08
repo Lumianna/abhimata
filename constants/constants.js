@@ -15,6 +15,8 @@ module.exports = {
     CREATE_EVENT_SUCCESS: null,
     CREATE_EVENT_FAIL: null,
     UPDATE_EVENT_PROPERTY: null,
+    SAVE_EVENT_SUCCESS: null,
+    SAVE_EVENT_FAIL: null,
     //admin authentication 
     REQUEST_LOGIN: null,
     REQUEST_LOGIN_SUCCESS: null,

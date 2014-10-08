@@ -36,6 +36,14 @@
        :body (str "Event " id " does not exist.")}
       {:status 200, :body (first result)})))
 
+(defn save-event [event-data]
+  (do
+    (let [event-data-prime (assoc event-data "signup_form" 
+                            (json/write-str (event-data "signup_form")))]
+      (jdbc/update! db-spec :abhimata_event
+                   event-data-prime
+                  ["event_id = ?" (event-data "event_id")]))))
+
 (defn make-event []
   (jdbc/insert! db-spec :abhimata_event 
                 {:title "New event", 

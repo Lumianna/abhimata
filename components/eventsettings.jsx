@@ -40,7 +40,7 @@ var EventSettings = React.createClass({
   },
   
   saveEvent: function() {
-    eventActionCreators.saveEvent(event_id);
+    eventActionCreators.saveEvent(this.eventId());
   },
   
   render: function() {

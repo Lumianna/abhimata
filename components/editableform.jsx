@@ -255,7 +255,7 @@ var EditableForm = React.createClass({
       url : "form",
       data : JSON.stringify({form : this.state.elements}),
       dataType : "json",
-      success : function(data) { alert(data); },
+      success : function(data) { alert(data) ; },
       contentType : "application/json; charset=utf-8"
     });
   },

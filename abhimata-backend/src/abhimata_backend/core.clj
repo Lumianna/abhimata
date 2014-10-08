@@ -19,6 +19,7 @@
   (POST "/" [] (resp/response (db/make-event)))
   (context "/:id" [id] 
     (GET "/" [] (db/get-event id) )
+    (POST "/" {event-data :json-params} (db/save-event event-data))
     ;;(GET "/registrants")
     ))
 
