@@ -6,7 +6,7 @@
    (cemerick.friend [workflows :as workflows]
                     [credentials :as creds])
    [compojure.core :as compojure
-    :refer (GET POST ANY defroutes context)]
+    :refer (GET POST DELETE ANY defroutes context)]
    [clojure.java.jdbc :as jdbc]
    [ring.adapter.jetty :as jetty]
    [ring.middleware.json :as ringjson]
@@ -20,7 +20,8 @@
   (POST "/" [] (resp/response (db/make-event)))
   (context "/:id" [id] 
     (GET "/" [] (db/get-event id) )
-    (POST "/" {event-data :json-params params :params} (db/save-event event-data params))
+    (DELETE "/" [] (db/delete-event id) )
+    (POST "/" {event-data :json-params} (db/save-event event-data))
     ;;(GET "/registrants")
     ))
 
@@ -40,6 +41,9 @@
 
 (defn failed-login-handler [ & _]
   (resp/status (resp/response "") 401))
+
+;Insert in handler stack for debugging
+(def prn-handler (fn [handler] (fn [req] (prn req) (handler req))))
 
 (def app
   (->

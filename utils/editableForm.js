@@ -1,17 +1,10 @@
-/* Model layer for Abhimata's simple user-editable sign-up forms.
+/* Model layer for Abhimata's simple user-editable registration forms.
    
-   A sign-up form is modeled as an array where each element represents a
+   A registration form is modeled as an array where each element represents a
    question in the form. A question is just a HTML input element, such
    as a text box or a radio button, accompanied by explanatory text labels
-   (e.g. "First name"). The event admin designing the sign-up form for an
+   (e.g. "First name"). The event admin designing the registration form for an
    event can add, delete, edit and reorder questions.
-   
-   An empty form starts with two special questions that cannot be deleted
-   or made optional: these questions are meant for the registrant's full
-   name and email address. Abhimata currently requires every registrant to
-   have a functioning email address, and each registrant should furthermore
-   be uniquely identifiable by the combination of full name and email 
-   address.
    
    In general questions can be optional or required, but there is currently
    no other form validation or branching: each registrant receives the same 
@@ -20,18 +13,6 @@
  */
 
 var _ = require('lodash');
-
-
-var recognizedQuestionTypes = [
-  { type: "text", 
-    description: "Small textbox"},
-  { type: "textarea", 
-    description: "Big textbox"},
-  { type: "radio", 
-    description: "Radio button" },
-  { type: "checkbox", 
-    description: "Checkbox" }
-]; 
 
 /* INTERNAL FUNCTIONS */
 
@@ -54,13 +35,13 @@ var makeQuestion = function(type) {
 // This key currently only matters in React rendering.
 
 var nextAvailableKey = function(form) {
-  return _.max(form, "key") + 1;
+  return _.max(form, "key").key + 1;
 };
 
 // Factory functions for the special questions that can't be deleted
 // from a form.
 
-makeNameQuestion() {
+var makeNameQuestion = function() {
   return {
     type : "text",
     tag : "fullname",
@@ -68,9 +49,10 @@ makeNameQuestion() {
     isDeletable : false,
     isResponseOptional : false,
     key : 0,
+  };
 };
 
-makeEmailQuestion = function() {
+var makeEmailQuestion = function() {
   return {
     type : "text",
     tag : "email",
@@ -78,6 +60,7 @@ makeEmailQuestion = function() {
     isDeletable : false,
     isResponseOptional : false,
     key : 1,
+  };
 };
 
 
@@ -114,5 +97,4 @@ module.exports = {
   addQuestion: addQuestion,
   deleteQuestion: deleteQuestion,
   moveQuestion: moveQuestion,
-  recognizedQuestionTypes: recognizedQuestionTypes,
 };

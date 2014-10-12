@@ -97,10 +97,62 @@ function saveEvent (event_id) {
   });
 }
 
+function deleteEvent (event_id) {
+  var url = "events/" + event_id;
+  var eventData = eventStore.getEventPrivate(event_id);
+  $.ajax({ 
+    type : "DELETE",
+    url : url,
+    data : JSON.stringify(eventData),
+    dataType : "json",
+    success : function() { 
+      dispatcher.handleServerAction({ 
+        type : actionTypes.DELETE_EVENT_SUCCESS,
+        event_id : event_id,
+      });
+    },
+    error : function() { 
+      dispatcher.handleServerAction({ 
+        type : actionTypes.DELETE_EVENT_FAIL });
+    },
+    contentType : "application/json; charset=utf-8"
+  });
+}
+
+
+function addQuestion(opts) {
+  dispatcher.handleViewAction({
+    questionType: opts.questionType,
+    event_id: event_id,
+  });
+}
+
+
+function updateQuestionProperty(opts) {
+  opts.type = actionTypes.UPDATE_REGISTRATION_FORM_QUESTION_PROPERTY;
+  dispatcher.handleViewAction(opts);
+}
+
+
+function addQuestion(opts) {
+  opts.type = actionTypes.ADD_REGISTRATION_FORM_QUESTION;
+  dispatcher.handleViewAction(opts);
+}
+
+
+function deleteQuestion(opts) {
+  opts.type = actionTypes.DELETE_REGISTRATION_FORM_QUESTION;
+  dispatcher.handleViewAction(opts);
+}
+
 module.exports = {
   requestEventsPublic: requestEventsPublic,
   requestEventPrivate: requestEventPrivate,
   createEvent: createEvent,
   updateEventProperty: updateEventProperty,
-  saveEvent: saveEvent
+  saveEvent: saveEvent,
+  deleteEvent: deleteEvent,
+  addQuestion: addQuestion,
+  updateQuestionProperty: updateQuestionProperty,
+  deleteQuestion: deleteQuestion,
 }

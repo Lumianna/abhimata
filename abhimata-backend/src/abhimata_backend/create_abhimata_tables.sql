@@ -2,7 +2,7 @@ create table abhimata_event
 (
   event_id serial,
   title varchar(2000) not null,
-  signup_form text not null,
+  registration_form text not null,
   constraint event_pk primary key (event_id)
 );
 

@@ -1,6 +1,7 @@
 (ns abhimata_backend.db
   (:gen-class)
-  (:require [clojure.java.jdbc :as jdbc]
+  (:require [abhimata_backend.event :as event]
+            [clojure.java.jdbc :as jdbc]
             [clojure.data.json :as json]
             [clojure.walk :as walk]))
 
@@ -12,7 +13,7 @@
   (do
     (jdbc/update! db-spec :abhimata_event
                   {:title "Test event",
-                   :signup_form (json/write-str json-form) }
+                   :registration_form (json/write-str json-form) }
                   ["event_id = ?" 1])))
 
 (defn load-form []
@@ -21,24 +22,24 @@
                     ["select * from abhimata_event where event_id = 1"])]
     (-> event-db-entry
         first
-        :signup_form
+        :registration_form
         json/read-str)))
 
 ;The PostgreSQL version we're using doesn't support JSON values, so
-;the sign-up form needs to be turned into a string before it's
+;the registration form needs to be turned into a string before it's
 ;stored into the database.
 
-(defn stringify-signup-form [event-data]
-  (let [stringified-form (json/write-str (:signup_form event-data))]
-    (assoc event-data :signup_form stringified-form)))
+(defn stringify-registration-form [event-data]
+  (let [stringified-form (json/write-str (:registration_form event-data))]
+    (assoc event-data :registration_form stringified-form)))
 
-(defn unstringify-signup-form [db-event-query]
-  (let [unstringified-form (json/read-str (:signup_form db-event-query))]
-    (assoc db-event-query :signup_form unstringified-form)))
+(defn unstringify-registration-form [db-event-query]
+  (let [unstringified-form (json/read-str (:registration_form db-event-query))]
+    (assoc db-event-query :registration_form unstringified-form)))
 
 
 (defn get-events-public []
-  (map unstringify-signup-form (jdbc/query db-spec ["select * from abhimata_event"])))
+  (map unstringify-registration-form (jdbc/query db-spec ["select * from abhimata_event"])))
 
 (defn get-event [id]
   (let [result 
@@ -48,20 +49,23 @@
     (if (empty? result)
       {:status 404, 
        :body (str "Event " id " does not exist.")}
-      {:status 200, :body (unstringify-signup-form (first result))})))
+      {:status 200, :body (unstringify-registration-form (first result))})))
 
 
-(defn save-event [event-data params]
+(defn save-event [event-data]
   (do
     (let [keywordized-data (walk/keywordize-keys event-data)]
     (jdbc/update! db-spec :abhimata_event
-                  (stringify-signup-form keywordized-data)
+                  (stringify-registration-form keywordized-data)
                   ["event_id = ?" (:event_id keywordized-data)]))))
 
+(defn delete-event [event-id]
+  (jdbc/delete! db-spec :abhimata_event
+                  ["event_id = ?" (Integer. event-id)]))
+
+
 (defn make-event []
-  (jdbc/insert! db-spec :abhimata_event 
-                {:title "New event", 
-                 :signup_form "[]"} ))
+  (jdbc/insert! db-spec :abhimata_event event/default-event))
 
 (defn fetch-admin-credentials [username]
   "Fetches admin credentials in the form expected by friend's

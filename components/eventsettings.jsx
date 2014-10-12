@@ -8,13 +8,15 @@ var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
 var eventActionCreators = require('../actions/eventActionCreators.js');
 var eventStore = require('../stores/eventStore.js');
 
+var EditableForm = require('../components/editableform.jsx');
+
 var EventSettings = React.createClass({
   mixins: [AuthenticatedRoute], 
 
   getInitialState: function() {
     return {
       title: "",
-      signup_form: [],
+      registration_form: [],
     };
   },
   
@@ -55,7 +57,7 @@ var EventSettings = React.createClass({
     return (
       <div className="eventSettings">
         <h1>{this.state.title}</h1> 
-        {/*<EventSettingsLinks/>*/}
+        <EventSettingsLinks eventId={this.props.params.eventId}/>
         <this.props.activeRouteHandler event={this.state}/>
         <button onClick={this.saveEvent}>Save changes</button>
     </div>
@@ -63,12 +65,44 @@ var EventSettings = React.createClass({
   }
 });
 
+var EventSettingsLinks = React.createClass({
+  render: function() { 
+    var linkParams = { eventId : this.props.eventId };
+    return (
+      <div className="event-settings-dashboard">
+        <Link to="general" params={linkParams}>
+          General settings
+        </Link>
+        <Link to="registrationform" params={linkParams}>
+          Sign-up form
+        </Link>
+        <Link to="delete" params={linkParams}>
+          Delete data
+        </Link>
+      </div> );
+  }
+});
+
+var DeleteData = React.createClass({
+  deleteEvent: function() {
+    eventActionCreators.deleteEvent(this.props.event.event_id);
+  },
+  render: function() {
+    return (
+      <button onClick={this.deleteEvent}>Delete event and all data</button>
+      );
+  }
+});
+
 var EventGeneral = React.createClass({
   render: function() {
     return (
       <form>
-        <input type="text" value={this.props.event.title}
+        <label>
+          Event title
+          <input type="text" value={this.props.event.title}
                onChange={this._onChange.bind(null, "title")}/>
+        </label>
       </form> );
   },
 
@@ -79,10 +113,47 @@ var EventGeneral = React.createClass({
   },
 });
 
+var RegistrationForm = React.createClass({
+  render : function() {
+    return (
+      <EditableForm editQuestion={this.updateQuestionProperty}
+                    addQuestion={this.addQuestion}
+                    deleteQuestion={this.deleteQuestion}
+                    elements={this.props.event.registration_form}> 
+      </EditableForm>
+    );
+  },
+
+  addQuestion: function(type) {
+    eventActionCreators.addQuestion({
+      event_id: this.props.event.event_id,
+      questionType: type,
+    });
+  },
+  
+  updateQuestionProperty: function(index, field, value) {
+    eventActionCreators.updateQuestionProperty({
+      event_id: this.props.event.event_id,
+      index: index,
+      property: field,
+      value: value,
+    });
+  },
+  
+  deleteQuestion: function(index) {
+    eventActionCreators.deleteQuestion({
+      event_id: this.props.event.event_id,
+      index: index,
+    });
+  },
+
+});
+
 
 
 module.exports = { 
   EventSettings: EventSettings,
   EventGeneral: EventGeneral,
-  SignUpForm: null //SignUpForm
+  RegistrationForm: RegistrationForm,
+  DeleteData: DeleteData,
 };

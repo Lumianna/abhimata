@@ -28,7 +28,8 @@ var routes = (
     <Route name="event" path="/events/:eventId" handler={es.EventSettings}>
       <DefaultRoute handler={es.EventGeneral}/>
       <Route name="general" path="general" handler={es.EventGeneral}/>
-      {/*<Route name="signupform" path="signupform" handler={es.SignUpForm}/>*/}
+      <Route name="registrationform" path="registrationform" handler={es.RegistrationForm}/>
+      <Route name="delete" path="delete" handler={es.DeleteData}/>
     </Route>
     <Redirect to="/events"/>
   </Routes>

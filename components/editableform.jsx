@@ -212,57 +212,17 @@ var FormElementSelector = React.createClass({
       <div className="form-element-selector">
         <h2> Add a new question: </h2>
         {buttons}
-        <button onClick={this.props.saveForm}>Save form </button>
       </div>
     );
   }
 });
 
-var EditableFormElement = function(type) {
-  this.type = type;
-  this.label = "?";
-  this.required = true;
-  if (type === "radio" || type === "checkbox") {
-    this.alternatives = ["a", "b"]; 
-  }
-}
 
 var EditableForm = React.createClass({
-  getInitialState: function() {
-    return {
-      elements : [],
-      nextKey : 0 // to generate keys
-    };
-  },
-
-  addFormElement : function(type) {
-    var elements = this.state.elements;
-    var newElement = new EditableFormElement(type);
-    newElement.key = this.state.nextKey;
-    elements.push(newElement);
-    this.setState({elements : elements, nextKey : this.state.nextKey + 1});
-  },
-  
-  editFormElement : function(key, field, value) {
-    var elements = this.state.elements;
-    elements[key][field] = value;
-    this.setState({elements : elements});
-  },
-  
-  saveForm : function() {
-    $.ajax({ 
-      type : "POST",
-      url : "form",
-      data : JSON.stringify({form : this.state.elements}),
-      dataType : "json",
-      success : function(data) { alert(data) ; },
-      contentType : "application/json; charset=utf-8"
-    });
-  },
 
   render: function() {
-    var components = this.state.elements.map(function(elem) {
-      var onEdit = this.editFormElement.bind(this, elem.key);
+    var components = this.props.elements.map(function(elem, index) {
+      var onEdit = this.props.editQuestion.bind(null, index);
       switch(elem.type) {
         case  "textarea" :
           return ( <EditableTextArea key={elem.key} element={elem}
@@ -288,8 +248,7 @@ var EditableForm = React.createClass({
     return (
       <div className="editableForm"> 
         <FormElementSelector formElements={recognizedFormElements} 
-                             onSelection={this.addFormElement}
-                             saveForm={this.saveForm}/>
+                             onSelection={this.props.addQuestion}/>
         {components}
       </div>
     );
