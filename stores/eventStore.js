@@ -14,41 +14,42 @@ var _eventsPrivate = [];
 
 var actionHandler = function(payload) {
   var act = payload.action;
+  var event = _eventsPrivate[act.event_id];
   switch(act.type) {
     case actionTypes.ADD_REGISTRATION_FORM_QUESTION:
-      formUtils.addQuestion(_eventsPrivate[act.event_id].registration_form,
+      formUtils.addQuestion(event.registration_form,
         act.questionType);
       eventStore.emitChange(act.event_id);
       break;
     case actionTypes.UPDATE_REGISTRATION_FORM_QUESTION_PROPERTY:
-      _eventsPrivate[act.event_id].registration_form[act.index][act.property] = act.value;
+      event.registration_form.questions[act.key][act.property] = act.value;
       eventStore.emitChange(act.event_id);
       break;
    case actionTypes.DELETE_REGISTRATION_FORM_QUESTION:
-      formUtils.deleteQuestion(_eventsPrivate[act.event_id].registration_form,
-                            act.index);
+      formUtils.deleteQuestion(event.registration_form,
+                            act.key);
       eventStore.emitChange(act.event_id);
       break;
     case actionTypes.MOVE_REGISTRATION_FORM_QUESTION:
-      formUtils.move(_eventsPrivate[act.event_id].registration_form, 
-        act.fromIndex, act.toIndex);
+      formUtils.move(event.registration_form, 
+        act.key, act.toIndex);
       eventStore.emitChange(act.event_id);
       break;
     case actionTypes.DELETE_EVENT_SUCCESS:
-      _eventsPrivate[act.event_id] = undefined;
+      delete event;
       eventStore.emitChange(act.event_id);
       break;
     case actionTypes.UPDATE_EVENT_PROPERTY:
-      _eventsPrivate[act.event_id][act.property] = act.value;
+      event[act.property] = act.value;
       eventStore.emitChange(act.event_id);
       break;
     case actionTypes.REQUEST_EVENTS_PUBLIC_SUCCESS:
-      _eventsPublic = payload.action.events;
+      _eventsPublic = act.events;
       eventStore.emitChange();
       break;
     case actionTypes.REQUEST_EVENT_PRIVATE_SUCCESS:
-      _eventsPrivate[payload.action.event.event_id] = payload.action.event;
-      eventStore.emitChange(payload.action.event.event_id);
+      _eventsPrivate[act.event.event_id] = act.event;
+      eventStore.emitChange(act.event.event_id);
       break;
     default:
       //do nothing

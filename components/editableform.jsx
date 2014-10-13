@@ -13,18 +13,44 @@ var recognizedFormElements = [
     description : "Checkbox" }
   ]; 
 
+var GeneralEditControls = React.createClass({
+  deleteQuestion: function() {
+    this.props.deleteQuestion(this.props.element.key);
+  },
 
-//Editable textarea element
-var EditableTextArea = React.createClass({
   handleChange: function(event) {
     this.props.onEdit("label", event.target.value);
   },
 
+  render: function() {
+    var deleteButton = null;
+    if(this.props.element.isDeletable)
+    {
+      deleteButton = (<button onClick={this.deleteQuestion}>Delete question</button>);
+    }
+
+    return(
+      <div>
+        <label> 
+          Question title 
+          <input type="text" onChange={this.handleChange} 
+                 value={this.props.element.label}/>
+        </label>
+        {deleteButton}
+      </div>
+    );
+
+  }
+});
+
+//Editable textarea element
+var EditableTextArea = React.createClass({
+
   render : function() {
-    var labelIdPreview = "preview" + this.props.key;
-    var labelIdEditable = "editable" + this.props.key;
+    var labelIdPreview = "preview" + this.props.element.key;
+    var labelIdEditable = "editable" + this.props.element.key;
     return (
-      <div className="editable-textarea editable-form-element" key={this.props.key}>
+      <div className="editable-textarea editable-form-element" key={this.props.element.key}>
         <div className="preview">
           <label htmlFor={labelIdPreview}> 
             {this.props.element.label} 
@@ -32,9 +58,9 @@ var EditableTextArea = React.createClass({
           <textarea id={labelIdPreview} rows="4"/>
         </div>
         <div className="edit-controls">
-      {/* <RequiredControl elemId={this.props.id} /> */}
-          <label htmlFor="labelIdEditable"> Question title </label>
-          <input id={labelIdEditable} type="text" onChange={this.handleChange} value={this.props.element.label}/>
+          <GeneralEditControls element={this.props.element} 
+                               deleteQuestion={this.props.deleteQuestion}
+                               onEdit={this.props.onEdit} /> );
         </div>
       </div> );
   }
@@ -47,10 +73,9 @@ var EditableText = React.createClass({
   },
 
   render : function() {
-    var labelIdPreview = "preview" + this.props.key;
-    var labelIdEditable = "editable" + this.props.key;
+    var labelIdPreview = "preview" + this.props.element.key;
     return (
-      <div className="editable-text editable-form-element" key={this.props.key}>
+      <div className="editable-text editable-form-element" key={this.props.element.key}>
         <div className="preview">
           <label htmlFor={labelIdPreview}> 
             {this.props.element.label} 
@@ -58,39 +83,14 @@ var EditableText = React.createClass({
           <input type="text" id={labelIdPreview} />
         </div>
         <div className="edit-controls">
-      {/* <RequiredControl elemId={this.props.id} /> */}
-          <label htmlFor="labelIdEditable"> Question title </label>
-          <input id={labelIdEditable} type="text" onChange={this.handleChange} value={this.props.element.label}/>
+          <GeneralEditControls element={this.props.element} 
+                               deleteQuestion={this.props.deleteQuestion}
+                               onEdit={this.props.onEdit} /> );
         </div>
       </div> );
   }
 });
 
-
-var EditableText = React.createClass({
-  handleChange: function(event) {
-    this.props.onEdit("label", event.target.value);
-  },
-
-  render : function() {
-    var labelIdPreview = "preview" + this.props.key;
-    var labelIdEditable = "editable" + this.props.key;
-    return (
-      <div className="editable-text editable-form-element" key={this.props.key}>
-        <div className="preview">
-          <label htmlFor={labelIdPreview}> 
-            {this.props.element.label} 
-          </label>
-          <input type="text" id={labelIdPreview} />
-        </div>
-        <div className="edit-controls">
-      {/* <RequiredControl elemId={this.props.id} /> */}
-          <label htmlFor="labelIdEditable"> Question title </label>
-          <input id={labelIdEditable} type="text" onChange={this.handleChange} value={this.props.element.label}/>
-        </div>
-      </div> );
-  }
-});
 
 var EditableRadioButton = React.createClass({
   handleLabelEdit: function(event) {
@@ -104,10 +104,10 @@ var EditableRadioButton = React.createClass({
   },
   
   render : function() {
-    var labelIdPreview = "preview" + this.props.key;
-    var labelIdTitle = "title" + this.props.key;
-    var labelIdAlts = "alternatives" + this.props.key;
-    var radioName = "radio" + this.props.key;
+    var labelIdPreview = "preview" + this.props.element.key;
+    var labelIdTitle = "title" + this.props.element.key;
+    var labelIdAlts = "alternatives" + this.props.element.key;
+    var radioName = "radio" + this.props.element.key;
     
     var altsStr = this.props.element.alternatives.join(",");
     
@@ -121,7 +121,7 @@ var EditableRadioButton = React.createClass({
           </label> );
       }.bind(this));
     return (
-      <div className="editable-text editable-form-element" key={this.props.key}>
+      <div className="editable-text editable-form-element" key={this.props.element.key}>
         <div className="preview">
           <label htmlFor={radioName}> 
             {this.props.element.label} 
@@ -131,9 +131,10 @@ var EditableRadioButton = React.createClass({
           </div>
         </div>
         <div className="edit-controls">
-      {/* <RequiredControl elemId={this.props.id} /> */}
-          <label htmlFor="labelIdTitle"> Question title </label>
-          <input id={labelIdTitle} type="text" onChange={this.handleLabelEdit} value={this.props.element.label}/>
+          <GeneralEditControls element={this.props.element} 
+                               deleteQuestion={this.props.deleteQuestion}
+                               onEdit={this.props.onEdit} /> );
+
           <label htmlFor="labelIdAlts"> Alternatives </label>
           <input id={labelIdAlts} type="text" onChange={this.handleAltsEdit} value={altsStr}/>
         </div>
@@ -154,10 +155,10 @@ var EditableCheckbox = React.createClass({
   },
   
   render : function() {
-    var labelIdPreview = "preview" + this.props.key;
-    var labelIdTitle = "title" + this.props.key;
-    var labelIdAlts = "alternatives" + this.props.key;
-    var checkboxName = "checkbox" + this.props.key;
+    var labelIdPreview = "preview" + this.props.element.key;
+    var labelIdTitle = "title" + this.props.element.key;
+    var labelIdAlts = "alternatives" + this.props.element.key;
+    var checkboxName = "checkbox" + this.props.element.key;
     
     var altsStr = this.props.element.alternatives.join(",");
     
@@ -171,7 +172,7 @@ var EditableCheckbox = React.createClass({
           </label> );
       }.bind(this));
     return (
-      <div className="editable-checkbox editable-form-element" key={this.props.key}>
+      <div className="editable-checkbox editable-form-element" key={this.props.element.key}>
         <div className="preview">
           <label htmlFor={checkboxName}> 
             {this.props.element.label} 
@@ -181,9 +182,10 @@ var EditableCheckbox = React.createClass({
           </div>
         </div>
         <div className="edit-controls">
-      {/* <RequiredControl elemId={this.props.id} /> */}
-          <label htmlFor="labelIdTitle"> Question title </label>
-          <input id={labelIdTitle} type="text" onChange={this.handleLabelEdit} value={this.props.element.label}/>
+          <GeneralEditControls element={this.props.element} 
+                               deleteQuestion={this.props.deleteQuestion}
+                               onEdit={this.props.onEdit} /> );
+
           <label htmlFor="labelIdAlts"> Alternatives </label>
           <input id={labelIdAlts} type="text" onChange={this.handleAltsEdit} value={altsStr}/>
         </div>
@@ -225,19 +227,27 @@ var EditableForm = React.createClass({
       var onEdit = this.props.editQuestion.bind(null, index);
       switch(elem.type) {
         case  "textarea" :
-          return ( <EditableTextArea key={elem.key} element={elem}
-                                     onEdit={onEdit} /> );
+          return ( 
+            <EditableTextArea element={elem}
+                              deleteQuestion={this.props.deleteQuestion}
+                              onEdit={onEdit} /> );
           break;
         case  "text" :
-          return ( <EditableText key={elem.key} element={elem} 
-                                 onEdit={onEdit} /> );
+          return ( 
+            <EditableText element={elem} 
+                          deleteQuestion={this.props.deleteQuestion}
+                          onEdit={onEdit} /> );
           break;
         case "radio" :
-          return ( <EditableRadioButton key={elem.key} element={elem} 
-                                        onEdit={onEdit} /> );
+          return ( 
+            <EditableRadioButton element={elem} 
+                                 deleteQuestion={this.props.deleteQuestion}
+                                 onEdit={onEdit} /> );
         case "checkbox" :
-          return ( <EditableCheckbox key={elem.key} element={elem} 
-                                        onEdit={onEdit} /> );
+          return ( 
+            <EditableCheckbox element={elem} 
+                              deleteQuestion={this.props.deleteQuestion}
+                              onEdit={onEdit} /> );
           break;
         default :
           console.log("Warning: unrecognized editable form element");

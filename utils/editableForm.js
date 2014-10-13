@@ -34,7 +34,13 @@ var makeQuestion = function(type) {
 // Generates a unique key.
 
 var nextAvailableKey = function(form) {
-  return _.max(_.keys(form.questions)) + 1;
+  return _.max(form.questions, "key").key + 1;
+};
+
+
+var findIndexByKey = function(form, key) {
+  return _.findIndex(form.order, 
+                     function(x) { return x === key; });
 };
 
 
@@ -43,27 +49,28 @@ var nextAvailableKey = function(form) {
 
 var addQuestion = function(form, type) {
   var newQuestion = makeQuestion(type);
-  var newkey = nextAvailableKey(form);
+  var key = nextAvailableKey(form);
+  newQuestion.key = key;
   
-  form.questions[newkey] = newQuestion;
-  form.order.push(newkey);
+  form.questions[key] = newQuestion;
+  form.order.push(key);
 };
 
 
 var deleteQuestion = function(form, key) {
   delete form.questions[key];
-  var index = _.find(form.order, key);
-  form.order = form.order.splice(index, 1);
+  var index = findIndexByKey(form, key);
+  form.order.splice(index, 1);
 };
 
 
-var moveQuestion =  function(form, fromIndex, toIndex) {
-  form.order = form.order.splice(toIndex, 0, form.splice(fromIndex, 1));
+var moveQuestion = function(form, key, toIndex) {
+  var fromIndex = findIndexByKey(form, key);
+  form.order.splice(toIndex, 0, form.order.splice(fromIndex, 1));
 };
   
   
 module.exports = {
-  makeForm: makeForm,
   addQuestion: addQuestion,
   deleteQuestion: deleteQuestion,
   moveQuestion: moveQuestion,

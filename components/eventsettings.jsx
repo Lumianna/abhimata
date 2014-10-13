@@ -115,11 +115,15 @@ var EventGeneral = React.createClass({
 
 var RegistrationForm = React.createClass({
   render : function() {
+    var questions = this.props.event.registration_form.order.map(
+      function(key) { 
+        return this.props.event.registration_form.questions[key]; 
+      }.bind(this));
     return (
       <EditableForm editQuestion={this.updateQuestionProperty}
                     addQuestion={this.addQuestion}
                     deleteQuestion={this.deleteQuestion}
-                    elements={this.props.event.registration_form}> 
+                    elements={questions}> 
       </EditableForm>
     );
   },
@@ -131,19 +135,19 @@ var RegistrationForm = React.createClass({
     });
   },
   
-  updateQuestionProperty: function(index, field, value) {
+  updateQuestionProperty: function(key, field, value) {
     eventActionCreators.updateQuestionProperty({
       event_id: this.props.event.event_id,
-      index: index,
+      key: key,
       property: field,
       value: value,
     });
   },
   
-  deleteQuestion: function(index) {
+  deleteQuestion: function(key) {
     eventActionCreators.deleteQuestion({
       event_id: this.props.event.event_id,
-      index: index,
+      key: key,
     });
   },
 
