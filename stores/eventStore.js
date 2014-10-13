@@ -27,12 +27,12 @@ var actionHandler = function(payload) {
       break;
    case actionTypes.DELETE_REGISTRATION_FORM_QUESTION:
       formUtils.deleteQuestion(event.registration_form,
-                            act.key);
+                               act.key);
       eventStore.emitChange(act.event_id);
       break;
     case actionTypes.MOVE_REGISTRATION_FORM_QUESTION:
-      formUtils.move(event.registration_form, 
-        act.key, act.toIndex);
+      formUtils.moveQuestion(event.registration_form, 
+                             act.key, act.toIndex);
       eventStore.emitChange(act.event_id);
       break;
     case actionTypes.DELETE_EVENT_SUCCESS:

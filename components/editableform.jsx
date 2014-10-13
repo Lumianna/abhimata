@@ -18,6 +18,16 @@ var GeneralEditControls = React.createClass({
     this.props.deleteQuestion(this.props.element.key);
   },
 
+  moveUp: function() {
+    this.props.moveQuestion(this.props.element.key, 
+                            this.props.element.index - 1);
+  },
+
+  moveDown: function() {
+    this.props.moveQuestion(this.props.element.key, 
+                            this.props.element.index + 1);
+  },
+
   handleChange: function(event) {
     this.props.onEdit("label", event.target.value);
   },
@@ -36,6 +46,8 @@ var GeneralEditControls = React.createClass({
           <input type="text" onChange={this.handleChange} 
                  value={this.props.element.label}/>
         </label>
+        <button onClick={this.moveUp}>Move question up</button>
+        <button onClick={this.moveDown}>Move question down</button>
         {deleteButton}
       </div>
     );
@@ -59,6 +71,7 @@ var EditableTextArea = React.createClass({
         </div>
         <div className="edit-controls">
           <GeneralEditControls element={this.props.element} 
+                               moveQuestion={this.props.moveQuestion}
                                deleteQuestion={this.props.deleteQuestion}
                                onEdit={this.props.onEdit} /> );
         </div>
@@ -84,6 +97,7 @@ var EditableText = React.createClass({
         </div>
         <div className="edit-controls">
           <GeneralEditControls element={this.props.element} 
+                               moveQuestion={this.props.moveQuestion}
                                deleteQuestion={this.props.deleteQuestion}
                                onEdit={this.props.onEdit} /> );
         </div>
@@ -132,6 +146,7 @@ var EditableRadioButton = React.createClass({
         </div>
         <div className="edit-controls">
           <GeneralEditControls element={this.props.element} 
+                               moveQuestion={this.props.moveQuestion}
                                deleteQuestion={this.props.deleteQuestion}
                                onEdit={this.props.onEdit} /> );
 
@@ -183,6 +198,7 @@ var EditableCheckbox = React.createClass({
         </div>
         <div className="edit-controls">
           <GeneralEditControls element={this.props.element} 
+                               moveQuestion={this.props.moveQuestion}
                                deleteQuestion={this.props.deleteQuestion}
                                onEdit={this.props.onEdit} /> );
 
@@ -230,23 +246,27 @@ var EditableForm = React.createClass({
           return ( 
             <EditableTextArea element={elem}
                               deleteQuestion={this.props.deleteQuestion}
+                              moveQuestion={this.props.moveQuestion}
                               onEdit={onEdit} /> );
           break;
         case  "text" :
           return ( 
             <EditableText element={elem} 
                           deleteQuestion={this.props.deleteQuestion}
+                          moveQuestion={this.props.moveQuestion}
                           onEdit={onEdit} /> );
           break;
         case "radio" :
           return ( 
             <EditableRadioButton element={elem} 
                                  deleteQuestion={this.props.deleteQuestion}
+                                 moveQuestion={this.props.moveQuestion}
                                  onEdit={onEdit} /> );
         case "checkbox" :
           return ( 
             <EditableCheckbox element={elem} 
                               deleteQuestion={this.props.deleteQuestion}
+                              moveQuestion={this.props.moveQuestion}
                               onEdit={onEdit} /> );
           break;
         default :

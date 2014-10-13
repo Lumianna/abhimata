@@ -120,13 +120,6 @@ function deleteEvent (event_id) {
 }
 
 
-function addQuestion(opts) {
-  dispatcher.handleViewAction({
-    questionType: opts.questionType,
-    event_id: event_id,
-  });
-}
-
 
 function updateQuestionProperty(opts) {
   opts.type = actionTypes.UPDATE_REGISTRATION_FORM_QUESTION_PROPERTY;
@@ -136,6 +129,12 @@ function updateQuestionProperty(opts) {
 
 function addQuestion(opts) {
   opts.type = actionTypes.ADD_REGISTRATION_FORM_QUESTION;
+  dispatcher.handleViewAction(opts);
+}
+
+
+function moveQuestion(opts) {
+  opts.type = actionTypes.MOVE_REGISTRATION_FORM_QUESTION;
   dispatcher.handleViewAction(opts);
 }
 
@@ -153,6 +152,7 @@ module.exports = {
   saveEvent: saveEvent,
   deleteEvent: deleteEvent,
   addQuestion: addQuestion,
+  moveQuestion: moveQuestion,
   updateQuestionProperty: updateQuestionProperty,
   deleteQuestion: deleteQuestion,
 }

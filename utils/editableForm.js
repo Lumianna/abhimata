@@ -66,7 +66,11 @@ var deleteQuestion = function(form, key) {
 
 var moveQuestion = function(form, key, toIndex) {
   var fromIndex = findIndexByKey(form, key);
-  form.order.splice(toIndex, 0, form.order.splice(fromIndex, 1));
+  
+  if(toIndex !== fromIndex && toIndex >= 0 && toIndex < form.order.length)
+  {
+    form.order.splice(toIndex, 0, form.order.splice(fromIndex, 1));
+  }
 };
   
   
