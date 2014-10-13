@@ -8,13 +8,13 @@
    :tag "email"
    :label "Email address"
    :isDeletable false
-   :isResponseOptional false
-   :key 0 })
+   :isResponseOptional false })
    
    
 
 (def default-registration-form
-  (json/write-str [email-question]))
+  (json/write-str { :questions : {0 : email-question},
+                   :order : [0] }))
 
 (def default-event
   {

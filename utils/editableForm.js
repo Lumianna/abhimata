@@ -32,63 +32,33 @@ var makeQuestion = function(type) {
 
 
 // Generates a unique key.
-// This key currently only matters in React rendering.
 
 var nextAvailableKey = function(form) {
-  return _.max(form, "key").key + 1;
-};
-
-// Factory functions for the special questions that can't be deleted
-// from a form.
-
-var makeNameQuestion = function() {
-  return {
-    type : "text",
-    tag : "fullname",
-    label : "Full name",
-    isDeletable : false,
-    isResponseOptional : false,
-    key : 0,
-  };
-};
-
-var makeEmailQuestion = function() {
-  return {
-    type : "text",
-    tag : "email",
-    label : "Email address",
-    isDeletable : false,
-    isResponseOptional : false,
-    key : 1,
-  };
+  return _.max(_.keys(form.questions)) + 1;
 };
 
 
 // EXPOSED FUNCTIONS 
 
-var makeForm = function() {
-  return [
-    makeNameQuestion(),
-    makeEmailQuestion()
-    ];
-};
-
 
 var addQuestion = function(form, type) {
   var newQuestion = makeQuestion(type);
-  newQuestion.key = nextAvailableKey(form);
+  var newkey = nextAvailableKey(form);
   
-  return form.concat([newQuestion]);
+  form.questions[newkey] = newQuestion;
+  form.order.push(newkey);
 };
 
 
-var deleteQuestion = function(form, index) {
-  return form.splice(index, 1);
+var deleteQuestion = function(form, key) {
+  delete form.questions[key];
+  var index = _.find(form.order, key);
+  form.order = form.order.splice(index, 1);
 };
 
 
 var moveQuestion =  function(form, fromIndex, toIndex) {
-  return form.splice(toIndex, 0, form.splice(fromIndex, 1));
+  form.order = form.order.splice(toIndex, 0, form.splice(fromIndex, 1));
 };
   
   
