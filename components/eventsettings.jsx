@@ -77,15 +77,18 @@ var EventSettingsLinks = React.createClass({
           Sign-up form
         </Link>
         <Link to="delete" params={linkParams}>
-          Delete data
+          Delete event 
         </Link>
       </div> );
   }
 });
 
 var DeleteData = React.createClass({
+  mixins: [Router.Transitions],
+
   deleteEvent: function() {
     eventActionCreators.deleteEvent(this.props.event.event_id);
+    this.transitionTo('/events');
   },
   render: function() {
     return (
