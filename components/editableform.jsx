@@ -52,7 +52,8 @@ var GeneralEditControls = React.createClass({
         <button onClick={this.moveUp}>Move question up</button>
         <button onClick={this.moveDown}>Move question down</button>
         {deleteButton}
-      </div> );
+      </div> 
+    );
   }
 });
 
@@ -74,7 +75,7 @@ var EditableTextArea = React.createClass({
           <GeneralEditControls element={this.props.element} 
                                moveQuestion={this.props.moveQuestion}
                                deleteQuestion={this.props.deleteQuestion}
-                               onEdit={this.props.onEdit} /> );
+                               onEdit={this.props.onEdit} /> 
         </div>
       </div> );
   }
@@ -100,7 +101,7 @@ var EditableText = React.createClass({
           <GeneralEditControls element={this.props.element} 
                                moveQuestion={this.props.moveQuestion}
                                deleteQuestion={this.props.deleteQuestion}
-                               onEdit={this.props.onEdit} /> );
+                               onEdit={this.props.onEdit} /> 
         </div>
       </div> );
   }
@@ -149,7 +150,7 @@ var EditableRadioButton = React.createClass({
           <GeneralEditControls element={this.props.element} 
                                moveQuestion={this.props.moveQuestion}
                                deleteQuestion={this.props.deleteQuestion}
-                               onEdit={this.props.onEdit} /> );
+                               onEdit={this.props.onEdit} /> 
 
           <label htmlFor="labelIdAlts"> Alternatives </label>
           <input id={labelIdAlts} type="text" onChange={this.handleAltsEdit} value={altsStr}/>
@@ -201,7 +202,7 @@ var EditableCheckbox = React.createClass({
           <GeneralEditControls element={this.props.element} 
                                moveQuestion={this.props.moveQuestion}
                                deleteQuestion={this.props.deleteQuestion}
-                               onEdit={this.props.onEdit} /> );
+                               onEdit={this.props.onEdit} /> 
 
           <label htmlFor="labelIdAlts"> Alternatives </label>
           <input id={labelIdAlts} type="text" onChange={this.handleAltsEdit} value={altsStr}/>
