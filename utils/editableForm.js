@@ -69,7 +69,7 @@ var moveQuestion = function(form, key, toIndex) {
   
   if(toIndex !== fromIndex && toIndex >= 0 && toIndex < form.order.length)
   {
-    form.order.splice(toIndex, 0, form.order.splice(fromIndex, 1));
+    form.order.splice(toIndex, 0, form.order.splice(fromIndex, 1)[0]);
   }
 };
   

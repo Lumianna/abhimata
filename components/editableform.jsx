@@ -34,12 +34,15 @@ var GeneralEditControls = React.createClass({
 
   render: function() {
     var deleteButton = null;
-    if(this.props.element.isDeletable)
-    {
-      deleteButton = (<button onClick={this.deleteQuestion}>Delete question</button>);
+    if(this.props.element.isDeletable) {
+      deleteButton = (
+        <button onClick={this.deleteQuestion}>
+          Delete question
+        </button>
+      );
     }
 
-    return(
+    return (
       <div>
         <label> 
           Question title 
@@ -49,9 +52,7 @@ var GeneralEditControls = React.createClass({
         <button onClick={this.moveUp}>Move question up</button>
         <button onClick={this.moveDown}>Move question down</button>
         {deleteButton}
-      </div>
-    );
-
+      </div> );
   }
 });
 
