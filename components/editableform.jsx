@@ -115,7 +115,8 @@ var EditableRadioButton = React.createClass({
   
   handleAltsEdit: function(event) {
     var altsString = event.target.value;
-    parsedAlts = altsString.split(",").map(function(x) { return x.trim(); });
+    var newLine = /\r\n|\r|\n/g;
+    parsedAlts = altsString.split(newLine);
     this.props.onEdit("alternatives", parsedAlts);
   },
   
@@ -125,7 +126,7 @@ var EditableRadioButton = React.createClass({
     var labelIdAlts = "alternatives" + this.props.element.key;
     var radioName = "radio" + this.props.element.key;
     
-    var altsStr = this.props.element.alternatives.join(",");
+    var altsStr = this.props.element.alternatives.join("\n");
     
     var radioButtons = this.props.element.alternatives.map(
       function(alternative, index) {
@@ -153,7 +154,7 @@ var EditableRadioButton = React.createClass({
                                onEdit={this.props.onEdit} /> 
 
           <label htmlFor="labelIdAlts"> Alternatives </label>
-          <input id={labelIdAlts} type="text" onChange={this.handleAltsEdit} value={altsStr}/>
+          <textarea id={labelIdAlts} rows={this.props.element.alternatives.length} onChange={this.handleAltsEdit} value={altsStr}/>
         </div>
       </div> );
   }
@@ -167,7 +168,8 @@ var EditableCheckbox = React.createClass({
   
   handleAltsEdit: function(event) {
     var altsString = event.target.value;
-    parsedAlts = altsString.split(",").map(function(x) { return x.trim(); });
+    var newLine = /\r\n|\r|\n/g;
+    parsedAlts = altsString.split(newLine);
     this.props.onEdit("alternatives", parsedAlts);
   },
   
@@ -177,7 +179,7 @@ var EditableCheckbox = React.createClass({
     var labelIdAlts = "alternatives" + this.props.element.key;
     var checkboxName = "checkbox" + this.props.element.key;
     
-    var altsStr = this.props.element.alternatives.join(",");
+    var altsStr = this.props.element.alternatives.join("\n");
     
     var checkboxes = this.props.element.alternatives.map(
       function(alternative, index) {
@@ -205,7 +207,7 @@ var EditableCheckbox = React.createClass({
                                onEdit={this.props.onEdit} /> 
 
           <label htmlFor="labelIdAlts"> Alternatives </label>
-          <input id={labelIdAlts} type="text" onChange={this.handleAltsEdit} value={altsStr}/>
+          <textarea id={labelIdAlts} rows={this.props.element.alternatives.length} onChange={this.handleAltsEdit} value={altsStr}/>
         </div>
       </div> );
   }
