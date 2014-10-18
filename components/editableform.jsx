@@ -28,17 +28,30 @@ var GeneralEditControls = React.createClass({
                             this.props.element.index + 1);
   },
 
-  handleChange: function(event) {
+  handleTitleChange: function(event) {
     this.props.onEdit("label", event.target.value);
   },
 
+  handleIsOptionalChange: function() {
+    this.props.onEdit("isResponseOptional", 
+                      !this.props.element.isResponseOptional);
+  },
+
   render: function() {
-    var deleteButton = null;
+    var deletableOnlyControls = null;
     if(this.props.element.isDeletable) {
-      deleteButton = (
-        <button onClick={this.deleteQuestion}>
-          Delete question
-        </button>
+      deletableOnlyControls = (
+        <div>
+          <label>
+            Answering is optional 
+            <input type="checkbox" 
+                   onChange={this.handleIsOptionalChange}
+                   checked={this.props.element.isResponseOptional}/>
+          </label>
+          <button onClick={this.deleteQuestion}>
+            Delete question
+          </button>
+        </div>
       );
     }
 
@@ -46,12 +59,12 @@ var GeneralEditControls = React.createClass({
       <div>
         <label> 
           Question title 
-          <input type="text" onChange={this.handleChange} 
+          <input type="text" onChange={this.handleTitleChange} 
                  value={this.props.element.label}/>
         </label>
         <button onClick={this.moveUp}>Move question up</button>
         <button onClick={this.moveDown}>Move question down</button>
-        {deleteButton}
+        {deletableOnlyControls}
       </div> 
     );
   }
