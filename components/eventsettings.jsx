@@ -16,25 +16,26 @@ var EventSettings = React.createClass({
   getInitialState: function() {
     return {
       title: "",
+      errors: {},
       registration_form: [],
     };
   },
   
   eventId: function() {
-    return parseInt(this.props.params.eventId);
+    return parseInt(this.props.params.eventId, 10);
   },
 
   
   _onChange: function(updated_event_id) {
     if(updated_event_id === this.eventId())
     {
-      this.setState(eventStore.getEventPrivate(updated_event_id));
+      this.setState(eventStore.getEventDraft(updated_event_id));
     }
   },
   
   componentDidMount: function() {
     eventStore.addChangeListener(this._onChange);
-    eventActionCreators.requestEventPrivate(this.props.params.eventId);
+    eventActionCreators.requestEventPrivate(this.eventId());
   },
   
   componentWillUnmount: function() {
@@ -98,6 +99,23 @@ var DeleteData = React.createClass({
   }
 });
 
+
+var ValidatedTextInput = React.createClass({ 
+  render: function() {
+    return( 
+      <label>
+        {this.props.label} 
+        <input type="text" value={this.props.value}
+               onChange={this.props.onChange}/>
+        <span className=".error"> {this.props.error}</span>
+      </label>
+    );
+  }
+});
+
+
+/* Component for managing general event settings: title, number of
+   participants, etc. */
 var EventGeneral = React.createClass({
   render: function() {
     return (
@@ -107,13 +125,23 @@ var EventGeneral = React.createClass({
           <input type="text" value={this.props.event.title}
                onChange={this._onChange.bind(null, "title")}/>
         </label>
+        <ValidatedTextInput 
+          label="Maximum number of participants"
+          value={this.props.event.max_participants}
+          error={this.props.event.errors.max_participants}
+          onChange={this._onChange.bind(null, "max_participants")}/>
+        <ValidatedTextInput 
+          label="Maximum length of waiting list"
+          value={this.props.event.max_waiting_list_length}
+          error={this.props.event.errors.max_waiting_list_length}
+          onChange={this._onChange.bind(null, "max_waiting_list_length")}/>
       </form> );
   },
 
-  _onChange: function(propertyName, jsEvent) {
+  _onChange: function(propertyName, event) {
     eventActionCreators.updateEventProperty(this.props.event.event_id,
                                             propertyName,
-                                            jsEvent.target.value);
+                                            event.target.value);
   },
 });
 

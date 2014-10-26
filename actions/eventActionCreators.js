@@ -77,45 +77,53 @@ function updateEventProperty (event_id, propertyName, value) {
 
 function saveEvent (event_id) {
   var url = "events/" + event_id;
-  var eventData = eventStore.getEventPrivate(event_id);
-  $.ajax({ 
-    type : "POST",
-    url : url,
-    data : JSON.stringify(eventData),
-    dataType : "json",
-    success : function() { 
-      dispatcher.handleServerAction({ 
-        type : actionTypes.SAVE_EVENT_SUCCESS,
-        event_id : event_id,
-      });
-    },
-    error : function() { 
-      dispatcher.handleServerAction({ 
-        type : actionTypes.SAVE_EVENT_FAIL });
-    },
-    contentType : "application/json; charset=utf-8"
-  });
+  var eventData = eventStore.validateEventDraft(event_id);
+  var failureHandler = function(errorMessage) {
+    dispatcher.handleServerAction({ 
+      type: actionTypes.SAVE_EVENT_FAIL,
+      errorMessage: errorMessage,
+    });
+  }
+
+  if(!eventData) {
+    failureHandler("Invalid event data; this is probably a bug.");
+  } else {
+    $.ajax({ 
+      type: "POST",
+      url: url,
+      data: JSON.stringify(eventData),
+      dataType: "json",
+      success: function() { 
+        dispatcher.handleServerAction({ 
+          type: actionTypes.SAVE_EVENT_SUCCESS,
+          event_id: event_id,
+        });
+      },
+      error: failureHandler.bind(null, "Saving to server failed."),
+      contentType: "application/json; charset=utf-8"
+    });
+  }
 }
 
 function deleteEvent (event_id) {
   var url = "events/" + event_id;
   var eventData = eventStore.getEventPrivate(event_id);
   $.ajax({ 
-    type : "DELETE",
-    url : url,
-    data : JSON.stringify(eventData),
-    dataType : "json",
-    success : function() { 
+    type: "DELETE",
+    url: url,
+    data: JSON.stringify(eventData),
+    dataType: "json",
+    success: function() { 
       dispatcher.handleServerAction({ 
-        type : actionTypes.DELETE_EVENT_SUCCESS,
-        event_id : event_id,
+        type: actionTypes.DELETE_EVENT_SUCCESS,
+        event_id: event_id,
       });
     },
-    error : function() { 
+    error: function() { 
       dispatcher.handleServerAction({ 
-        type : actionTypes.DELETE_EVENT_FAIL });
+        type: actionTypes.DELETE_EVENT_FAIL });
     },
-    contentType : "application/json; charset=utf-8"
+    contentType: "application/json; charset=utf-8"
   });
 }
 

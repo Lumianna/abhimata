@@ -20,5 +20,6 @@
 (def default-event
   {
    :title "Untitled event"
+   :max_participants 40
+   :max_waiting_list_length 40
    :registration_form default-registration-form })
-   
