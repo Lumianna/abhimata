@@ -7,9 +7,9 @@ module.exports = {
   parsePositiveInteger: function(str) {
     var num = parseInt(str, 10);
     if(!isNaN(num) && num > 0 && str.match(digitsOnly)) {
-      return { value: num } ;
+      return { value: num };
     } else {
-      return { error: "Not a positive integer." } ;
+      return { error: "Not a positive integer." };
     }
   }
 };

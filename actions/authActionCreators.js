@@ -1,9 +1,10 @@
-var dispatcher = require('../dispatcher/dispatcher.js');
 var actionTypes = require('../constants/constants.js').actionTypes;
+var dispatcher = require('../dispatcher/dispatcher.js');
 var $ = require('jquery');
+
 module.exports = {
   
-  login : function(username, password) {
+  login: function(username, password) {
     dispatcher.handleViewAction({ type : actionTypes.REQUEST_LOGIN });
     $.ajax({ 
       type : "POST",
@@ -22,5 +23,10 @@ module.exports = {
       contentType : "application/json; charset=utf-8"
     });
   },
+  
+  loginExpired: function() {
+    dispatcher.handleServerAction(
+        { type: actionTypes.LOGIN_EXPIRED });
+  }  
 
 };

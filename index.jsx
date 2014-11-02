@@ -19,19 +19,22 @@ var EditableForm = require('./components/editableform.jsx');
 var es = require('./components/eventsettings.jsx');
 var EventList = require('./components/eventlist.jsx');
 var Login = require('./components/Login.jsx');
+var Admin = require('./components/Admin.jsx');
 
 
 var routes = (
   <Routes location="hash">
-    <Route path="/login" handler={Login}/>
-    <Route path="/events" handler={EventList}/>
-    <Route name="event" path="/events/:eventId" handler={es.EventSettings}>
-      <DefaultRoute handler={es.EventGeneral}/>
-      <Route name="general" path="general" handler={es.EventGeneral}/>
-      <Route name="registrationform" path="registrationform" handler={es.RegistrationForm}/>
-      <Route name="delete" path="delete" handler={es.DeleteData}/>
+    <Route path="/admin" handler={Admin}>
+      <Route name="admin-login" path="login" handler={Login}/>
+      <Route path="events" handler={EventList}/>
+      <Route name="event" path="events/:eventId" handler={es.EventSettings}>
+        <DefaultRoute handler={es.EventGeneral}/>
+        <Route name="general" handler={es.EventGeneral}/>
+        <Route name="registrationform" handler={es.RegistrationForm}/>
+        <Route name="delete" handler={es.DeleteData}/>
+      </Route>
+      <Redirect to="/admin/events"/>
     </Route>
-    <Redirect to="/events"/>
   </Routes>
 );
 

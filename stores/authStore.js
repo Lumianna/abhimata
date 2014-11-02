@@ -19,6 +19,10 @@ function handleActions (payload) {
       isAuthenticated = false;
       authStore.emitChange();
       break;
+    case actionTypes.LOGIN_EXPIRED:
+      isAuthenticated = false;
+      authStore.emitChange();
+      break;
   }
 } 
 

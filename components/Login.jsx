@@ -5,7 +5,7 @@ var authStore = require('../stores/authStore.js');
 var authActions = require('../actions/authActionCreators.js');
 
 var Login = React.createClass({
-  mixins : [Router.Transitions],
+  mixins: [Router.Transitions],
 
   getInitialState : function() {
     return { 
@@ -29,7 +29,7 @@ var Login = React.createClass({
 
   _onChange : function() {
     if(authStore.userIsAuthenticated()) {
-      this.transitionTo('/events');
+      this.transitionTo('/admin/events');
     }
   },
   

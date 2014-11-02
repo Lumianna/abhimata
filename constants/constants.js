@@ -30,6 +30,7 @@ module.exports = {
     REQUEST_LOGOUT_SUCCESS: null,
     REQUEST_LOGOUT_FAIL: null,
     AUTHENTICATION_FAILED: null,
+    LOGIN_EXPIRED: null,
   }),
 
   payloadSources: keyMirror({

@@ -1,6 +1,7 @@
 var dispatcher = require('../dispatcher/dispatcher.js');
 var actionTypes = require('../constants/constants.js').actionTypes;
 var eventStore = require('../stores/eventStore.js');
+var authActions = require('./authActionCreators.js');
 var $ = require('jquery');
 
 function requestEventsPublic () {
@@ -40,6 +41,10 @@ function requestEventPrivate (event_id) {
       dispatcher.handleServerAction(
         { type: actionTypes.REQUEST_EVENT_PRIVATE_FAIL,
           event: data });
+      
+      if(data.status === 401) {
+        authActions.loginExpired();
+      }
       console.log(data);
     },
     dataType: "json"
