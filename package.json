@@ -14,15 +14,13 @@
     "browserify": "~6.2.0",
     "envify": "~3.0.0",
     "reactify": "~0.14.0",
-    "statics": "~0.1.0",
     "uglifyjs": "~2.3.6",
     "watchify": "~2.1.0",
     "lessify": "^0.4.1"
   },
   "scripts": {
-    "start": "STATIC_ROOT=./static watchify -o browser-bundle.js -v -d .",
-    "build": "STATIC_ROOT=./static NODE_ENV=production browserify . | uglifyjs -cm > browser-bundle.min.js",
-    "collect-static": "collect-static . ./static",
+    "start": "watchify -o browser-bundle.js -v -d .",
+    "build": "NODE_ENV=production browserify . | uglifyjs -cm > browser-bundle.min.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Kristian Nybo",
