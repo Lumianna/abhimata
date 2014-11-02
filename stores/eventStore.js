@@ -23,6 +23,9 @@ var _eventPropertyParsers = {
 
 function makeEventDraft(event) {
   var draft = _.cloneDeep(event);
+  _.each(_eventPropertyParsers, function(__, key) { 
+    draft[key] = draft[key] + ""; 
+  });
   draft.hasUnsavedChanges = false;
   draft.errors = {};
   
