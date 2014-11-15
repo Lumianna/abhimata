@@ -1,6 +1,8 @@
 var dispatcher = require('../dispatcher/dispatcher.js');
 var actionTypes = require('../constants/constants.js').actionTypes;
-var eventStore = require('../stores/eventStore.js');
+var publicEventStore = require('../stores/publicEventStore.js');
+var privateEventStore = require('../stores/privateEventStore.js');
+var eventDraftStore = require('../stores/eventDraftStore.js');
 var authActions = require('./authActionCreators.js');
 var $ = require('jquery');
 
@@ -102,7 +104,7 @@ function updateEventProperty (event_id, propertyName, value) {
 
 function saveEvent (event_id) {
   var url = "events-private/" + event_id;
-  var eventData = eventStore.validateEventDraft(event_id);
+  var eventData = eventDraftStore.validateEventDraft(event_id);
   var failureHandler = function(errorMessage) {
     dispatcher.handleServerAction({ 
       type: actionTypes.SAVE_EVENT_FAIL,
@@ -132,7 +134,7 @@ function saveEvent (event_id) {
 
 function deleteEvent (event_id) {
   var url = "events-private/" + event_id;
-  var eventData = eventStore.getEventPrivate(event_id);
+  var eventData = privateEventStore.getEvent(event_id);
   $.ajax({ 
     type: "DELETE",
     url: url,

@@ -6,7 +6,7 @@ var Link = Router.Link;
 
 var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
 var eventActionCreators = require('../actions/eventActionCreators.js');
-var eventStore = require('../stores/eventStore.js');
+var eventDraftStore = require('../stores/eventDraftStore.js');
 
 var EditableForm = require('../components/editableform.jsx');
 
@@ -29,17 +29,17 @@ var EventSettings = React.createClass({
   _onChange: function(updated_event_id) {
     if(updated_event_id === this.eventId())
     {
-      this.setState(eventStore.getEventDraft(updated_event_id));
+      this.setState(eventDraftStore.getEventDraft(updated_event_id));
     }
   },
   
   componentDidMount: function() {
-    eventStore.addChangeListener(this._onChange);
+    eventDraftStore.addChangeListener(this._onChange);
     eventActionCreators.requestEventDetails(this.eventId());
   },
   
   componentWillUnmount: function() {
-    eventStore.removeChangeListener(this._onChange);
+    eventDraftStore.removeChangeListener(this._onChange);
   },
   
   saveEvent: function() {

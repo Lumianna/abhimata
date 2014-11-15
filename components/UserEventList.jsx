@@ -5,7 +5,7 @@ var Link = Router.Link;
 
 var $ = require('jquery');
 var eventActionCreators = require('../actions/eventActionCreators.js');
-var eventStore = require('../stores/eventStore.js');
+var publicEventStore = require('../stores/publicEventStore.js');
 
 var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
 
@@ -15,12 +15,12 @@ var UserEventList = React.createClass({
   },
   
   componentDidMount: function() {
-    eventStore.addChangeListener(this._onChange);
+    publicEventStore.addChangeListener(this._onChange);
     eventActionCreators.requestPublicEventList();
   },
   
   getStateFromStores: function() {
-    return { events: eventStore.getEventsPublic() };
+    return { events: publicEventStore.getEvents() };
   },
   
   _onChange: function() {
@@ -28,7 +28,7 @@ var UserEventList = React.createClass({
   },
 
   componentWillUnmount: function() {
-    eventStore.removeChangeListener(this._onChange);
+    publicEventStore.removeChangeListener(this._onChange);
   },
   
   createNewEvent: function() {

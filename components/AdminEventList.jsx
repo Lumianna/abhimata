@@ -6,7 +6,7 @@ var Link = Router.Link;
 var $ = require('jquery');
 var _ = require('lodash');
 var eventActionCreators = require('../actions/eventActionCreators.js');
-var eventStore = require('../stores/eventStore.js');
+var privateEventStore = require('../stores/privateEventStore.js');
 
 var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
 
@@ -18,12 +18,12 @@ var AdminEventList = React.createClass({
   },
   
   componentDidMount: function() {
-    eventStore.addChangeListener(this._onChange);
+    privateEventStore.addChangeListener(this._onChange);
     eventActionCreators.requestPrivateEventList();
   },
   
   getStateFromStores: function() {
-    return { events: eventStore.getEventsPrivate() };
+    return { events: privateEventStore.getEvents() };
   },
                                  
   _onChange: function() {
@@ -31,7 +31,7 @@ var AdminEventList = React.createClass({
   },
 
   componentWillUnmount: function() {
-    eventStore.removeChangeListener(this._onChange);
+    privateEventStore.removeChangeListener(this._onChange);
   },
   
   createNewEvent: function() {

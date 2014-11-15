@@ -3,7 +3,7 @@ var createStore = require('../utils/createStore.js');
 
 var CHANGE_EVENT = 'change';
 
-var isAuthenticated = false;
+var isAuthenticated = true;
 
 function handleActions (payload) {
   switch(payload.action.type) {
