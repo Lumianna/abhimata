@@ -40,11 +40,12 @@ select
   event_id,
   title,
   max_participants,
+  registration_form,
   (select count(*) from abhimata_registration 
     where abhimata_registration.event_id = abhimata_event.event_id) 
     as num_participants,
   registration_open
-from abhimata_event;
+from abhimata_event where abhimata_event.visible_to_public = true;
 
 
 create function abhimata_registration_trigger() returns trigger as $$

@@ -22,4 +22,6 @@
    :title "Untitled event"
    :max_participants 40
    :max_waiting_list_length 40
+   :visible_to_public false
+   :registration_open false
    :registration_form default-registration-form })

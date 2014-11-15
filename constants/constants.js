@@ -3,13 +3,16 @@ var keyMirror = require('react/lib/keyMirror');
 module.exports = {
   actionTypes: keyMirror({
     //Get public event data from server.
-    REQUEST_EVENTS_PUBLIC: null,
-    REQUEST_EVENTS_PUBLIC_SUCCESS: null,
-    REQUEST_EVENTS_PUBLIC_FAIL: null,
+    REQUEST_PUBLIC_EVENT_LIST: null,
+    REQUEST_PUBLIC_EVENT_LIST_SUCCESS: null,
+    REQUEST_PUBLIC_EVENT_LIST_FAIL: null,
     //Get admin-only event data from server. 
-    REQUEST_EVENT_PRIVATE: null,
-    REQUEST_EVENT_PRIVATE_SUCCESS: null,
-    REQUEST_EVENT_PRIVATE_FAIL: null,
+    REQUEST_PRIVATE_EVENT_LIST: null,
+    REQUEST_PRIVATE_EVENT_LIST_SUCCESS: null,
+    REQUEST_PRIVATE_EVENT_LIST_FAIL: null,
+    REQUEST_EVENT_DETAILS: null,
+    REQUEST_EVENT_DETAILS_SUCCESS: null,
+    REQUEST_EVENT_DETAILS_FAIL: null,
     //Create and edit events (admin-only)
     CREATE_EVENT: null,
     CREATE_EVENT_SUCCESS: null,

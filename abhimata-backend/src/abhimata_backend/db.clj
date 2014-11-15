@@ -39,7 +39,12 @@
 
 
 (defn get-events-public []
-  (map unstringify-registration-form (jdbc/query db-spec ["select * from abhimata_event"])))
+  (map unstringify-registration-form 
+       (jdbc/query db-spec ["select * from abhimata_public_events"])))
+
+(defn get-events-private []
+  (map unstringify-registration-form 
+       (jdbc/query db-spec ["select * from abhimata_event"])))
 
 (defn get-event [id]
   (let [result 
@@ -56,7 +61,7 @@
   (do
     (let [keywordized-data (walk/keywordize-keys event-data)]
     (jdbc/update! db-spec :abhimata_event
-                  (stringify-registration-form keywordized-data)
+                  (stringify-registration-form (dissoc keywordized-data :event_id))
                   ["event_id = ?" (:event_id keywordized-data)]))))
 
 (defn delete-event [event-id]

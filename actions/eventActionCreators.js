@@ -4,19 +4,19 @@ var eventStore = require('../stores/eventStore.js');
 var authActions = require('./authActionCreators.js');
 var $ = require('jquery');
 
-function requestEventsPublic () {
-  dispatcher.handleViewAction({type: actionTypes.REQUEST_EVENTS_PUBLIC});
+function requestPublicEventList () {
+  dispatcher.handleViewAction({type: actionTypes.REQUEST_PUBLIC_EVENT_LIST});
   $.ajax({ 
     type: "GET",
-    url: "events",
+    url: "events-public",
     success: function(data) { 
       dispatcher.handleServerAction(
-        { type: actionTypes.REQUEST_EVENTS_PUBLIC_SUCCESS,
+        { type: actionTypes.REQUEST_PUBLIC_EVENT_LIST_SUCCESS,
           events: data });
     },
     error: function(data, textStatus) { 
       dispatcher.handleServerAction(
-        { type: actionTypes.REQUEST_EVENTS_PUBLIC_FAILURE,
+        { type: actionTypes.REQUEST_PUBLIC_EVENT_LIST_FAILURE,
           errorData: data,
           statusCode: textStatus });
     },
@@ -24,22 +24,42 @@ function requestEventsPublic () {
   });
 }
 
-function requestEventPrivate (event_id) {
-  dispatcher.handleViewAction({type: actionTypes.REQUEST_EVENT_PRIVATE});
+function requestPrivateEventList () {
+  dispatcher.handleViewAction({type: actionTypes.REQUEST_PRIVATE_EVENT_LIST});
+  $.ajax({ 
+    type: "GET",
+    url: "events-private",
+    success: function(data) { 
+      dispatcher.handleServerAction(
+        { type: actionTypes.REQUEST_PRIVATE_EVENT_LIST_SUCCESS,
+          events: data });
+    },
+    error: function(data, textStatus) { 
+      dispatcher.handleServerAction(
+        { type: actionTypes.REQUEST_PRIVATE_EVENT_LIST_FAILURE,
+          errorData: data,
+          statusCode: textStatus });
+    },
+    dataType: "json"
+  });
+}
 
-  var url = "events/" + event_id;
+function requestEventDetails (event_id) {
+  dispatcher.handleViewAction({type: actionTypes.REQUEST_EVENT_DETAILS});
+
+  var url = "events-private/" + event_id;
   $.ajax({ 
     type: "GET",
     url: url,
     success: function(data) { 
       console.log(data);
       dispatcher.handleServerAction(
-        { type: actionTypes.REQUEST_EVENT_PRIVATE_SUCCESS,
+        { type: actionTypes.REQUEST_EVENT_DETAILS_SUCCESS,
           event: data });
     },
     error: function(data, textStatus) { 
       dispatcher.handleServerAction(
-        { type: actionTypes.REQUEST_EVENT_PRIVATE_FAIL,
+        { type: actionTypes.REQUEST_EVENT_DETAILS_FAIL,
           event: data });
       
       if(data.status === 401) {
@@ -55,13 +75,13 @@ function createEvent () {
   dispatcher.handleViewAction( { type: actionTypes.CREATE_EVENT } );
   $.ajax({ 
     type: "POST",
-    url: "events",
+    url: "events-private",
     data: JSON.stringify(
       { }),
     success: function(data) { 
       dispatcher.handleServerAction(
         { type: actionTypes.CREATE_EVENT_SUCCESS } );
-      requestEventsPublic();
+      requestPrivateEventList();
     },
     error: function(data, textStatus) { 
       dispatcher.handleServerAction( 
@@ -81,7 +101,7 @@ function updateEventProperty (event_id, propertyName, value) {
 }
 
 function saveEvent (event_id) {
-  var url = "events/" + event_id;
+  var url = "events-private/" + event_id;
   var eventData = eventStore.validateEventDraft(event_id);
   var failureHandler = function(errorMessage) {
     dispatcher.handleServerAction({ 
@@ -111,7 +131,7 @@ function saveEvent (event_id) {
 }
 
 function deleteEvent (event_id) {
-  var url = "events/" + event_id;
+  var url = "events-private/" + event_id;
   var eventData = eventStore.getEventPrivate(event_id);
   $.ajax({ 
     type: "DELETE",
@@ -158,8 +178,9 @@ function deleteQuestion(opts) {
 }
 
 module.exports = {
-  requestEventsPublic: requestEventsPublic,
-  requestEventPrivate: requestEventPrivate,
+  requestPublicEventList: requestPublicEventList,
+  requestPrivateEventList: requestPrivateEventList,
+  requestEventDetails: requestEventDetails,
   createEvent: createEvent,
   updateEventProperty: updateEventProperty,
   saveEvent: saveEvent,

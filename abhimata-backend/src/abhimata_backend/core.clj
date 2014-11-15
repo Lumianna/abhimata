@@ -32,8 +32,9 @@
        (friend/authorize #{:admin} (resp/response "auth ok")))
   (POST "/form" {json-form :json-params} (db/save-form json-form) )
   (GET "/form" [] (resp/response (db/load-form)))
-  (context "/events" []
-    (GET "/" [] (resp/response (db/get-events-public)))
+  (GET "/events-public" [] (resp/response (db/get-events-public)))
+  (context "/events-private" []
+    (GET "/" [] (resp/response (db/get-events-private)))
     (friend/wrap-authorize admin-routes #{:admin}))
   (route/files "/" 
                {:root (str (System/getProperty "user.dir") "/static/public")} )

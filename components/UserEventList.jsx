@@ -4,28 +4,25 @@ var Router = require('react-router');
 var Link = Router.Link;
 
 var $ = require('jquery');
-var _ = require('lodash');
 var eventActionCreators = require('../actions/eventActionCreators.js');
 var eventStore = require('../stores/eventStore.js');
 
 var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
 
-var AdminEventList = React.createClass({
-  mixins: [AuthenticatedRoute],
-
+var UserEventList = React.createClass({
   getInitialState: function() {
     return this.getStateFromStores();
   },
   
   componentDidMount: function() {
     eventStore.addChangeListener(this._onChange);
-    eventActionCreators.requestPrivateEventList();
+    eventActionCreators.requestPublicEventList();
   },
   
   getStateFromStores: function() {
-    return { events: eventStore.getEventsPrivate() };
+    return { events: eventStore.getEventsPublic() };
   },
-                                 
+  
   _onChange: function() {
     this.setState(this.getStateFromStores());
   },
@@ -39,12 +36,12 @@ var AdminEventList = React.createClass({
   },
 
   render: function() {
-    var eventTitles = _.map(this.state.events, function(event) {
+    var eventTitles = this.state.events.map(function(event) {
       return ( 
         <li key={event.event_id}> 
-          <Link to="event" 
+          <Link to="event-registration" 
                 params={{eventId: event.event_id}}> 
-          {event.title} 
+            {event.title} 
           </Link> 
         </li> );
     });
@@ -53,9 +50,8 @@ var AdminEventList = React.createClass({
       <div>
         <h1>Events</h1>
         <ul>{eventTitles}</ul> 
-        <button onClick={this.createNewEvent}>Create new event</button>
       </div>);
   }
 });
 
-module.exports = AdminEventList;
+module.exports = UserEventList;

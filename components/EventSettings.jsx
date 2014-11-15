@@ -35,7 +35,7 @@ var EventSettings = React.createClass({
   
   componentDidMount: function() {
     eventStore.addChangeListener(this._onChange);
-    eventActionCreators.requestEventPrivate(this.eventId());
+    eventActionCreators.requestEventDetails(this.eventId());
   },
   
   componentWillUnmount: function() {
@@ -90,7 +90,7 @@ var DeleteData = React.createClass({
 
   deleteEvent: function() {
     eventActionCreators.deleteEvent(this.props.event.event_id);
-    this.transitionTo('/events');
+    this.transitionTo('/admin/events');
   },
   render: function() {
     return (
@@ -135,6 +135,18 @@ var EventGeneral = React.createClass({
           value={this.props.event.max_waiting_list_length}
           error={this.props.event.errors.max_waiting_list_length}
           onChange={this._onChange.bind(null, "max_waiting_list_length")}/>
+        <label>
+          Visible to public
+          <input type="checkbox" 
+                 checked={this.props.event.visible_to_public}
+                 onChange={this._onCheckboxClick.bind(null, "visible_to_public")}/>
+        </label>
+        <label>
+          Registration open
+          <input type="checkbox" 
+                 checked={this.props.event.registration_open}
+                 onChange={this._onCheckboxClick.bind(null, "registration_open")}/>
+        </label>
       </form> );
   },
 
@@ -143,6 +155,13 @@ var EventGeneral = React.createClass({
                                             propertyName,
                                             event.target.value);
   },
+  
+  _onCheckboxClick: function(propertyName, event) {
+    eventActionCreators.updateEventProperty(this.props.event.event_id,
+                                            propertyName,
+                                            event.target.checked);
+  },
+
 });
 
 var RegistrationForm = React.createClass({

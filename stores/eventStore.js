@@ -1,6 +1,6 @@
 var actionTypes = require('../constants/constants.js').actionTypes;
 var createStore = require('../utils/createStore.js');
-var editableForm = require('../utils/editableForm.js');
+var EditableForm = require('../utils/EditableForm.js');
 var formFieldParsers = require('../utils/formFieldParsers.js');
 var merge = require('react/lib/merge');
 var _ = require('lodash');
@@ -60,7 +60,7 @@ var actionHandler = function(payload) {
   var eventDraft = _eventDrafts[act.event_id];
   switch(act.type) {
     case actionTypes.ADD_REGISTRATION_FORM_QUESTION:
-      editableForm.addQuestion(eventDraft.registration_form,
+      EditableForm.addQuestion(eventDraft.registration_form,
         act.questionType);
       eventDraft.hasUnsavedChanges = true;
       eventStore.emitChange(act.event_id);
@@ -71,13 +71,13 @@ var actionHandler = function(payload) {
       eventStore.emitChange(act.event_id);
       break;
    case actionTypes.DELETE_REGISTRATION_FORM_QUESTION:
-      editableForm.deleteQuestion(eventDraft.registration_form,
+      EditableForm.deleteQuestion(eventDraft.registration_form,
                                act.key);
       eventDraft.hasUnsavedChanges = true;
       eventStore.emitChange(act.event_id);
       break;
     case actionTypes.MOVE_REGISTRATION_FORM_QUESTION:
-      editableForm.moveQuestion(eventDraft.registration_form, 
+      EditableForm.moveQuestion(eventDraft.registration_form, 
                              act.key, act.toIndex);
       eventDraft.hasUnsavedChanges = true;
       eventStore.emitChange(act.event_id);
@@ -101,11 +101,18 @@ var actionHandler = function(payload) {
       eventStore.emitChange(act.event_id);
       break;
 
-    case actionTypes.REQUEST_EVENTS_PUBLIC_SUCCESS:
+    case actionTypes.REQUEST_PUBLIC_EVENT_LIST_SUCCESS:
       _eventsPublic = act.events;
       eventStore.emitChange();
       break;
-    case actionTypes.REQUEST_EVENT_PRIVATE_SUCCESS:
+    case actionTypes.REQUEST_PRIVATE_EVENT_LIST_SUCCESS:
+      _eventsPrivate = {};
+      _.each(act.events, function(event) {
+        _eventsPrivate[event.event_id] = event;
+      });
+      eventStore.emitChange();
+      break;
+    case actionTypes.REQUEST_EVENT_DETAILS_SUCCESS:
       _eventsPrivate[act.event.event_id] = act.event;
       if(!_eventDrafts[act.event.event_id] || 
          !_eventDrafts[act.event.event_id].hasUnsavedChanges) {
@@ -124,6 +131,10 @@ var eventStore = createStore(actionHandler, {
     return _eventsPublic;
   },
 
+  getEventsPrivate: function(event_id) {
+    return _eventsPrivate;
+  },
+
   getEventPrivate: function(event_id) {
     return _eventsPrivate[event_id];
   },
@@ -135,7 +146,6 @@ var eventStore = createStore(actionHandler, {
   validateEventDraft: function(event_id) {
     return validateEventDraft(_eventDrafts[event_id]);
   }
-
 });
 
 module.exports = eventStore;
