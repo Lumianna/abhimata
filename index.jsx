@@ -15,6 +15,7 @@ var Link = Router.Link;
 
 //my modules
 require('./main.less');
+var authActions = require('./actions/authActionCreators.js');
 var EditableForm = require('./components/EditableForm.jsx');
 var EventRegistration = require('./components/EventRegistration.jsx');
 var es = require('./components/EventSettings.jsx');
@@ -42,6 +43,7 @@ var routes = (
   </Routes>
 );
 
+authActions.testAuth();
 
 React.renderComponent(
   routes

@@ -5,22 +5,36 @@ var $ = require('jquery');
 module.exports = {
   
   login: function(username, password) {
-    dispatcher.handleViewAction({ type : actionTypes.REQUEST_LOGIN });
+    dispatcher.handleViewAction({ type: actionTypes.REQUEST_LOGIN });
     $.ajax({ 
-      type : "POST",
-      url : "login",
-      data : JSON.stringify(
-        { username : username,
-          password : password }),
-      success : function() { 
+      type: "POST",
+      url: "login",
+      data: JSON.stringify(
+        { username: username,
+          password: password }),
+      success: function() { 
         dispatcher.handleServerAction({ 
-          type : actionTypes.REQUEST_LOGIN_SUCCESS });
+          type: actionTypes.REQUEST_LOGIN_SUCCESS });
       },
-      error : function() { 
+      error: function() { 
         dispatcher.handleServerAction({ 
-          type : actionTypes.REQUEST_LOGIN_FAIL });
+          type: actionTypes.REQUEST_LOGIN_FAIL });
       },
-      contentType : "application/json; charset=utf-8"
+      contentType: "application/json; charset=utf-8"
+    });
+  },
+  
+  // See whether we have valid authentication credentials;
+  // this is useful for avoiding needing to log in after a 
+  // full page reload
+  testAuth: function() {
+    $.ajax({ 
+      type: "GET",
+      url: "secret",
+      success: function() { 
+        dispatcher.handleServerAction({ 
+          type: actionTypes.REQUEST_LOGIN_SUCCESS });
+      },
     });
   },
   
