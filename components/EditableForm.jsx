@@ -11,7 +11,7 @@ var recognizedFormElements = [
     description : "Radio button" },
   { type : "checkbox", 
     description : "Checkbox" }
-  ]; 
+]; 
 
 var GeneralEditControls = React.createClass({
   deleteQuestion: function() {
@@ -32,9 +32,9 @@ var GeneralEditControls = React.createClass({
     this.props.onEdit("label", event.target.value);
   },
 
-  handleIsOptionalChange: function() {
+  handleIsOptionalChange: function(event) {
     this.props.onEdit("isResponseOptional", 
-                      !this.props.element.isResponseOptional);
+                      event.target.checked);
   },
 
   render: function() {
@@ -77,7 +77,7 @@ var EditableTextArea = React.createClass({
     var labelIdPreview = "preview" + this.props.element.key;
     var labelIdEditable = "editable" + this.props.element.key;
     return (
-      <div className="editable-textarea editable-form-element" key={this.props.element.key}>
+      <div className="editable-textarea editable-form-element">
         <div className="preview">
           <label htmlFor={labelIdPreview}> 
             {this.props.element.label} 
@@ -103,7 +103,7 @@ var EditableText = React.createClass({
   render : function() {
     var labelIdPreview = "preview" + this.props.element.key;
     return (
-      <div className="editable-text editable-form-element" key={this.props.element.key}>
+      <div className="editable-text editable-form-element">
         <div className="preview">
           <label htmlFor={labelIdPreview}> 
             {this.props.element.label} 
@@ -144,14 +144,14 @@ var EditableRadioButton = React.createClass({
     var radioButtons = this.props.element.alternatives.map(
       function(alternative, index) {
         return ( 
-          <label> 
+          <label key={index}> 
             {alternative} 
             <input type="radio" value={alternative} 
-                   key={index} name={radioName} /> 
+                   name={radioName} /> 
           </label> );
       }.bind(this));
     return (
-      <div className="editable-text editable-form-element" key={this.props.element.key}>
+      <div className="editable-text editable-form-element">
         <div className="preview">
           <label htmlFor={radioName}> 
             {this.props.element.label} 
@@ -197,14 +197,14 @@ var EditableCheckbox = React.createClass({
     var checkboxes = this.props.element.alternatives.map(
       function(alternative, index) {
         return ( 
-          <label> 
+          <label key={index}> 
             {alternative} 
             <input type="checkbox" value={alternative} 
-                   key={index} name={checkboxName} /> 
+                   name={checkboxName} /> 
           </label> );
       }.bind(this));
     return (
-      <div className="editable-checkbox editable-form-element" key={this.props.element.key}>
+      <div className="editable-checkbox editable-form-element">
         <div className="preview">
           <label htmlFor={checkboxName}> 
             {this.props.element.label} 
@@ -257,11 +257,12 @@ var EditableForm = React.createClass({
 
   render: function() {
     var components = this.props.elements.map(function(elem, index) {
-      var onEdit = this.props.editQuestion.bind(null, index);
+      var onEdit = this.props.editQuestion.bind(null, elem.key);
       switch(elem.type) {
         case  "textarea" :
           return ( 
             <EditableTextArea element={elem}
+                              key={elem.key}
                               deleteQuestion={this.props.deleteQuestion}
                               moveQuestion={this.props.moveQuestion}
                               onEdit={onEdit} /> );
@@ -269,6 +270,7 @@ var EditableForm = React.createClass({
         case  "text" :
           return ( 
             <EditableText element={elem} 
+                          key={elem.key}
                           deleteQuestion={this.props.deleteQuestion}
                           moveQuestion={this.props.moveQuestion}
                           onEdit={onEdit} /> );
@@ -276,12 +278,14 @@ var EditableForm = React.createClass({
         case "radio" :
           return ( 
             <EditableRadioButton element={elem} 
+                                 key={elem.key}
                                  deleteQuestion={this.props.deleteQuestion}
                                  moveQuestion={this.props.moveQuestion}
                                  onEdit={onEdit} /> );
         case "checkbox" :
           return ( 
             <EditableCheckbox element={elem} 
+                              key={elem.key}
                               deleteQuestion={this.props.deleteQuestion}
                               moveQuestion={this.props.moveQuestion}
                               onEdit={onEdit} /> );
