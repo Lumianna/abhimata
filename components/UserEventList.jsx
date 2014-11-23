@@ -4,6 +4,7 @@ var Router = require('react-router');
 var Link = Router.Link;
 
 var $ = require('jquery');
+var _ = require('lodash');
 var eventActionCreators = require('../actions/eventActionCreators.js');
 var publicEventStore = require('../stores/publicEventStore.js');
 
@@ -36,7 +37,7 @@ var UserEventList = React.createClass({
   },
 
   render: function() {
-    var eventTitles = this.state.events.map(function(event) {
+    var eventTitles = _.map(this.state.events, function(event) {
       return ( 
         <li key={event.event_id}> 
           <Link to="event-registration" 
