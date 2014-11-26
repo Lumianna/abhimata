@@ -3,7 +3,6 @@ var createStore = require('../utils/createStore.js');
 var privateEventStore = require('./privateEventStore.js');
 var EditableForm = require('../utils/EditableForm.js');
 var formFieldParsers = require('../utils/formFieldParsers.js');
-var merge = require('react/lib/merge');
 var _ = require('lodash');
 
 var _eventDrafts = {};

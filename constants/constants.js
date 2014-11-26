@@ -26,6 +26,8 @@ module.exports = {
     UPDATE_REGISTRATION_FORM_QUESTION_PROPERTY: null,
     DELETE_REGISTRATION_FORM_QUESTION: null,
     MOVE_REGISTRATION_FORM_QUESTION: null,
+    //submitting applications
+    UPDATE_APPLICATION_ANSWER: null,
     //admin authentication 
     REQUEST_LOGIN: null,
     REQUEST_LOGIN_SUCCESS: null,
