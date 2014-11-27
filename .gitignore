@@ -3,7 +3,8 @@ browser-bundle.js
 browser-bundle.min.js
 npm-debug.log
 *~
-\#*#
+\#*
+.\#*
 
 abhimata-backend/target
 abhimata-backend/classes
