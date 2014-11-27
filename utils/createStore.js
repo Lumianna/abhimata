@@ -28,7 +28,7 @@ var createStore = function (actionHandler, properties) {
   
   store.dispatchToken = dispatcher.register(actionHandler);
   return store;
-}
+};
 
  
 module.exports = createStore;

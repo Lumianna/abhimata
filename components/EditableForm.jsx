@@ -266,7 +266,6 @@ var EditableForm = React.createClass({
                               deleteQuestion={this.props.deleteQuestion}
                               moveQuestion={this.props.moveQuestion}
                               onEdit={onEdit} /> );
-          break;
         case  "text" :
           return ( 
             <EditableText element={elem} 
@@ -274,7 +273,6 @@ var EditableForm = React.createClass({
                           deleteQuestion={this.props.deleteQuestion}
                           moveQuestion={this.props.moveQuestion}
                           onEdit={onEdit} /> );
-          break;
         case "radio" :
           return ( 
             <EditableRadioButton element={elem} 
@@ -289,7 +287,6 @@ var EditableForm = React.createClass({
                               deleteQuestion={this.props.deleteQuestion}
                               moveQuestion={this.props.moveQuestion}
                               onEdit={onEdit} /> );
-          break;
         default :
           console.log("Warning: unrecognized editable form element");
           return null;

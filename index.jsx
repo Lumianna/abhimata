@@ -46,5 +46,5 @@ var routes = (
 authActions.testAuth();
 
 React.renderComponent(
-  routes
-, document.body);
+  routes,
+  document.body);

@@ -21,6 +21,10 @@
   "scripts": {
     "start": "watchify -o browser-bundle.js -v -d .",
     "build": "NODE_ENV=production browserify . | uglifyjs -cm > browser-bundle.min.js",
+    "jshint": "jshint `npm run -s js-files`",
+    "js-files": "find . -name '*.js' -not -path './node_modules/*' -not -name 'browser-bundle.*'",
+    "jsxhint": "jsxhint `npm run -s jsx-files`",
+    "jsx-files": "find . -name '*.jsx' -not -path './node_modules/*'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Kristian Nybo",

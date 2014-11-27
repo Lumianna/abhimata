@@ -44,7 +44,7 @@ var Login = React.createClass({
   render : function() {
     var errorMessage = null;
     if(this.state.error) {
-      errorMessage = <p className="error-message">{this.state.error}</p>
+      errorMessage = <p className="error-message">{this.state.error}</p>;
     }
     
     return (

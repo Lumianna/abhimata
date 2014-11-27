@@ -24,6 +24,6 @@ dispatcher.handleViewAction = function (action) {
     source: payloadSources.VIEW_ACTION,
     action: action
   });
-}
+};
 
 module.exports = dispatcher;

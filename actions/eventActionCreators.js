@@ -110,7 +110,7 @@ function saveEvent (event_id) {
       type: actionTypes.SAVE_EVENT_FAIL,
       errorMessage: errorMessage,
     });
-  }
+  };
 
   if(!eventData) {
     failureHandler("Invalid event data; this is probably a bug.");
@@ -191,4 +191,4 @@ module.exports = {
   moveQuestion: moveQuestion,
   updateQuestionProperty: updateQuestionProperty,
   deleteQuestion: deleteQuestion,
-}
+};

@@ -141,7 +141,6 @@ function renderQuestions(state, updateFunc) {
                     value={state.answers[key]}
                     onChange={updateFunc}/>
         );
-        break;
       case  "text" :
         return ( 
           <TextInput key={question.key}
@@ -149,7 +148,6 @@ function renderQuestions(state, updateFunc) {
                      value={state.answers[key]}
                      onChange={updateFunc}/>
         );
-        break;
       case "radio" :
         return ( 
           <RadioGroup key={question.key}
@@ -167,7 +165,6 @@ function renderQuestions(state, updateFunc) {
                          onChange={updateFunc}/>
 
         );
-        break;
       default :
         console.log("Warning: unrecognized editable form element");
         return null;
