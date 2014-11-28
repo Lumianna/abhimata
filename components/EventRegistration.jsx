@@ -10,16 +10,6 @@ var publicEventStore = require('../stores/publicEventStore.js');
 var eventApplicationStore = require('../stores/eventApplicationStore.js');
 var registrationActionCreators = require('../actions/registrationActionCreators.js');
 
-//TODO: write separate components (text area etc), refactor
-//editable form component to use these components for preview
-
-function generalUpdateFunc(updateFunc, event) {
-  updateFunc(event.target.value);
-}
-
-function checkboxUpdateFunc(updateFunc, event) {
-  updateFunc(event.target.value);
-}
 
 var TextArea = React.createClass({
   render: function() {
@@ -58,24 +48,33 @@ var TextInput = React.createClass({
 
 var CheckboxGroup = React.createClass({
   render: function() {
+    var groupId = "checkbox_" + this.props.key;
     var checkboxes = _.map(
       this.props.alternatives,
       function(alternative, index) {
+        var id = groupId + "_" + index;
         return ( 
-          <label key={index}> 
-            {alternative} 
+          <div key={index}>
+            <label for={id}> 
+              {alternative} 
+            </label> 
             <input type="checkbox" 
+                   id={id}
                    onChange={this.onChange.bind(null, index)}
                    checked={this.props.value[index]} /> 
-          </label> 
+          </div>
         );
       }.bind(this));
 
     return(  
-      <label key={this.props.key}>
-        {this.props.label}
-        {checkboxes}
-      </label>
+      <div key={this.props.key}>
+        <label for={groupId}>
+          {this.props.label}
+        </label>
+        <div id={groupId}>
+          {checkboxes}
+        </div>
+      </div>
     );
   },
   
@@ -89,33 +88,44 @@ var CheckboxGroup = React.createClass({
 
 var RadioGroup = React.createClass({
   render: function() {
-      var name = "radio" + this.props.key;
-      var radioButtons = _.map(
-        this.props.alternatives, 
-        function(alternative, index) {
-          return ( 
-            <label key={index}> 
+    var name = "radio_" + this.props.key;
+    var groupId = name + "_id";
+    
+    var radioButtons = _.map(
+      this.props.alternatives, 
+      function(alternative, index) {
+        var id = name + "_" + index;
+        return ( 
+          <div key={index}>
+            <input type="radio" 
+                   value={alternative} 
+                   name={name}
+                   id={id}
+                   checked={index === this.props.value ? true : null}
+                   onChange={this.onChange.bind(this, index)}/> 
+            <label for={id}> 
               {alternative} 
-              <input type="radio" 
-                     value={alternative} 
-                     id={index}
-                     name={name}
-                     checked={index === this.props.value}
-                     onChange={this.onChange.bind(this, index)}/> 
             </label> 
-          );
-        }.bind(this));
+          </div>
+        );
+      }.bind(this));
 
     return(  
-      <label key={this.props.key}>
-        {this.props.label}
-        {radioButtons}
-      </label>
+      <div key={this.props.key}>
+        <label for={groupId}>
+          {this.props.label}
+        </label>
+        <div id={groupId}>
+          {radioButtons}
+        </div>
+      </div>
     );
   },
   
-  onChange: function(index) {
-    this.props.onChange(this.props.key, index);
+  onChange: function(index, event) {
+    if(this.props.value !== index) {
+      this.props.onChange(this.props.key, index);
+    }
   },
 });
 
