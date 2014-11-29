@@ -194,6 +194,7 @@ var EventRegistration = React.createClass({
     var events = publicEventStore.getEvents();
     var event_id = parseInt(this.props.params.eventId, 10);
     return { 
+      title: events[event_id].title,
       form: events[event_id].registration_form,
       event_id: event_id,
       answers: eventApplicationStore.getDraft(event_id) 

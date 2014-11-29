@@ -37,20 +37,41 @@ var UserEventList = React.createClass({
   },
 
   render: function() {
-    var eventTitles = _.map(this.state.events, function(event) {
+    var events = _.map(this.state.events, function(event) {
+      var participants = (event.max_participants - event.num_participants) +
+                          "/" + event.max_participants;
       return ( 
-        <li key={event.event_id}> 
-          <Link to="event-registration" 
-                params={{eventId: event.event_id}}> 
-            {event.title} 
-          </Link> 
-        </li> );
+        <tr key={event.event_id}> 
+          <td>
+            <Link to="event-registration" 
+                  params={{eventId: event.event_id}}> 
+              Sign up
+            </Link> 
+          </td>
+          <td>
+            {event.title}
+          </td>
+          <td>
+            {participants}
+          </td>
+        </tr> );
     });
 
     return ( 
       <div>
         <h1>Events</h1>
-        <ul>{eventTitles}</ul> 
+        <table>
+          <thead>
+            <tr>
+              <th>{/* Sign up link*/}</th>
+              <th>{/*Name */}</th>
+              <th>Places available</th>
+            </tr>
+          </thead>
+          <tbody>
+            {events}
+          </tbody>
+        </table>
       </div>);
   }
 });
