@@ -9,22 +9,6 @@
               :subname "//localhost:5432/knyb",
               :user "knyb"})
 
-(defn save-form [json-form]
-  (do
-    (jdbc/update! db-spec :abhimata_event
-                  {:title "Test event",
-                   :registration_form (json/write-str json-form) }
-                  ["event_id = ?" 1])))
-
-(defn load-form []
-  (let [event-db-entry
-        (jdbc/query db-spec
-                    ["select * from abhimata_event where event_id = 1"])]
-    (-> event-db-entry
-        first
-        :registration_form
-        json/read-str)))
-
 ;The PostgreSQL version we're using doesn't support JSON values, so
 ;the registration form needs to be turned into a string before it's
 ;stored into the database.
@@ -81,5 +65,3 @@
     (if (empty? query-results) 
       nil
       (assoc (into {} query-results) :roles #{:admin}))))
-  
-

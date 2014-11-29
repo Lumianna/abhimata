@@ -30,8 +30,6 @@
   (GET "/logout" [] (friend/logout* (resp/response "logout ok")))
   (GET "/secret" req
        (friend/authorize #{:admin} (resp/response "auth ok")))
-  (POST "/form" {json-form :json-params} (db/save-form json-form) )
-  (GET "/form" [] (resp/response (db/load-form)))
   (GET "/events-public" [] (resp/response (db/get-events-public)))
   (context "/events-private" []
     (GET "/" [] (resp/response (db/get-events-private)))
