@@ -15,17 +15,10 @@ var TextArea = React.createClass({
   render: function() {
     var id = _.uniqueId("textarea");
     return(  
-      <div className={this.props.className}>
-        <label key={this.props.key}
-               for={id}>
-          {this.props.label}
-        </label> 
-
-        <textarea rows="4" 
-                  id={id}
-                  value={this.props.value}
-                  onChange={this.onChange}/>
-      </div>
+      <textarea rows="4" 
+                id={this.props.id}
+                value={this.props.value}
+                onChange={this.onChange}/>
     );
   },
   
@@ -38,18 +31,10 @@ var TextInput = React.createClass({
   render: function() {
     var id = _.uniqueId("textinput");
     return(  
-      <div className={this.props.className}>
-        <label  
-          for={id}
-          key={this.props.key}>
-          {this.props.label}
-        </label> 
-
-        <input type="text" 
-               id={id}
-               value={this.props.value}
-               onChange={this.onChange}/>
-      </div>
+      <input type="text" 
+             id={this.props.id}
+             value={this.props.value}
+             onChange={this.onChange}/>
     );
   },
   
@@ -61,7 +46,6 @@ var TextInput = React.createClass({
 
 var CheckboxGroup = React.createClass({
   render: function() {
-    var groupId = _.uniqueId("checkbox_group");
     var checkboxes = _.map(
       this.props.alternatives,
       function(alternative, index) {
@@ -72,7 +56,7 @@ var CheckboxGroup = React.createClass({
                    id={id}
                    onChange={this.onChange.bind(null, index)}
                    checked={this.props.value[index]} /> 
-            <label for={id}> 
+            <label htmlFor={id}> 
               {alternative} 
             </label> 
           </div>
@@ -80,14 +64,8 @@ var CheckboxGroup = React.createClass({
       }.bind(this));
 
     return(  
-      <div className={this.props.className} 
-           key={this.props.key}>
-        <label for={groupId}>
-          {this.props.label}
-        </label>
-        <div id={groupId} className="checkbox-group">
-          {checkboxes}
-        </div>
+      <div id={this.props.id} className="checkbox-group">
+        {checkboxes}
       </div>
     );
   },
@@ -103,7 +81,6 @@ var CheckboxGroup = React.createClass({
 var RadioGroup = React.createClass({
   render: function() {
     var name = "radio_" + this.props.key;
-    var groupId = _.uniqueId("radiogroup");
     
     var radioButtons = _.map(
       this.props.alternatives, 
@@ -117,7 +94,7 @@ var RadioGroup = React.createClass({
                    id={id}
                    checked={index === this.props.value ? true : null}
                    onChange={this.onChange.bind(this, index)}/> 
-            <label for={id}> 
+            <label htmlFor={id}> 
               {alternative} 
             </label> 
           </div>
@@ -125,14 +102,8 @@ var RadioGroup = React.createClass({
       }.bind(this));
 
     return(  
-      <div className={this.props.className} 
-           key={this.props.key}>
-        <label for={groupId}>
-          {this.props.label}
-        </label>
-        <div id={groupId} className="radio-group">
-          {radioButtons}
-        </div>
+      <div id={this.props.id} className="radio-group">
+        {radioButtons}
       </div>
     );
   },
@@ -143,8 +114,6 @@ var RadioGroup = React.createClass({
     }
   },
 });
-
-
 
 
 function renderQuestions(state, updateFunc) {
@@ -158,47 +127,63 @@ function renderQuestions(state, updateFunc) {
   
   return _.map(questions, function(question) {
     var key = question.key;
+    var id = _.uniqueId("formquestion");
+    var label = (
+        <label key={question.key}
+               htmlFor={id}>
+          {question.label}
+        </label> 
+    );
+
+    var input;
     switch(question.type) {
       case  "textarea" :
-        return ( 
-          <TextArea key={question.key}
-                    label={question.label}
-                    className="form-question"
+        input = (
+          <TextArea id={id}
                     value={state.answers[key]}
                     onChange={updateFunc}/>
         );
+        break;
+
       case  "text" :
-        return ( 
-          <TextInput key={question.key}
-                     label={question.label}
-                     className="form-question"
+        input = ( 
+          <TextInput id={id}
                      value={state.answers[key]}
                      onChange={updateFunc}/>
         );
+        break;
+
       case "radio" :
-        return ( 
-          <RadioGroup key={question.key}
-                      label={question.label}
-                      alternatives={question.alternatives}
-                      className="form-question"
+        input = ( 
+          <RadioGroup alternatives={question.alternatives}
                       value={state.answers[key]}
+                      id={id}
                       onChange={updateFunc}/>
         );
+        break;
+        
       case "checkbox" :
-        return ( 
-          <CheckboxGroup key={question.key}
-                         label={question.label}
-                         alternatives={question.alternatives}
-                         className="form-question"
+        input = ( 
+          <CheckboxGroup alternatives={question.alternatives}
                          value={state.answers[key]}
+                         id={id}
                          onChange={updateFunc}/>
 
         );
+        break;
+
       default :
         console.log("Warning: unrecognized editable form element");
         return null;
-
     }
+    
+    return (
+      <div className="form-question"
+           key={question.key}>
+        {label}
+        {input}
+      </div>
+    );
   });
 }
 
