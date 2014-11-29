@@ -13,13 +13,19 @@ var registrationActionCreators = require('../actions/registrationActionCreators.
 
 var TextArea = React.createClass({
   render: function() {
+    var id = _.uniqueId("textarea");
     return(  
-      <label key={this.props.key}>
-        {this.props.label}
+      <div className={this.props.className}>
+        <label key={this.props.key}
+               for={id}>
+          {this.props.label}
+        </label> 
+
         <textarea rows="4" 
+                  id={id}
                   value={this.props.value}
                   onChange={this.onChange}/>
-      </label> 
+      </div>
     );
   },
   
@@ -30,13 +36,20 @@ var TextArea = React.createClass({
 
 var TextInput = React.createClass({
   render: function() {
+    var id = _.uniqueId("textinput");
     return(  
-      <label key={this.props.key}>
-        {this.props.label}
+      <div className={this.props.className}>
+        <label  
+          for={id}
+          key={this.props.key}>
+          {this.props.label}
+        </label> 
+
         <input type="text" 
+               id={id}
                value={this.props.value}
                onChange={this.onChange}/>
-      </label> 
+      </div>
     );
   },
   
@@ -48,30 +61,31 @@ var TextInput = React.createClass({
 
 var CheckboxGroup = React.createClass({
   render: function() {
-    var groupId = "checkbox_" + this.props.key;
+    var groupId = _.uniqueId("checkbox_group");
     var checkboxes = _.map(
       this.props.alternatives,
       function(alternative, index) {
-        var id = groupId + "_" + index;
+        var id = _.uniqueId("checkbox");
         return ( 
           <div key={index}>
-            <label for={id}> 
-              {alternative} 
-            </label> 
             <input type="checkbox" 
                    id={id}
                    onChange={this.onChange.bind(null, index)}
                    checked={this.props.value[index]} /> 
+            <label for={id}> 
+              {alternative} 
+            </label> 
           </div>
         );
       }.bind(this));
 
     return(  
-      <div key={this.props.key}>
+      <div className={this.props.className} 
+           key={this.props.key}>
         <label for={groupId}>
           {this.props.label}
         </label>
-        <div id={groupId}>
+        <div id={groupId} className="checkbox-group">
           {checkboxes}
         </div>
       </div>
@@ -89,12 +103,12 @@ var CheckboxGroup = React.createClass({
 var RadioGroup = React.createClass({
   render: function() {
     var name = "radio_" + this.props.key;
-    var groupId = name + "_id";
+    var groupId = _.uniqueId("radiogroup");
     
     var radioButtons = _.map(
       this.props.alternatives, 
       function(alternative, index) {
-        var id = name + "_" + index;
+        var id = _.uniqueId("radio");
         return ( 
           <div key={index}>
             <input type="radio" 
@@ -111,11 +125,12 @@ var RadioGroup = React.createClass({
       }.bind(this));
 
     return(  
-      <div key={this.props.key}>
+      <div className={this.props.className} 
+           key={this.props.key}>
         <label for={groupId}>
           {this.props.label}
         </label>
-        <div id={groupId}>
+        <div id={groupId} className="radio-group">
           {radioButtons}
         </div>
       </div>
@@ -148,6 +163,7 @@ function renderQuestions(state, updateFunc) {
         return ( 
           <TextArea key={question.key}
                     label={question.label}
+                    className="form-question"
                     value={state.answers[key]}
                     onChange={updateFunc}/>
         );
@@ -155,6 +171,7 @@ function renderQuestions(state, updateFunc) {
         return ( 
           <TextInput key={question.key}
                      label={question.label}
+                     className="form-question"
                      value={state.answers[key]}
                      onChange={updateFunc}/>
         );
@@ -163,6 +180,7 @@ function renderQuestions(state, updateFunc) {
           <RadioGroup key={question.key}
                       label={question.label}
                       alternatives={question.alternatives}
+                      className="form-question"
                       value={state.answers[key]}
                       onChange={updateFunc}/>
         );
@@ -171,6 +189,7 @@ function renderQuestions(state, updateFunc) {
           <CheckboxGroup key={question.key}
                          label={question.label}
                          alternatives={question.alternatives}
+                         className="form-question"
                          value={state.answers[key]}
                          onChange={updateFunc}/>
 
@@ -218,7 +237,7 @@ var EventRegistration = React.createClass({
 
   render: function() {
     return (
-      <div className="eventSettings">
+      <div className="event-registration">
         <Link to="/">Back to list of events</Link>
         <h1>{this.state.title}</h1> 
         {renderQuestions(this.state, this.updateAnswer)}
