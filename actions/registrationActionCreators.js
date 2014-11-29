@@ -11,6 +11,11 @@ function updateApplicationAnswer(event_id, key, value) {
   dispatcher.handleViewAction(payload);
 }
 
+function submit(event_id) {
+  // TODO
+}
+
 module.exports = {
   updateApplicationAnswer: updateApplicationAnswer,
+  submit: submit,
 };

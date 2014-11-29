@@ -23,7 +23,7 @@ var TextArea = React.createClass({
   },
   
   onChange: function(event) {
-    this.props.onChange(this.props.key, event.target.value);
+    this.props.onChange(event.target.value);
   },
 });
 
@@ -39,7 +39,7 @@ var TextInput = React.createClass({
   },
   
   onChange: function(event) {
-    this.props.onChange(this.props.key, event.target.value);
+    this.props.onChange(event.target.value);
   },
 });
 
@@ -73,7 +73,7 @@ var CheckboxGroup = React.createClass({
   onChange: function(index) {
     var newValue = _.clone(this.props.value);
     newValue[index] = !newValue[index];
-    this.props.onChange(this.props.key, newValue);
+    this.props.onChange(newValue);
   },
 });
 
@@ -110,7 +110,7 @@ var RadioGroup = React.createClass({
   
   onChange: function(index, event) {
     if(this.props.value !== index) {
-      this.props.onChange(this.props.key, index);
+      this.props.onChange(index);
     }
   },
 });
@@ -128,20 +128,22 @@ function renderQuestions(state, updateFunc) {
   return _.map(questions, function(question) {
     var key = question.key;
     var id = _.uniqueId("formquestion");
+    var isRequired = question.isResponseOptional ? "" : " (required)";
     var label = (
         <label key={question.key}
                htmlFor={id}>
-          {question.label}
+          {question.label + isRequired}
         </label> 
     );
 
+    var onChange = updateFunc.bind(null, question.key);
     var input;
     switch(question.type) {
       case  "textarea" :
         input = (
           <TextArea id={id}
                     value={state.answers[key]}
-                    onChange={updateFunc}/>
+                    onChange={onChange}/>
         );
         break;
 
@@ -149,7 +151,7 @@ function renderQuestions(state, updateFunc) {
         input = ( 
           <TextInput id={id}
                      value={state.answers[key]}
-                     onChange={updateFunc}/>
+                     onChange={onChange}/>
         );
         break;
 
@@ -158,7 +160,7 @@ function renderQuestions(state, updateFunc) {
           <RadioGroup alternatives={question.alternatives}
                       value={state.answers[key]}
                       id={id}
-                      onChange={updateFunc}/>
+                      onChange={onChange}/>
         );
         break;
         
@@ -167,7 +169,7 @@ function renderQuestions(state, updateFunc) {
           <CheckboxGroup alternatives={question.alternatives}
                          value={state.answers[key]}
                          id={id}
-                         onChange={updateFunc}/>
+                         onChange={onChange}/>
 
         );
         break;
@@ -190,12 +192,18 @@ function renderQuestions(state, updateFunc) {
 var EventRegistration = React.createClass({
   getInitialState: function() {
     var events = publicEventStore.getEvents();
-    var event_id = this.eventId();
+    var event_id = parseInt(this.props.params.eventId, 10);
     return { 
       form: events[event_id].registration_form,
       event_id: event_id,
       answers: eventApplicationStore.getDraft(event_id) 
     };
+  },
+  
+  componentWillReceiveProps: function(nextProps) {
+    this.setState({ 
+      event_id: parseInt(nextProps.params.eventId, 10) 
+    });
   },
   
   updateAnswers: function() {
@@ -216,8 +224,8 @@ var EventRegistration = React.createClass({
     registrationActionCreators.updateApplicationAnswer(this.state.event_id, key, value);
   },
   
-  eventId: function() {
-    return parseInt(this.props.params.eventId, 10);
+  submit: function() {
+    registrationActionCreators.submit(this.state.event_id);
   },
 
   render: function() {
@@ -226,6 +234,7 @@ var EventRegistration = React.createClass({
         <Link to="/">Back to list of events</Link>
         <h1>{this.state.title}</h1> 
         {renderQuestions(this.state, this.updateAnswer)}
+        <button onClick={this.submit}>Submit application</button>
     </div>
     );
   }
