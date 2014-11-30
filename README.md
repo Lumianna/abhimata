@@ -1,6 +1,5 @@
 # Abhimata
 
-## What
 Abhimata ([_(adj.) desired, wished for; pleasant, agreeable_](https://palidictionary.appspot.com/browse/a/abhimata)) tries to make the lives of people who organize meditation retreats a bit easier by handling registration, cancellations, and mundane email reminders. The software can be used for managing other kinds of events as well, but it has been designed specifically with retreats in mind. The idea is not to create a sophisticated general event management system, but rather to provide a simple tool for making a specific workflow as easy as possible.
 
 Abhimata uses React and Flux for the frontend and Clojure and PostgreSQL for the backend.
