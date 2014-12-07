@@ -28,6 +28,9 @@ module.exports = {
     MOVE_REGISTRATION_FORM_QUESTION: null,
     //submitting applications
     UPDATE_APPLICATION_ANSWER: null,
+    SUBMIT_APPLICATION_REQUEST: null,
+    SUBMIT_APPLICATION_SUCCESS: null,
+    SUBMIT_APPLICATION_FAIL: null,
     //admin authentication 
     REQUEST_LOGIN: null,
     REQUEST_LOGIN_SUCCESS: null,

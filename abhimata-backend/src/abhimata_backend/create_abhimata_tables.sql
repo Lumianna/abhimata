@@ -27,7 +27,7 @@ create table abhimata_registration
   event_id integer not null,
   submitted_form text not null,
   submission_date date not null,
-  tentatively_accepted boolean not null,
+--  tentatively_accepted boolean not null,
   confirmed boolean not null,
   constraint registration_pk primary key (registration_id),
   constraint registration_event_id_fk 
@@ -53,10 +53,13 @@ declare
   event_record record;
   num_registrants integer;
 begin
+  new.submission_date = current_timestamp;
+  new.confirmed = false;
   select * into event_record from abhimata_event
     where abhimata_event.event_id = new.event_id;
   select count(*) into num_registrants from abhimata_registration
     where abhimata_registration.event_id = new.event_id;
+
   if num_registrants = event_record.max_participants + event_record.max_waiting_list_length then
     raise notice 'Insertion aborted: waiting list full';
     return null;

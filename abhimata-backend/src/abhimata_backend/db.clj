@@ -56,6 +56,15 @@
 (defn make-event []
   (jdbc/insert! db-spec :abhimata_event event/default-event))
 
+(defn register-for-event [submission-data]
+  (jdbc/insert! 
+   db-spec :abhimata_registration
+   (let [submitted-form (submission-data "submitted_form")
+         _ (prn submission-data)]
+         {:event_id (submission-data "event_id")
+          :submitted_form (str submitted-form)
+          :email (submitted-form (str event/email-key))})))
+
 (defn fetch-admin-credentials [username]
   "Fetches admin credentials in the form expected by friend's
    bcrypt-credential-fn"

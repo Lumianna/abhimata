@@ -31,6 +31,7 @@
   (GET "/secret" req
        (friend/authorize #{:admin} (resp/response "auth ok")))
   (GET "/events-public" [] (resp/response (db/get-events-public)))
+  (POST "/events-public" {submission-data :json-params} (resp/response (db/register-for-event submission-data)))
   (context "/events-private" []
     (GET "/" [] (resp/response (db/get-events-private)))
     (friend/wrap-authorize admin-routes #{:admin}))

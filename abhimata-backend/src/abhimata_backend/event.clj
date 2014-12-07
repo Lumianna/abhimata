@@ -2,19 +2,20 @@
   (:require [clojure.data.json :as json])
   (:gen-class))
 
+(def email-key 0)
+
 (def email-question 
   { 
    :type "text"
-   :tag "email"
    :label "Email address"
    :isDeletable false
    :isResponseOptional false
-   :key 0 })
+   :key email-key })
    
    
 
 (def default-registration-form
-  (json/write-str { :questions  {0 email-question},
+  (json/write-str { :questions  {email-key email-question},
                     :order  [0] }))
 
 (def default-event
