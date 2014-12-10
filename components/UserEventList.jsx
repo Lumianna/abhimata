@@ -38,21 +38,21 @@ var UserEventList = React.createClass({
 
   render: function() {
     var events = _.map(this.state.events, function(event) {
-      var participants = (event.max_participants - event.num_participants) +
-                          "/" + event.max_participants;
+      var openPlaces = Math.max(0, event.max_participants - event.num_participants); 
+      
       return ( 
         <tr key={event.event_id}> 
           <td>
             <Link to="event-registration" 
                   params={{eventId: event.event_id}}> 
-              Sign up
+              {openPlaces > 0 ? "Sign up" : "Sign up for waiting list"}
             </Link> 
           </td>
           <td>
             {event.title}
           </td>
           <td>
-            {participants}
+            {openPlaces + "/" + event.max_participants}
           </td>
         </tr> );
     });
