@@ -142,7 +142,7 @@ function renderQuestions(state, updateFunc) {
       case  "textarea" :
         input = (
           <TextArea id={id}
-                    value={state.answers[key]}
+                    value={state.answers[key].value}
                     onChange={onChange}/>
         );
         break;
@@ -150,7 +150,7 @@ function renderQuestions(state, updateFunc) {
       case  "text" :
         input = ( 
           <TextInput id={id}
-                     value={state.answers[key]}
+                     value={state.answers[key].value}
                      onChange={onChange}/>
         );
         break;
@@ -158,7 +158,7 @@ function renderQuestions(state, updateFunc) {
       case "radio" :
         input = ( 
           <RadioGroup alternatives={question.alternatives}
-                      value={state.answers[key]}
+                      value={state.answers[key].value}
                       id={id}
                       onChange={onChange}/>
         );
@@ -167,7 +167,7 @@ function renderQuestions(state, updateFunc) {
       case "checkbox" :
         input = ( 
           <CheckboxGroup alternatives={question.alternatives}
-                         value={state.answers[key]}
+                         value={state.answers[key].value}
                          id={id}
                          onChange={onChange}/>
 
@@ -184,6 +184,9 @@ function renderQuestions(state, updateFunc) {
            key={question.key}>
         {label}
         {input}
+        <span className="error">
+          {state.answers[key].error}
+        </span>
       </div>
     );
   });
@@ -230,12 +233,13 @@ var EventRegistration = React.createClass({
   },
 
   render: function() {
+    var disabled = _.any(this.state.answers, "error");
     return (
       <div className="event-registration">
         <Link to="/">Back to list of events</Link>
         <h1>{this.state.title}</h1> 
         {renderQuestions(this.state, this.updateAnswer)}
-        <button onClick={this.submit}>Submit application</button>
+        <button disabled={disabled} onClick={this.submit}>Submit application</button>
     </div>
     );
   }

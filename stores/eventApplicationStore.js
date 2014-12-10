@@ -6,6 +6,10 @@ var _ = require('lodash');
 
 var _applications = {};
 
+var ERR_ANSWER_REQUIRED = "This question must be answered.";
+var NO_RADIO_SELECTED = -1;
+
+
 function makeDraft(event) {
   var draft = {};
   
@@ -13,7 +17,7 @@ function makeDraft(event) {
     var response;
     switch(question.type) {
       case "radio":
-        response = 0;
+        response = NO_RADIO_SELECTED;
         break;
       case "checkbox":
         response = _.map(question.alternatives, function() { return false; });
@@ -23,10 +27,39 @@ function makeDraft(event) {
         break;
     }
 
-    draft[question.key] = response;
+    draft[question.key] = {
+      value: response,
+      error: question.isResponseOptional ? null : ERR_ANSWER_REQUIRED,
+      question: question,
+    };
   });
   
   return draft;
+}
+
+// Currently only checks whether required questions have been answered,
+// but could in principle check something else as well.
+
+function getAnswerErrorState(answer) {
+  if(answer.question.isResponseOptional) {
+    return null;
+  }
+
+  var answered = false;
+  switch(answer.question.type) {
+    case "text":
+    case "textarea":
+      answered = answer.value.length > 0;
+      break;
+    case "radio":
+      answered = answer.value !== NO_RADIO_SELECTED;
+      break;
+    case "checkbox":
+      answered = _.contains(answer.value, true);
+      break;
+  }
+  
+  return answered ? null : ERR_ANSWER_REQUIRED;
 }
 
 var actionHandler = function(payload) {
@@ -35,7 +68,8 @@ var actionHandler = function(payload) {
 
   switch(act.type) {
     case actionTypes.UPDATE_APPLICATION_ANSWER:
-      draft[act.key] = act.value;
+      draft[act.key].value = act.value;
+      draft[act.key].error = getAnswerErrorState(draft[act.key]);
       eventApplicationStore.emitChange();
       break;
 
