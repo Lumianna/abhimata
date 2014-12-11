@@ -28,6 +28,7 @@ function handleActions (payload) {
 
 var authStore = createStore(handleActions, {
   userIsAuthenticated : function() {
+    console.log("auth " + isAuthenticated);
     return isAuthenticated;
   }
 });

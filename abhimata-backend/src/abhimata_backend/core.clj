@@ -17,6 +17,7 @@
               [route :as route])))
 
 (defroutes admin-routes
+  (GET "/" [] (resp/response (db/get-events-private)))
   (POST "/" [] (resp/response (db/make-event)))
   (context "/:id" [id] 
     (GET "/" [] (db/get-event id) )
@@ -33,7 +34,6 @@
   (GET "/events-public" [] (resp/response (db/get-events-public)))
   (POST "/events-public" {submission-data :json-params} (resp/response (db/register-for-event submission-data)))
   (context "/events-private" []
-    (GET "/" [] (resp/response (db/get-events-private)))
     (friend/wrap-authorize admin-routes #{:admin}))
   (route/files "/" 
                {:root (str (System/getProperty "user.dir") "/static/public")} )
