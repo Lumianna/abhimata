@@ -59,11 +59,10 @@
 (defn register-for-event [submission-data]
   (jdbc/insert! 
    db-spec :abhimata_registration
-   (let [submitted-form (submission-data "submitted_form")
-         _ (prn submission-data)]
+   (let [submitted-form (submission-data "submitted_form")]
          {:event_id (submission-data "event_id")
-          :submitted_form (str submitted-form)
-          :email (submitted-form (str event/email-key))})))
+          :submitted_form (json/write-str submitted-form)
+          :email ((submitted-form (str event/email-key)) "value")})))
 
 (defn fetch-admin-credentials [username]
   "Fetches admin credentials in the form expected by friend's
