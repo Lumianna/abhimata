@@ -8,13 +8,15 @@
    [compojure.core :as compojure
     :refer (GET POST DELETE ANY defroutes context)]
    [clojure.java.jdbc :as jdbc]
+   [clojure.string :as string]
    [ring.adapter.jetty :as jetty]
    [ring.middleware.json :as ringjson]
    [ring.middleware.keyword-params :as keyword-params]
    [clojure.data.json :as json]
    [ring.util.response :as resp]
    (compojure [handler :as handler]
-              [route :as route])))
+              [route :as route]))
+  (:import java.sql.SQLException))
 
 (defroutes admin-routes
   (GET "/" [] (resp/response (db/get-events-private)))
@@ -42,8 +44,20 @@
 (defn failed-login-handler [ & _]
   (resp/status (resp/response "") 401))
 
-;Insert in handler stack for debugging
-(def prn-handler (fn [handler] (fn [req] (prn req) (handler req))))
+;Insert in middleware stack for debugging
+(def prn-middleware (fn [handler] (fn [req] (prn req) (handler req))))
+
+;Return HTTP status 500 whenever a DB error occurs.
+(defn wrap-db-error [handler]
+  (fn [request]
+    (try (handler request)
+         (catch SQLException e
+           { :status 500
+            :body (str "Database error\n"
+                        (.getMessage e)
+                        (string/join "\n" (.getStackTrace e))) 
+            } ))))
+
 
 (def app
   (->
@@ -59,8 +73,10 @@
                        db/fetch-admin-credentials %)
       :workflows [(workflows/interactive-form)]})
     (handler/site)
+    (wrap-db-error)
     (ringjson/wrap-json-params)
     (ringjson/wrap-json-response {:pretty true})))
+
 
 #_(defonce server
  (do
