@@ -25,7 +25,7 @@
     (GET "/" [] (db/get-event id) )
     (DELETE "/" [] (db/delete-event id) )
     (POST "/" {event-data :json-params} (db/save-event event-data))
-    ;;(GET "/registrants")
+    (GET "/participants" [] (db/get-participants id))
     ))
 
 (defroutes app-routes

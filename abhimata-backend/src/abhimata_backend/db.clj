@@ -31,6 +31,12 @@
   (resp/response (map unstringify-registration-form 
        (jdbc/query db-spec ["select * from abhimata_event"]))))
 
+(defn get-participants [id]
+  (resp/response
+   (jdbc/query db-spec 
+               ["select * from abhimata_registration where event_id = ?"
+                (Integer. id)])))
+
 (defn get-event [id]
   (let [result 
         (jdbc/query 
