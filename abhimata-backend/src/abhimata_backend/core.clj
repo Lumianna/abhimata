@@ -19,8 +19,8 @@
   (:import java.sql.SQLException))
 
 (defroutes admin-routes
-  (GET "/" [] (resp/response (db/get-events-private)))
-  (POST "/" [] (resp/response (db/make-event)))
+  (GET "/" [] (db/get-events-private))
+  (POST "/" [] (db/make-event))
   (context "/:id" [id] 
     (GET "/" [] (db/get-event id) )
     (DELETE "/" [] (db/delete-event id) )
@@ -33,8 +33,8 @@
   (GET "/logout" [] (friend/logout* (resp/response "logout ok")))
   (GET "/secret" req
        (friend/authorize #{:admin} (resp/response "auth ok")))
-  (GET "/events-public" [] (resp/response (db/get-events-public)))
-  (POST "/events-public" {submission-data :json-params} (resp/response (db/register-for-event submission-data)))
+  (GET "/events-public" [] (db/get-events-public))
+  (POST "/events-public" {submission-data :json-params} (db/register-for-event submission-data))
   (context "/events-private" []
     (friend/wrap-authorize admin-routes #{:admin}))
   (route/files "/" 

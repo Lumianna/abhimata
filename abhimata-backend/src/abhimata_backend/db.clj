@@ -3,6 +3,7 @@
   (:require [abhimata_backend.event :as event]
             [clojure.java.jdbc :as jdbc]
             [clojure.data.json :as json]
+            [ring.util.response :as resp]
             [clojure.walk :as walk]))
 
 (def db-spec {:subprotocol "postgresql",
@@ -23,12 +24,12 @@
 
 
 (defn get-events-public []
-  (map unstringify-registration-form 
-       (jdbc/query db-spec ["select * from abhimata_public_events"])))
+  (resp/response (map unstringify-registration-form 
+       (jdbc/query db-spec ["select * from abhimata_public_events"]))))
 
 (defn get-events-private []
-  (map unstringify-registration-form 
-       (jdbc/query db-spec ["select * from abhimata_event"])))
+  (resp/response (map unstringify-registration-form 
+       (jdbc/query db-spec ["select * from abhimata_event"]))))
 
 (defn get-event [id]
   (let [result 
@@ -38,31 +39,35 @@
     (if (empty? result)
       {:status 404, 
        :body (str "Event " id " does not exist.")}
-      {:status 200, :body (unstringify-registration-form (first result))})))
+      (resp/response (unstringify-registration-form (first result))))))
 
 
 (defn save-event [event-data]
-  (do
-    (let [keywordized-data (walk/keywordize-keys event-data)]
-    (jdbc/update! db-spec :abhimata_event
+  (resp/response 
+   (let [keywordized-data (walk/keywordize-keys event-data)]
+     (jdbc/update! db-spec :abhimata_event
                   (stringify-registration-form (dissoc keywordized-data :event_id))
                   ["event_id = ?" (:event_id keywordized-data)]))))
 
 (defn delete-event [event-id]
-  (jdbc/delete! db-spec :abhimata_event
-                  ["event_id = ?" (Integer. event-id)]))
+  (resp/response (jdbc/delete! db-spec :abhimata_event
+                               ["event_id = ?" (Integer. event-id)])))
 
 
 (defn make-event []
-  (jdbc/insert! db-spec :abhimata_event event/default-event))
+  (resp/response (jdbc/insert! db-spec :abhimata_event event/default-event)))
 
 (defn register-for-event [submission-data]
-  (jdbc/insert! 
-   db-spec :abhimata_registration
-   (let [submitted-form (submission-data "submitted_form")]
-         {:event_id (submission-data "event_id")
-          :submitted_form (json/write-str submitted-form)
-          :email ((submitted-form (str event/email-key)) "value")})))
+  (let [submitted-form (submission-data "submitted_form")
+        insert-cols {:event_id (submission-data "event_id")
+                     :submitted_form (json/write-str submitted-form)
+                     :email ((submitted-form (str event/email-key)) "value")}
+        insert-result (jdbc/insert! db-spec :abhimata_registration
+                                    insert-cols)]
+    (if (nil? (first insert-result))
+      { :status 403
+       :body "The event you tried to sign up for is fully booked." }
+      (resp/response "The application was successfully submitted."))))
 
 (defn fetch-admin-credentials [username]
   "Fetches admin credentials in the form expected by friend's
