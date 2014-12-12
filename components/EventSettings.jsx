@@ -56,7 +56,7 @@ var EventSettings = React.createClass({
     }
   
     return (
-      <div className="eventSettings">
+      <div className="event-settings">
         <h1>{this.state.title}</h1> 
         <Link to="/admin/events">Back to list of events</Link>
         <EventSettingsLinks eventId={this.props.params.eventId}/>
