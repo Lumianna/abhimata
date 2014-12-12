@@ -26,7 +26,7 @@ create table abhimata_registration
   email varchar(2000) not null,
   event_id integer not null,
   submitted_form text not null,
-  submission_date date not null,
+  submission_date timestamp with time zone not null,
 --  tentatively_accepted boolean not null,
   confirmed boolean not null,
   constraint registration_pk primary key (registration_id),
