@@ -1,10 +1,10 @@
 var EventEmitter = require('events').EventEmitter;
 var dispatcher = require('../dispatcher/dispatcher.js');
-var merge = require('react/lib/merge');
+var _ = require('lodash');
 
 var CHANGE_EVENT = 'change';
 
-var skeleton = merge(EventEmitter.prototype, {
+var skeleton = _.extend({}, EventEmitter.prototype, {
   addChangeListener : function(callback) {
     this.on(CHANGE_EVENT, callback);
   },
@@ -24,7 +24,7 @@ var skeleton = merge(EventEmitter.prototype, {
 
 
 var createStore = function (actionHandler, properties) {
-  var store = merge(skeleton, properties);
+  var store = _.extend({}, skeleton, properties);
   
   store.dispatchToken = dispatcher.register(actionHandler);
   return store;

@@ -1,6 +1,5 @@
 var actionTypes = require('../constants/constants.js').actionTypes;
 var createStore = require('../utils/createStore.js');
-var merge = require('react/lib/merge');
 var _ = require('lodash');
 
 

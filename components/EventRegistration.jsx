@@ -193,9 +193,11 @@ function renderQuestions(state, updateFunc) {
 }
 
 var EventRegistration = React.createClass({
+  mixins: [ Router.State ],
+
   getInitialState: function() {
     var events = publicEventStore.getEvents();
-    var event_id = parseInt(this.props.params.eventId, 10);
+    var event_id = parseInt(this.getParams().eventId, 10);
     return { 
       title: events[event_id].title,
       form: events[event_id].registration_form,
@@ -206,7 +208,7 @@ var EventRegistration = React.createClass({
   
   componentWillReceiveProps: function(nextProps) {
     this.setState({ 
-      event_id: parseInt(nextProps.params.eventId, 10) 
+      event_id: parseInt(this.getParams().eventId, 10) 
     });
   },
   

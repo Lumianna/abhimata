@@ -1,5 +1,6 @@
 var React = require('react');
 var Router = require('react-router');
+var RouteHandler = Router.RouteHandler;
 var authStore = require('../stores/authStore.js');
 
 // A top-level component for the admin interface; it exists only to
@@ -8,7 +9,7 @@ var authStore = require('../stores/authStore.js');
 // cleanly from components.
 
 var Admin = React.createClass({
-  mixins: [Router.Transitions], 
+  mixins: [Router.Navigation], 
   
   _onAuthChange: function() {
     if(!authStore.userIsAuthenticated()) {
@@ -25,7 +26,7 @@ var Admin = React.createClass({
   },
 
   render: function() {
-    return (<this.props.activeRouteHandler/>);
+    return (<RouteHandler/>);
   }
 });
 

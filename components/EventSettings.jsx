@@ -2,6 +2,7 @@ var React = require('react');
 
 var $ = require('jquery');
 var Router = require('react-router');
+var RouteHandler = Router.RouteHandler;
 var Link = Router.Link;
 
 var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
@@ -11,7 +12,7 @@ var eventDraftStore = require('../stores/eventDraftStore.js');
 var EditableForm = require('../components/editableform.jsx');
 
 var EventSettings = React.createClass({
-  mixins: [AuthenticatedRoute], 
+  mixins: [AuthenticatedRoute, Router.State], 
 
   getInitialState: function() {
     return {
@@ -22,7 +23,7 @@ var EventSettings = React.createClass({
   },
   
   eventId: function() {
-    return parseInt(this.props.params.eventId, 10);
+    return parseInt(this.getParams().eventId, 10);
   },
   
   _onChange: function(updated_event_id) {
@@ -58,8 +59,8 @@ var EventSettings = React.createClass({
       <div className="event-settings">
         <h1>{this.state.title}</h1> 
         <Link to="/admin/events">Back to list of events</Link>
-        <EventSettingsLinks eventId={this.props.params.eventId}/>
-        <this.props.activeRouteHandler event={this.state}/>
+        <EventSettingsLinks eventId={this.getParams().eventId}/>
+        <RouteHandler event={this.state}/>
         <button onClick={this.saveEvent}>Save changes</button>
     </div>
     );

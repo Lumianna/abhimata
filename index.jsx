@@ -10,8 +10,8 @@ var Router = require('react-router');
 var Route = Router.Route;
 var Redirect = Router.Redirect;
 var DefaultRoute = Router.DefaultRoute;
-var Routes = Router.Routes;
 var Link = Router.Link;
+var RouteHandler = Router.RouteHandler;
 
 //my modules
 require('./main.less');
@@ -24,9 +24,16 @@ var UserEventList = require('./components/UserEventList.jsx');
 var Login = require('./components/Login.jsx');
 var Admin = require('./components/Admin.jsx');
 
+var App = React.createClass({
+  render: function() {
+    return (
+      <RouteHandler/>
+    );
+  }
+});
 
 var routes = (
-  <Routes location="hash">
+  <Route name="app" handler={App}>
     <Route path="/" handler={UserEventList}/>
     <Route name="event-registration" path="/register/:eventId" handler={EventRegistration}/>
     <Route path="/admin" handler={Admin}>
@@ -40,11 +47,11 @@ var routes = (
       </Route>
       <Redirect to="/admin/events"/>
     </Route>
-  </Routes>
+  </Route>
 );
 
 authActions.testAuth();
 
-React.renderComponent(
-  routes,
-  document.body);
+Router.run(routes, function(Handler) {
+  React.render(<Handler/>, document.body);
+});
