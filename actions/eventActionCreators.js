@@ -38,7 +38,7 @@ function requestPrivateEventList () {
     },
     error: function(data, textStatus) { 
       dispatcher.handleServerAction(
-        { type: actionTypes.REQUEST_PRIVATE_EVENT_LIST_FAILURE,
+        { type: actionTypes.REQUEST_PRIVATE_EVENT_LIST_FAIL,
           errorData: data,
           statusCode: textStatus });
     },
