@@ -24,7 +24,6 @@ var EventSettings = React.createClass({
   eventId: function() {
     return parseInt(this.props.params.eventId, 10);
   },
-
   
   _onChange: function(updated_event_id) {
     if(updated_event_id === this.eventId())
@@ -214,8 +213,6 @@ var RegistrationForm = React.createClass({
   },
 
 });
-
-
 
 module.exports = { 
   EventSettings: EventSettings,

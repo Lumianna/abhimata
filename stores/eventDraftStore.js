@@ -103,9 +103,8 @@ var actionHandler = function(payload) {
       if(!_eventDrafts[act.event.event_id] || 
          !_eventDrafts[act.event.event_id].hasUnsavedChanges) {
            _eventDrafts[act.event.event_id] = makeEventDraft(act.event);
-
-           eventDraftStore.emitChange(act.event.event_id);
       }
+           eventDraftStore.emitChange(act.event.event_id);
       break;
 
     default:
