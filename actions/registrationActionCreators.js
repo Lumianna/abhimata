@@ -14,10 +14,10 @@ function updateApplicationAnswer(event_id, key, value) {
 }
 
 function submit(event_id) {
-  var submitted_form = eventApplicationStore.getDraft(event_id);
+  var draft = eventApplicationStore.getDraft(event_id);
   var data = { 
     event_id: event_id,
-    submitted_form: submitted_form,
+    submitted_form: draft.questions,
   };
 
    dispatcher.handleViewAction({type: actionTypes.SUBMIT_APPLICATION_REQUEST});
@@ -35,11 +35,12 @@ function submit(event_id) {
       dispatcher.handleServerAction(
         { 
           type: actionTypes.SUBMIT_APPLICATION_FAIL,
-          errorData: data,
+          event_id: event_id,
+          errorMessage: data,
           statusCode: textStatus, 
         });
     },
-    dataType: "json",
+    dataType: "text",
     contentType: "application/json; charset=utf-8",
     data: JSON.stringify(data),
   });

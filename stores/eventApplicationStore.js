@@ -11,7 +11,12 @@ var NO_RADIO_SELECTED = -1;
 
 
 function makeDraft(event) {
-  var draft = {};
+  var draft = {
+    submissionCompleted: false,
+    waitingForResponse: false,
+    serverError: null,
+    questions: {},
+  };
   
   _.each(event.registration_form.questions, function(question) {
     var response;
@@ -27,7 +32,7 @@ function makeDraft(event) {
         break;
     }
 
-    draft[question.key] = {
+    draft.questions[question.key] = {
       value: response,
       error: question.isResponseOptional ? null : ERR_ANSWER_REQUIRED,
       question: question,
@@ -68,8 +73,9 @@ var actionHandler = function(payload) {
 
   switch(act.type) {
     case actionTypes.UPDATE_APPLICATION_ANSWER:
-      draft[act.key].value = act.value;
-      draft[act.key].error = getAnswerErrorState(draft[act.key]);
+      var question = draft.questions[act.key];
+      question.value = act.value;
+      question.error = getAnswerErrorState(question);
       eventApplicationStore.emitChange();
       break;
 
@@ -80,6 +86,17 @@ var actionHandler = function(payload) {
           _applications[event.event_id] = makeDraft(event);
         }
       });
+      eventApplicationStore.emitChange();
+      break;
+      
+    case actionTypes.SUBMIT_APPLICATION_SUCCESS:
+      draft.submissionComplete = true;
+      draft.serverError = null;
+      eventApplicationStore.emitChange();
+      break;
+
+    case actionTypes.SUBMIT_APPLICATION_FAIL:
+      draft.serverError = act.errorMessage;
       eventApplicationStore.emitChange();
       break;
 

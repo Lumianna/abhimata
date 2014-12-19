@@ -117,7 +117,7 @@ var RadioGroup = React.createClass({
 
 
 function renderQuestions(state, updateFunc) {
-  if(!state.answers) {
+  if(!state.draft.questions) {
     return null;
   }
 
@@ -142,7 +142,7 @@ function renderQuestions(state, updateFunc) {
       case  "textarea" :
         input = (
           <TextArea id={id}
-                    value={state.answers[key].value}
+                    value={state.draft.questions[key].value}
                     onChange={onChange}/>
         );
         break;
@@ -150,7 +150,7 @@ function renderQuestions(state, updateFunc) {
       case  "text" :
         input = ( 
           <TextInput id={id}
-                     value={state.answers[key].value}
+                     value={state.draft.questions[key].value}
                      onChange={onChange}/>
         );
         break;
@@ -158,7 +158,7 @@ function renderQuestions(state, updateFunc) {
       case "radio" :
         input = ( 
           <RadioGroup alternatives={question.alternatives}
-                      value={state.answers[key].value}
+                      value={state.draft.questions[key].value}
                       id={id}
                       onChange={onChange}/>
         );
@@ -167,7 +167,7 @@ function renderQuestions(state, updateFunc) {
       case "checkbox" :
         input = ( 
           <CheckboxGroup alternatives={question.alternatives}
-                         value={state.answers[key].value}
+                         value={state.draft.questions[key].value}
                          id={id}
                          onChange={onChange}/>
 
@@ -185,7 +185,7 @@ function renderQuestions(state, updateFunc) {
         {label}
         {input}
         <span className="error">
-          {state.answers[key].error}
+          {state.draft.questions[key].error}
         </span>
       </div>
     );
@@ -202,7 +202,7 @@ var EventRegistration = React.createClass({
       title: events[event_id].title,
       form: events[event_id].registration_form,
       event_id: event_id,
-      answers: eventApplicationStore.getDraft(event_id) 
+      draft: eventApplicationStore.getDraft(event_id) 
     };
   },
   
@@ -212,18 +212,18 @@ var EventRegistration = React.createClass({
     });
   },
   
-  updateAnswers: function() {
+  updateDraft: function() {
     this.setState({ 
-      answers: eventApplicationStore.getDraft(this.state.event_id)
+      draft: eventApplicationStore.getDraft(this.state.event_id)
     });
   },
   
   componentDidMount: function() {
-    eventApplicationStore.addChangeListener(this.updateAnswers);
+    eventApplicationStore.addChangeListener(this.updateDraft);
   },
   
   componentWillUnmount: function() {
-    eventApplicationStore.removeChangeListener(this.updateAnswers);
+    eventApplicationStore.removeChangeListener(this.updateDraft);
   },
 
   updateAnswer: function(key, value) {
@@ -235,13 +235,39 @@ var EventRegistration = React.createClass({
   },
 
   render: function() {
-    var disabled = _.any(this.state.answers, "error");
+    var disabled = _.any(this.state.draft.questions, "error");
+    var content;
+    var serverError = this.state.draft.serverError;
+    var alreadySubmitted = this.state.draft.submissionComplete;
+
+    if (serverError) {
+      serverError = (<p className="error"> {serverError} </p>);
+    }
+    
+    if(alreadySubmitted) {
+      content = (
+        <p className="ok">
+          Your application was successfully submitted.
+        </p>
+      );
+    }
+    else {
+      content = renderQuestions(this.state, this.updateAnswer);
+    }
+    
+    var submissionButton = (
+      <button disabled={disabled} onClick={this.submit}>
+        Submit application
+      </button>
+    );
+
     return (
       <div className="event-registration">
         <Link to="/">Back to list of events</Link>
         <h1>{this.state.title}</h1> 
-        {renderQuestions(this.state, this.updateAnswer)}
-        <button disabled={disabled} onClick={this.submit}>Submit application</button>
+        {serverError}
+        {content}
+        {this.state.draft.submissionComplete ? null : submissionButton}
     </div>
     );
   }

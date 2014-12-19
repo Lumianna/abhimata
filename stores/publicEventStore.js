@@ -4,7 +4,7 @@ var _ = require('lodash');
 
 
 //Event data that can be obtained without authenticating.
-var _events = [];
+var _events = {};
 
 var actionHandler = function(payload) {
   var act = payload.action;
