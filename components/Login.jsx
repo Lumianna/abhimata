@@ -5,7 +5,7 @@ var authStore = require('../stores/authStore.js');
 var authActions = require('../actions/authActionCreators.js');
 
 var Login = React.createClass({
-  mixins: [Router.Transitions],
+  mixins: [Router.Navigation], 
 
   getInitialState : function() {
     return { 

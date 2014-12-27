@@ -116,7 +116,7 @@ var RadioGroup = React.createClass({
 });
 
 
-function renderQuestions(state, updateFunc) {
+function renderForm(state, updateFunc) {
   if(!state.draft.questions) {
     return null;
   }
@@ -252,7 +252,7 @@ var EventRegistration = React.createClass({
       );
     }
     else {
-      content = renderQuestions(this.state, this.updateAnswer);
+      content = renderForm(this.state, this.updateAnswer);
     }
     
     var submissionButton = (

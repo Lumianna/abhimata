@@ -86,7 +86,7 @@ var EventSettingsLinks = React.createClass({
 });
 
 var DeleteData = React.createClass({
-  mixins: [Router.Transitions],
+  mixins: [Router.Navigation], 
 
   deleteEvent: function() {
     eventActionCreators.deleteEvent(this.props.event.event_id);
