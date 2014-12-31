@@ -2,6 +2,7 @@
   (:gen-class)
   (:require 
    [abhimata_backend.db :as db]
+   [abhimata_backend.config :as config]
    [cemerick.friend :as friend :as friend]
    (cemerick.friend [workflows :as workflows]
                     [credentials :as creds])
@@ -82,6 +83,7 @@
  (do
  (jetty/run-jetty #'app {:port 3000 :join? false})))
 
-(defn -main [port]
+(defn -main [cfgfile]
   (do
-    (jetty/run-jetty #'app {:port (Integer. port) :join? false})))
+    (config/update-config-from-file cfgfile)
+    (jetty/run-jetty #'app {:port (:port (config/get-config)) :join? false})))
