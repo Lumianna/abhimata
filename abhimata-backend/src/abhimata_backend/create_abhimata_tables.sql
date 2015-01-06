@@ -24,6 +24,9 @@ create table abhimata_registration
 (
   registration_id serial,
   email varchar(2000) not null,
+  email_verified boolean not null,
+  email_verification_code varchar(1000) unique not null,
+  cancellation_code varchar(1000) unique not null,
   event_id integer not null,
   submitted_form text not null,
   submission_date timestamp with time zone not null,
@@ -32,6 +35,22 @@ create table abhimata_registration
   constraint registration_pk primary key (registration_id),
   constraint registration_event_id_fk 
     foreign key(event_id) references abhimata_event(event_id)
+);
+
+create table abhimata_email 
+(
+  email_id serial not null,
+  event_id integer not null,
+  registration_id integer not null,
+  subject text not null,
+  body text not null,
+  sent boolean not null,
+  send_time timestamp not null,
+  constraint email_pk primary key (email_id),
+  constraint email_event_id_fk
+    foreign key(event_id) references abhimata_event(event_id),
+  constraint email_registration_id_fk
+    foreign key(registration_id) references abhimata_registration(registration_id)
 );
 
 
@@ -47,7 +66,6 @@ select
   registration_open
 from abhimata_event where abhimata_event.visible_to_public = true;
 
-
 create function abhimata_registration_trigger() returns trigger as $$
 declare
   event_record record;
@@ -55,6 +73,7 @@ declare
 begin
   new.submission_date = current_timestamp;
   new.confirmed = false;
+  new.email_verified = false;
   select * into event_record from abhimata_event
     where abhimata_event.event_id = new.event_id;
   select count(*) into num_registrants from abhimata_registration
