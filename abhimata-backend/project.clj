@@ -7,6 +7,7 @@
                  [org.clojure/data.json "0.2.5"]
                  [org.clojure/java.jdbc "0.3.6"]
                  [clj-time "0.8.0"]
+                 [hiccup "1.0.5"]
                  [postgresql/postgresql "9.1-901.jdbc4"]
                  [com.cemerick/friend "0.2.1"]
                  [com.draines/postal "1.11.3"]

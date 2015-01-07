@@ -8,6 +8,7 @@
             [clj-time.core :as time]
             [clj-time.coerce :as coercetime]
             [postal.core :as postal]
+            [hiccup.core :as hiccup]
             [ring.util.response :as resp]
             [clojure.walk :as walk]))
 
@@ -90,10 +91,26 @@
 (defn verify-email [uuid]
   (let [update-res 
         (jdbc/update! (get-db-spec) :abhimata_registration
-          {:email_verified true} ["email_verification_code = ?" uuid])]
+                      {:email_verified true}
+                      ["email_verification_code = ? and email_verified = false" uuid])]
     (if (> (first update-res) 0)
-      (resp/response "Thank you for verifying your email address. We have emailed you another link that you can use if you wish to cancel your application.")
-      {:status 403 :body "There was a problem with verifying your email address."})))
+      (resp/response
+       (hiccup/html
+        [:html
+         [:head
+          [:title "Your email has been verified."]]
+         [:body
+          [:h1 "Thank you for verifying your email."]
+          [:p "We have emailed you another link that you can use if you wish to cancel your application."]]]))
+
+      {:status 404
+       :body (hiccup/html
+              [:html
+               [:head
+                [:title "Invalid email verification link"]]
+               [:body
+                [:h1 "Invalid email verification link"]
+                [:p "We could not find an unverified email address corresponding to this link. Either you have already verified your email address, or there is something wrong with the link. Please contact the event managers."]]])})))
 
 (defn send-email [{:keys [email body subject email_id]}]
   (try
