@@ -1,74 +1,74 @@
 (ns abhimata_backend.event
   (:require [clojure.data.json :as json]
-            [schema.core :as schema])
+            [schema.core :as sc])
   (:gen-class))
 
 (def email-key 0)
 
-(schema/defschema NonNegIntString
+(sc/defschema NonNegIntString
   "Schema for a string consisting of a non-zero-padded, non-negative integer."
-  (schema/pred
+  (sc/pred
    (fn is-non-neg-int-str [s] (re-matches #"^(0|[1-9]\d+)$" s))))
 
-(schema/defschema PosInt
+(sc/defschema PosInt
   "Schema for a positive integer."
-  (schema/both
-   schema/Int
-   (schema/pred (fn is-positive [key] (> key email-key)))))
+  (sc/both
+   sc/Int
+   (sc/pred (fn is-positive [key] (> key email-key)))))
 
-(schema/defschema RegistrationFormQuestion
+(sc/defschema RegistrationFormQuestion
   "Schema for a registration form question."
-   (schema/if (fn is-email-question [q] (= (:key q) email-key))
-     {:type (schema/eq "text")
-      :label schema/Str
-      :isDeletable (schema/eq false)
-      :isResponseOptional (schema/eq false)
-      :key (schema/eq email-key)} 
+   (sc/if (fn is-email-question [q] (= (q "key") email-key))
+     {(sc/required-key "type") (sc/eq "text")
+      (sc/required-key "label") sc/Str
+      (sc/required-key "isDeletable") (sc/eq false)
+      (sc/required-key "isResponseOptional") (sc/eq false)
+      (sc/required-key "key") (sc/eq email-key)} 
 
-     {:type (schema/enum "text" "textarea" "radio" "checkbox")
-      :label schema/Str
-      :isDeletable schema/Bool
-      :isResponseOptional schema/Bool
-      :key PosInt }))
+     {(sc/required-key "type") (sc/enum "text" "textarea" "radio" "checkbox")
+      (sc/required-key "label") sc/Str
+      (sc/required-key "isDeletable") sc/Bool
+      (sc/required-key "isResponseOptional") sc/Bool
+      (sc/required-key "key") PosInt }))
 
-(schema/defschema RegistrationForm
+(sc/defschema RegistrationForm
   "Schema for a registration form."
-  (schema/both
-   {:order [schema/Int]
-    :questions {NonNegIntString RegistrationFormQuestion}}
+  (sc/both
+   {(sc/required-key "order") [sc/Int]
+    (sc/required-key "questions") {NonNegIntString RegistrationFormQuestion}}
 
    ;; Each key of :questions should map to a value in :order
-   (schema/pred
+   (sc/pred
     (fn questions-keys-match-order-values [form]
-      (let [order-vals (:order form)
+      (let [order-vals (form "order")
             questions-keys (map (fn [key] (Integer/parseInt key))
-                                (keys (:questions form)))]
+                                (keys (form "questions")))]
         (= (set order-vals) (set questions-keys)))))))
 
 (defn is-json-registration-form [form]
-  (schema/validate RegistrationForm (json/read-str form)))
+  (sc/validate RegistrationForm (json/read-str form)))
   
-(schema/defschema Event
+(sc/defschema Event
   "Schema for an event."
 
-  {:title schema/Str
+  {:title sc/Str
    :max_participants PosInt
    :max_waiting_list_length PosInt
-   :visible_to_public schema/Bool
-   :registration_open schema/Bool
-   :registration_form (schema/pred is-json-registration-form)})
+   :visible_to_public sc/Bool
+   :registration_open sc/Bool
+   :registration_form (sc/pred is-json-registration-form)})
 
 
 (def email-question 
-  {:type "text"
-   :label "Email address"
-   :isDeletable false
-   :isResponseOptional false
-   :key email-key })
+  {"type" "text"
+   "label" "Email address"
+   "isDeletable" false
+   "isResponseOptional" false
+   "key" email-key })
 
 (def default-registration-form
-  {:questions  {(str email-key) email-question},
-   :order  [email-key] })
+  {"questions"  {(str email-key) email-question},
+   "order"  [email-key] })
 
 (def default-event
   {:title "Untitled event"
