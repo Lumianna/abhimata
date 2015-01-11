@@ -66,6 +66,7 @@ select
   registration_open
 from abhimata_event where abhimata_event.visible_to_public = true;
 
+
 create function abhimata_registration_trigger() returns trigger as $$
 declare
   event_record record;
@@ -92,3 +93,26 @@ create trigger trig_abhimata_registration_insert
 before insert on abhimata_registration
 for each row
 execute procedure abhimata_registration_trigger(); 
+
+
+-- Don't allow updates on primary keys
+create function abhimata_throw_exception() returns trigger as $$
+begin
+  raise exception 'Do not modify primary keys!';
+end
+$$ language plpgsql;
+
+create trigger trig_abhimata_event_before_pk_update
+before update of event_id on abhimata_event 
+for each row
+execute procedure abhimata_throw_exception(); 
+
+create trigger trig_abhimata_email_before_pk_update
+before update of email_id on abhimata_email 
+for each row
+execute procedure abhimata_throw_exception(); 
+
+create trigger trig_abhimata_registration_before_pk_update
+before update of registration_id on abhimata_registration
+for each row
+execute procedure abhimata_throw_exception(); 
