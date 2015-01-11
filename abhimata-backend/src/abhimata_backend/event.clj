@@ -56,7 +56,9 @@
    :max_waiting_list_length PosInt
    :visible_to_public sc/Bool
    :registration_open sc/Bool
-   :registration_form (sc/pred is-json-registration-form)})
+   :registration_form (sc/or
+                       (sc/RegistrationForm)
+                       (sc/pred is-json-registration-form))})
 
 
 (def email-question 

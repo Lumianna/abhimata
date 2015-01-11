@@ -55,7 +55,7 @@
       (resp/response (unstringify-registration-form (first result))))))
 
 
-(defn save-event [event-data]
+(defn save-event [event-id event-data]
   "Update an event in the database."
   (let [keywordized-data (walk/keywordize-keys event-data)
          db-ready-data (stringify-registration-form
@@ -64,7 +64,7 @@
        (sc/validate event/Event db-ready-data)
        (resp/response
         (jdbc/update! (get-db-spec) :abhimata_event db-ready-data
-                      ["event_id = ?" (:event_id keywordized-data)]))
+                      ["event_id = ?" event-id]))
        ;;SQL exceptions handled by ring middleware
        (catch SQLException e
          (throw e))
