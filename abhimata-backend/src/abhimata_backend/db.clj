@@ -9,8 +9,10 @@
             [clj-time.coerce :as coercetime]
             [postal.core :as postal]
             [hiccup.core :as hiccup]
+            [schema.core :as sc]
             [ring.util.response :as resp]
-            [clojure.walk :as walk]))
+            [clojure.walk :as walk])
+  (:import java.sql.SQLException))
 
 (defn get-db-spec []
   (:db-spec (config/get-config)))
@@ -54,11 +56,22 @@
 
 
 (defn save-event [event-data]
-  (resp/response 
-   (let [keywordized-data (walk/keywordize-keys event-data)]
-     (jdbc/update! (get-db-spec) :abhimata_event
-                  (stringify-registration-form (dissoc keywordized-data :event_id))
-                  ["event_id = ?" (:event_id keywordized-data)]))))
+  "Update an event in the database."
+  (let [keywordized-data (walk/keywordize-keys event-data)
+         db-ready-data (stringify-registration-form
+                        (dissoc keywordized-data :event_id))]
+     (try
+       (sc/validate event/Event db-ready-data)
+       (resp/response
+        (jdbc/update! (get-db-spec) :abhimata_event db-ready-data
+                      ["event_id = ?" (:event_id keywordized-data)]))
+       ;;SQL exceptions handled by ring middleware
+       (catch SQLException e
+         (throw e))
+       (catch Exception e
+         (prn e)
+         {:status 403,
+          :body "Invalid event data; this is probably a bug in Abhimata."}))))
 
 (defn delete-event [event-id]
   (resp/response (jdbc/delete! (get-db-spec) :abhimata_event
