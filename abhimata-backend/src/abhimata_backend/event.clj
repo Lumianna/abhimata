@@ -56,8 +56,8 @@
    :max_waiting_list_length PosInt
    :visible_to_public sc/Bool
    :registration_open sc/Bool
-   :registration_form (sc/or
-                       (sc/RegistrationForm)
+   :registration_form (sc/either
+                       RegistrationForm
                        (sc/pred is-json-registration-form))})
 
 

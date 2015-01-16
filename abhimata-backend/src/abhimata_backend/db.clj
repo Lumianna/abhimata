@@ -58,15 +58,16 @@
 (defn save-event [event-id event-data]
   "Update an event in the database."
   (let [keywordized-data (walk/keywordize-keys event-data)
-         db-ready-data (stringify-registration-form
+        db-ready-data (stringify-registration-form
                         (dissoc keywordized-data :event_id))]
      (try
        (sc/validate event/Event db-ready-data)
        (resp/response
         (jdbc/update! (get-db-spec) :abhimata_event db-ready-data
-                      ["event_id = ?" event-id]))
+                      ["event_id = ?" (Integer. event-id)]))
        ;;SQL exceptions handled by ring middleware
        (catch SQLException e
+         (prn (.getNextException e))
          (throw e))
        (catch Exception e
          (prn e)
@@ -155,18 +156,18 @@
 (defn register-for-event [submission-data]
   (let [{submitted-form "submitted_form"
          event_id "event_id"} submission-data
-        user-email ((submitted-form (str event/email-key)) "value")
-        email-uuid (random-uuid)
-        insert-cols {:event_id event_id
-                     :submitted_form (json/write-str submitted-form)
-                     :email user-email
-                     :email_verification_code email-uuid
-                     :cancellation_code (random-uuid)}
-        insert-result (jdbc/insert! (get-db-spec) :abhimata_registration
-                        insert-cols :result-set-fn first)]
+         user-email ((submitted-form (str event/email-key)) "value")
+         email-uuid (random-uuid)
+         insert-cols {:event_id event_id
+                      :submitted_form (json/write-str submitted-form)
+                      :email user-email
+                      :email_verification_code email-uuid
+                      :cancellation_code (random-uuid)}
+         insert-result (jdbc/insert! (get-db-spec) :abhimata_registration
+                                     insert-cols :result-set-fn first)]
     (if (nil? insert-result)
       { :status 403
-       :body "The event you tried to sign up for is fully booked." }
+       :body "The event you tried to sign up for is fully booked (or there's a bug in the system)." }
       (do 
         (queue-email 
           {:to user-email,
