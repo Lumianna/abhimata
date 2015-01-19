@@ -59,7 +59,8 @@
   "Update an event in the database."
   (let [keywordized-data (walk/keywordize-keys event-data)
         db-ready-data (stringify-registration-form
-                        (dissoc keywordized-data :event_id))]
+                       (dissoc keywordized-data :event_id))
+        _ (prn db-ready-data)]
      (try
        (sc/validate event/Event db-ready-data)
        (resp/response
@@ -153,29 +154,53 @@
                    " and e.registration_id = r.registration_id")])]
     (doall (map send-email emails))))
 
+(defn queue-verification-email [user-email event_id email-uuid]
+  (queue-email 
+   {:to user-email,
+    :event_id event_id,
+    :subject "Please verify your email address"
+    :body (str "Please click on the following link to verify your email address: " (make-email-verification-url email-uuid) )}))
+
+(defn get-registration-form [event-id]
+  (json/read-str
+   (:registration_form 
+    (jdbc/query
+     (get-db-spec) 
+     ["select registration_form from abhimata_event 
+        where event_id = ?" event-id]
+     :result-set-fn first))))
+               
 (defn register-for-event [submission-data]
-  (let [{submitted-form "submitted_form"
-         event_id "event_id"} submission-data
-         user-email ((submitted-form (str event/email-key)) "value")
-         email-uuid (random-uuid)
-         insert-cols {:event_id event_id
-                      :submitted_form (json/write-str submitted-form)
-                      :email user-email
-                      :email_verification_code email-uuid
-                      :cancellation_code (random-uuid)}
-         insert-result (jdbc/insert! (get-db-spec) :abhimata_registration
-                                     insert-cols :result-set-fn first)]
-    (if (nil? insert-result)
-      { :status 403
-       :body "The event you tried to sign up for is fully booked (or there's a bug in the system)." }
-      (do 
-        (queue-email 
-          {:to user-email,
-           :event_id event_id,
-           :subject "Please verify your email address"
-           :body (str "Please click on the following link to verify your email address: " (make-email-verification-url email-uuid) )})
-        (future (flush-email-queue))
-        (resp/response "Your application has been submitted, but you will still need to verify your email address by clicking on the link that we just emailed you.")))))
+  (try
+    (let [{submitted-form "submitted_form"
+           event_id "event_id"} submission-data
+           registration-form (get-registration-form event_id)
+           __ (prn (event/make-submitted-application-schema registration-form))
+
+           _ (sc/validate (event/make-submitted-application-schema
+                           registration-form)
+                          submission-data)
+           user-email (submitted-form (str event/email-key))
+           email-uuid (random-uuid)
+           insert-cols {:event_id event_id
+                        :submitted_form (json/write-str submitted-form)
+                        :email user-email
+                        :email_verification_code email-uuid
+                        :cancellation_code (random-uuid)}
+           insert-result (jdbc/insert! (get-db-spec) :abhimata_registration
+                                       insert-cols)]
+      (if (empty? insert-result)
+        { :status 403
+         :body "The event you tried to sign up for is fully booked (or there's a bug in the system)." }
+        (do 
+          (queue-verification-email user-email event_id email-uuid)
+          (future (flush-email-queue))
+          (resp/response "Your application has been submitted, but you will still need to verify your email address by clicking on the link that we just emailed you."))))
+    (catch SQLException e (throw e))
+    (catch Exception e
+      (.printStackTrace e)
+      {:status 403
+       :body "Invalid registration form (this is probably a bug in Abhimata)."})))
 
 (defn fetch-admin-credentials [username]
   "Fetches admin credentials in the form expected by friend's

@@ -2,6 +2,7 @@ var actionTypes = require('../constants/constants.js').actionTypes;
 var dispatcher = require('../dispatcher/dispatcher.js');
 var eventApplicationStore = require('../stores/eventApplicationStore.js');
 var $ = require('jquery');
+var _ = require('lodash');
 
 function updateApplicationAnswer(event_id, key, value) {
   var payload = {
@@ -15,9 +16,12 @@ function updateApplicationAnswer(event_id, key, value) {
 
 function submit(event_id) {
   var draft = eventApplicationStore.getDraft(event_id);
+  var answers = _.mapValues(draft.questions, function(question) {
+    return question.value;
+  });
   var data = { 
     event_id: event_id,
-    submitted_form: draft.questions,
+    submitted_form: answers,
   };
 
    dispatcher.handleViewAction({type: actionTypes.SUBMIT_APPLICATION_REQUEST});

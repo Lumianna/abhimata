@@ -75,13 +75,23 @@
                                 (keys (form "questions")))]
         (= (set order-vals) (set questions-keys)))))))
 
+(defn make-checkbox-answer-schema [alternatives]
+  (sc/both
+   [sc/Bool]
+   (sc/pred (fn [v] (= (count v) (count alternatives))))))
+
+(defn make-radio-answer-schema [alternatives]
+  (apply sc/enum no-radio-selected (range (count alternatives))))
+         
+  
+
 (defn make-answer-schema [{type "type"
                            alternatives "alternatives"
                            is-optional "isResponseOptional"}]
   (sc/both
    (cond
-     (= type "checkbox") [(apply sc/enum alternatives)]
-     (= type "radio") (apply sc/enum alternatives no-radio-selected)
+     (= type "checkbox") (make-checkbox-answer-schema alternatives)
+     (= type "radio") (make-radio-answer-schema alternatives)
      :else sc/Str)
    (if is-optional
      (sc/Any)
@@ -92,14 +102,16 @@
 (defn make-submitted-form-schema [registration-form]
   (reduce
    (fn [answers-schema [q-key question]]
-     (assoc answers-schema q-key
-            (sc/required-key (make-answer-schema question))))
-   {} (seq (registration-form "questions"))))
+     (assoc answers-schema
+            (sc/required-key q-key)
+            (make-answer-schema question)))
+   {}
+   (seq (registration-form "questions"))))
 
 (defn make-submitted-application-schema [registration-form]
   "Generates a schema for the data submitted when a user registers for an event (essentially a filled-in form). The parameter registration-form is the registration form for the event: what the filled-in form should look like naturally depends on the registration form."
   {(sc/required-key "event_id")
-   [sc/Int]
+   sc/Int
    (sc/required-key "submitted_form")
    (make-submitted-form-schema registration-form)})
   
