@@ -59,21 +59,13 @@
   "Update an event in the database."
   (let [keywordized-data (walk/keywordize-keys event-data)
         db-ready-data (stringify-registration-form
-                       (dissoc keywordized-data :event_id))
-        _ (prn db-ready-data)]
-     (try
-       (sc/validate event/Event db-ready-data)
-       (resp/response
-        (jdbc/update! (get-db-spec) :abhimata_event db-ready-data
-                      ["event_id = ?" (Integer. event-id)]))
-       ;;SQL exceptions handled by ring middleware
-       (catch SQLException e
-         (prn (.getNextException e))
-         (throw e))
-       (catch Exception e
-         (prn e)
-         {:status 403,
-          :body "Invalid event data; this is probably a bug in Abhimata."}))))
+                       (dissoc keywordized-data :event_id))]
+       (if (sc/check event/Event db-ready-data)
+         {:status 403
+          :body "Invalid event data; this is probably a bug in Abhimata."}
+         (resp/response
+          (jdbc/update! (get-db-spec) :abhimata_event db-ready-data
+                        ["event_id = ?" (Integer. event-id)])))))
 
 (defn delete-event [event-id]
   (resp/response (jdbc/delete! (get-db-spec) :abhimata_event

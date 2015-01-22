@@ -16,7 +16,7 @@
   "Schema for a non-negative integer."
   (sc/both
    sc/Int
-   (sc/pred (fn is-positive [key] (>= key 0)))))
+   (sc/pred (fn is-non-negative [key] (>= key 0)))))
 
 (sc/defschema PosInt
   "Schema for a positive integer."
@@ -117,7 +117,7 @@
   
 
 (defn is-json-registration-form [form]
-  (sc/validate RegistrationForm (json/read-str form)))
+  (not (sc/check RegistrationForm (json/read-str form))))
   
 (sc/defschema Event
   "Schema for an event."
@@ -127,9 +127,10 @@
    :max_waiting_list_length PosInt
    :visible_to_public sc/Bool
    :registration_open sc/Bool
-   :registration_form (sc/either
-                       RegistrationForm
-                       (sc/pred is-json-registration-form))})
+   :registration_form
+   (sc/either
+    RegistrationForm
+    (sc/pred is-json-registration-form))})
 
 
 (def default-email-field
