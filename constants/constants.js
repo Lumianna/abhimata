@@ -6,6 +6,9 @@ module.exports = {
     REQUEST_PUBLIC_EVENT_LIST: null,
     REQUEST_PUBLIC_EVENT_LIST_SUCCESS: null,
     REQUEST_PUBLIC_EVENT_LIST_FAIL: null,
+    REQUEST_PUBLIC_EVENT: null,
+    REQUEST_PUBLIC_EVENT_SUCCESS: null,
+    REQUEST_PUBLIC_EVENT_FAIL: null,
     //Get admin-only event data from server. 
     REQUEST_PRIVATE_EVENT_LIST: null,
     REQUEST_PRIVATE_EVENT_LIST_SUCCESS: null,
@@ -41,8 +44,17 @@ module.exports = {
     LOGIN_EXPIRED: null,
   }),
 
+  // Values that store getters can return when a requested item isn't
+  // available.
+  itemStatus: keyMirror({
+    LOADING: null,
+    NOT_AVAILABLE: null,
+  }),
+
   payloadSources: keyMirror({
+    // The action came from the backend (e.g., fetched data)
     SERVER_ACTION: null,
+    // This action came from the user (e.g., user submitted a form)
     VIEW_ACTION: null,
   })
 }; 

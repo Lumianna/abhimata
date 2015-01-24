@@ -26,6 +26,33 @@ function requestPublicEventList () {
   });
 }
 
+function requestPublicEvent (event_id) {
+  dispatcher.handleViewAction({
+    type: actionTypes.REQUEST_PUBLIC_EVENT,
+    event_id: event_id,
+  });
+
+  $.ajax({
+    type: "GET",
+    url: "events-public/" + event_id,
+    success: function(data) { 
+      dispatcher.handleServerAction(
+        { type: actionTypes.REQUEST_PUBLIC_EVENT_SUCCESS,
+          event_id: event_id,
+          event: data });
+    },
+    error: function(data, textStatus) { 
+      dispatcher.handleServerAction(
+        { type: actionTypes.REQUEST_PUBLIC_EVENT_FAILURE,
+          event_id: event_id,
+          errorData: data,
+          statusCode: textStatus });
+    },
+    dataType: "json"
+  });
+}
+
+
 function requestPrivateEventList () {
   dispatcher.handleViewAction({type: actionTypes.REQUEST_PRIVATE_EVENT_LIST});
   $.ajax({ 
@@ -180,6 +207,7 @@ function deleteQuestion(opts) {
 }
 
 module.exports = {
+  requestPublicEvent: requestPublicEvent,
   requestPublicEventList: requestPublicEventList,
   requestPrivateEventList: requestPrivateEventList,
   requestEventDetails: requestEventDetails,

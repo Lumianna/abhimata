@@ -5,11 +5,13 @@ var _ = require('lodash');
 var Router = require('react-router');
 var Link = Router.Link;
 
+var itemStatus = require('../constants/constants.js').itemStatus;
 var eventActionCreators = require('../actions/eventActionCreators.js');
 var publicEventStore = require('../stores/publicEventStore.js');
 var eventApplicationStore = require('../stores/eventApplicationStore.js');
 var registrationActionCreators = require('../actions/registrationActionCreators.js');
 
+var Loading = require('./Loading.jsx');
 
 var TextArea = React.createClass({
   render: function() {
@@ -121,8 +123,8 @@ function renderForm(state, updateFunc) {
     return null;
   }
 
-  var questions = _.map(state.form.order, function(key) { 
-    return state.form.questions[key];
+  var questions = _.map(state.event.registration_form.order, function(key) { 
+    return state.event.registration_form.questions[key];
   });
   
   return _.map(questions, function(question) {
@@ -196,11 +198,9 @@ var EventRegistration = React.createClass({
   mixins: [ Router.State ],
 
   getInitialState: function() {
-    var events = publicEventStore.getEvents();
     var event_id = parseInt(this.getParams().eventId, 10);
     return { 
-      title: events[event_id].title,
-      form: events[event_id].registration_form,
+      event: publicEventStore.getEvent(event_id),
       event_id: event_id,
       draft: eventApplicationStore.getDraft(event_id) 
     };
@@ -217,24 +217,46 @@ var EventRegistration = React.createClass({
       draft: eventApplicationStore.getDraft(this.state.event_id)
     });
   },
+
+  updateEvent: function() {
+    this.setState({ 
+      event: publicEventStore.getEvent(this.state.event_id)
+    });
+  },
   
   componentDidMount: function() {
     eventApplicationStore.addChangeListener(this.updateDraft);
+    publicEventStore.addChangeListener(this.updateEvent);
+    eventActionCreators.requestPublicEvent(this.state.event_id);
   },
   
   componentWillUnmount: function() {
     eventApplicationStore.removeChangeListener(this.updateDraft);
+    publicEventStore.removeChangeListener(this.updateEvent);
   },
 
   updateAnswer: function(key, value) {
     registrationActionCreators.updateApplicationAnswer(this.state.event_id, key, value);
   },
-  
+
   submit: function() {
     registrationActionCreators.submit(this.state.event_id);
   },
 
   render: function() {
+    if(_.contains([this.state.event, this.state.draft], itemStatus.LOADING)) {
+      return (<Loading/>);
+    }
+
+    if(this.state.event === itemStatus.NOT_AVAILABLE) {
+      return (
+        <div>
+          <p>The event you tried to access does not seem to exist.</p>
+          <Link to="/">Back to list of events</Link>
+        </div>
+      );
+    }
+                    
     var disabled = _.any(this.state.draft.questions, "error");
     var content;
     var serverError = this.state.draft.serverError;

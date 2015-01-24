@@ -30,13 +30,32 @@
     (assoc db-event-query :registration_form unstringified-form)))
 
 
-(defn get-events-public []
-  (resp/response (map unstringify-registration-form 
-       (jdbc/query (get-db-spec) ["select * from abhimata_public_events"]))))
+(defn get-public-event-list []
+  (resp/response
+   (map
+    unstringify-registration-form 
+    (jdbc/query
+     (get-db-spec)
+     ["select * from abhimata_public_events"]))))
+
+(defn get-event-public [id]
+  (if-let
+      [event
+       (jdbc/query
+        (get-db-spec)
+        ["select * from abhimata_public_events where event_id = ?"
+         (Integer. id)]
+        :result-set-fn first)]
+    (resp/response (unstringify-registration-form event))
+    {:status 404
+     :body "Event does not exist."}))
+
 
 (defn get-events-private []
-  (resp/response (map unstringify-registration-form 
-       (jdbc/query (get-db-spec) ["select * from abhimata_event"]))))
+  (resp/response
+   (map
+    unstringify-registration-form 
+    (jdbc/query (get-db-spec) ["select * from abhimata_event"]))))
 
 (defn get-participants [id]
   (resp/response

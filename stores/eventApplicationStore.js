@@ -1,4 +1,5 @@
 var actionTypes = require('../constants/constants.js').actionTypes;
+var itemStatus = require('../constants/constants.js').itemStatus;
 var createStore = require('../utils/createStore.js');
 var publicEventStore = require('./publicEventStore.js');
 
@@ -88,7 +89,14 @@ var actionHandler = function(payload) {
       });
       eventApplicationStore.emitChange();
       break;
-      
+
+    case actionTypes.REQUEST_PUBLIC_EVENT_SUCCESS:
+      if(!_applications[act.event.event_id]) {
+        _applications[act.event.event_id] = makeDraft(act.event);
+      }
+      eventApplicationStore.emitChange();
+      break;
+
     case actionTypes.SUBMIT_APPLICATION_SUCCESS:
       draft.submissionComplete = true;
       draft.serverError = null;
@@ -109,7 +117,7 @@ var actionHandler = function(payload) {
 var eventApplicationStore = createStore(actionHandler, {
   getDraft: function(event_id) {
     if(!_applications[event_id]) {
-      return undefined;
+      return itemStatus.LOADING;
     }
     return _applications[event_id];
   },

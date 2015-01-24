@@ -31,6 +31,7 @@ create table abhimata_registration
   submitted_form text not null,
   submission_date timestamp with time zone not null,
 --  tentatively_accepted boolean not null,
+  cancelled boolean not null,
   confirmed boolean not null,
   constraint registration_pk primary key (registration_id),
   constraint registration_event_id_fk 
