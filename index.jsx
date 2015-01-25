@@ -20,6 +20,7 @@ var EditableForm = require('./components/EditableForm.jsx');
 var EventRegistration = require('./components/EventRegistration.jsx');
 var es = require('./components/EventSettings.jsx');
 var AdminEventList = require('./components/AdminEventList.jsx');
+var Cancellation = require('./components/Cancellation.jsx');
 var UserEventList = require('./components/UserEventList.jsx');
 var Login = require('./components/Login.jsx');
 var Admin = require('./components/Admin.jsx');
@@ -36,6 +37,7 @@ var routes = (
   <Route name="app" handler={App}>
     <Route path="/" handler={UserEventList}/>
     <Route name="event-registration" path="/register/:eventId" handler={EventRegistration}/>
+    <Route name="cancellation" path="/cancel/:uuid" handler={Cancellation}/>
     <Route path="/admin" handler={Admin}>
       <Route name="admin-login" path="login" handler={Login}/>
       <Route path="events" handler={AdminEventList}/>

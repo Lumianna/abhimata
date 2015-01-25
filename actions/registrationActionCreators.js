@@ -50,7 +50,65 @@ function submit(event_id) {
   });
 }
 
+function getCancellationInfo(uuid) {
+  dispatcher.handleViewAction({
+    type: actionTypes.GET_CANCELLATION_INFO_REQUEST
+  });
+
+  $.ajax({ 
+    type: "GET",
+    url: "cancel/" + uuid,
+    success: function(data) { 
+      dispatcher.handleServerAction(
+        { 
+          type: actionTypes.GET_CANCELLATION_INFO_SUCCESS,
+          uuid: uuid,
+          info: data,
+        });
+    },
+    error: function(data, textStatus) { 
+      dispatcher.handleServerAction(
+        { 
+          type: actionTypes.GET_CANCELLATION_INFO_FAIL,
+          uuid: uuid,
+          errorMessage: data,
+          statusCode: textStatus, 
+        });
+    },
+    dataType: "json",
+    contentType: "application/json; charset=utf-8",
+  });
+}
+
+function cancel(uuid) {
+   dispatcher.handleViewAction({type: actionTypes.CANCEL_REGISTRATION_REQUEST});
+  $.ajax({ 
+    type: "POST",
+    url: "cancel/" + uuid,
+    success: function() { 
+      dispatcher.handleServerAction(
+        { 
+          type: actionTypes.CANCEL_REGISTRATION_SUCCESS,
+          uuid: uuid,
+        });
+    },
+    error: function(data, textStatus) { 
+      dispatcher.handleServerAction(
+        { 
+          type: actionTypes.CANCEL_REGISTRATION_FAIL,
+          uuid: uuid,
+          errorMessage: data,
+          statusCode: textStatus, 
+        });
+    },
+    dataType: "text",
+    contentType: "application/json; charset=utf-8",
+  });
+}
+
 module.exports = {
   updateApplicationAnswer: updateApplicationAnswer,
   submit: submit,
+  getCancellationInfo: getCancellationInfo,
+  cancel: cancel,
 };

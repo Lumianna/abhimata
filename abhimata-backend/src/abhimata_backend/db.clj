@@ -60,18 +60,22 @@
 (defn get-participants [id]
   (resp/response
    (jdbc/query (get-db-spec) 
-               ["select * from abhimata_registration where event_id = ?"
+               [(str "select * from abhimata_registration where event_id = ?"
+                     " and cancelled = false")
                 (Integer. id)])))
 
+(defn get-event-by-id [id]
+  (jdbc/query 
+   (get-db-spec)
+   ["select * from abhimata_event where event_id = ?" id]
+   :result-set-fn first))
+
 (defn get-event [id]
-  (let [result 
-        (jdbc/query 
-         (get-db-spec) ["select * from abhimata_event where event_id = ?" 
-                  (Integer. id)])]
-    (if (empty? result)
+  (let [event (get-event-by-id (Integer. id))]
+    (if event
+      (resp/response (unstringify-registration-form event))
       {:status 404, 
-       :body (str "Event " id " does not exist.")}
-      (resp/response (unstringify-registration-form (first result))))))
+       :body (str "Event " id " does not exist.")})))
 
 
 (defn save-event [event-id event-data]
@@ -112,7 +116,23 @@
        :sent false})))
 
 (defn make-email-verification-url [uuid]
-  (str (:url (config/get-config)) "/verify-email/" uuid))
+  (str (:backend-url (config/get-config)) "/verify-email/" uuid))
+
+(defn make-cancellation-url [uuid]
+  (str (:frontend-url (config/get-config)) "/cancel/" uuid))
+
+(defn queue-cancellation-email [user-email event_id uuid]
+  (let [event (get-event-by-id event_id)]
+    (queue-email 
+     {:to user-email,
+      :event_id event_id,
+      :subject "If you need to cancel your registration"
+      :body (str "Thank you for registering for the event \""
+                 (:title event) "\". If you later find that you "
+                 "need to cancel your "
+                 "registration, you can use this link: "
+                 (make-cancellation-url uuid) " . Do not share this link "
+                 "with anyone else.")})))
 
 (defn verify-email [uuid]
   (let [update-res 
@@ -186,18 +206,18 @@
     (let [{submitted-form "submitted_form"
            event_id "event_id"} submission-data
            registration-form (get-registration-form event_id)
-           __ (prn (event/make-submitted-application-schema registration-form))
-
            _ (sc/validate (event/make-submitted-application-schema
                            registration-form)
                           submission-data)
            user-email (submitted-form (str event/email-key))
            email-uuid (random-uuid)
+           cancellation-code (random-uuid)
            insert-cols {:event_id event_id
                         :submitted_form (json/write-str submitted-form)
+                        :cancelled false
                         :email user-email
                         :email_verification_code email-uuid
-                        :cancellation_code (random-uuid)}
+                        :cancellation_code cancellation-code}
            insert-result (jdbc/insert! (get-db-spec) :abhimata_registration
                                        insert-cols)]
       (if (empty? insert-result)
@@ -205,6 +225,7 @@
          :body "The event you tried to sign up for is fully booked (or there's a bug in the system)." }
         (do 
           (queue-verification-email user-email event_id email-uuid)
+          (queue-cancellation-email user-email event_id cancellation-code)
           (future (flush-email-queue))
           (resp/response "Your application has been submitted, but you will still need to verify your email address by clicking on the link that we just emailed you."))))
     (catch SQLException e (throw e))
@@ -212,6 +233,48 @@
       (.printStackTrace e)
       {:status 403
        :body "Invalid registration form (this is probably a bug in Abhimata)."})))
+
+(defn get-registration-info [uuid]
+  (if-let [registration
+           (jdbc/query
+            (get-db-spec)
+            ["select * from abhimata_registration where cancellation_code = ?"
+             uuid]
+            :result-set-fn first)]
+    (let [event-title
+          (:title
+           (jdbc/query
+            (get-db-spec)
+            ["select title from abhimata_event where event_id = ?"
+             (:event_id registration)]
+            :result-set-fn first))]
+      (resp/response
+       {:eventTitle event-title
+        :alreadyCancelled (:cancelled registration)
+        :onWaitingList false}))
+    {:status 404
+     :body "No registration matching that cancellation uuid."}))
+
+(defn cancel-registration! [uuid]
+  (if-let [registration
+           (jdbc/query
+            (get-db-spec)
+            ["select * from abhimata_registration where cancellation_code = ?"
+             uuid]
+            :result-set-fn first)]
+    (let [changed-entries
+          (jdbc/update!
+           (get-db-spec)
+           :abhimata_registration
+           {:cancelled true}
+           ["cancellation_code = ?" uuid])]
+      (if (> (first changed-entries) 0)
+        (resp/response "cancellation successful")
+        {:status 500
+         :body "Cancellation failed (this shouldn't happen)"}))
+    {:status 404
+     :body "No registration matching that cancellation uuid."}))
+
 
 (defn fetch-admin-credentials [username]
   "Fetches admin credentials in the form expected by friend's

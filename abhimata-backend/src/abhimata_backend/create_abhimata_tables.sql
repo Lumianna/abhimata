@@ -62,7 +62,8 @@ select
   max_participants,
   registration_form,
   (select count(*) from abhimata_registration 
-    where abhimata_registration.event_id = abhimata_event.event_id) 
+    where abhimata_registration.event_id = abhimata_event.event_id
+      and abhimata_registration.cancelled = false) 
     as num_participants,
   registration_open
 from abhimata_event where abhimata_event.visible_to_public = true;

@@ -1,6 +1,5 @@
 var React = require('react');
 
-var $ = require('jquery');
 var _ = require('lodash');
 var Router = require('react-router');
 var Link = Router.Link;
@@ -290,7 +289,7 @@ var EventRegistration = React.createClass({
         {serverError}
         {content}
         {this.state.draft.submissionComplete ? null : submissionButton}
-    </div>
+      </div>
     );
   }
 });
