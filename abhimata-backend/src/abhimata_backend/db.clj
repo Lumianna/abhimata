@@ -2,6 +2,7 @@
   (:gen-class)
   (:require [abhimata_backend.event :as event]
             [abhimata_backend.config :as config]
+            [abhimata_backend.macros :as macros]
             [clojure.stacktrace]
             [clojure.java.jdbc :as jdbc]
             [clojure.data.json :as json]
@@ -13,6 +14,8 @@
             [ring.util.response :as resp]
             [clojure.walk :as walk])
   (:import java.sql.SQLException))
+
+(def max-transaction-attempts 5)
 
 (defn get-db-spec []
   (:db-spec (config/get-config)))
@@ -57,16 +60,27 @@
     unstringify-registration-form 
     (jdbc/query (get-db-spec) ["select * from abhimata_event"]))))
 
-(defn get-participants [id]
+(defn get-participants [id & {:keys [connection]
+                              :or {connection (get-db-spec)}}]
+  (let [applications
+        (jdbc/query
+         connection 
+         ["select * from abhimata_registration where event_id = ?" 
+          (Integer. id)])
+        {not-cancelled false cancelled true}
+        (group-by :cancelled applications)
+        {participants false waiting-list true}
+        (group-by :on_waiting_list not-cancelled)]
+        
   (resp/response
-   (jdbc/query (get-db-spec) 
-               [(str "select * from abhimata_registration where event_id = ?"
-                     " and cancelled = false")
-                (Integer. id)])))
+   {:participants participants
+    :waitingList waiting-list
+    :cancelled cancelled})))
 
-(defn get-event-by-id [id]
+(defn get-event-by-id [id & {:keys [connection]
+                              :or {connection (get-db-spec)}}]
   (jdbc/query 
-   (get-db-spec)
+   connection
    ["select * from abhimata_event where event_id = ?" id]
    :result-set-fn first))
 
@@ -200,6 +214,33 @@
      ["select registration_form from abhimata_event 
         where event_id = ?" event-id]
      :result-set-fn first))))
+
+(defn insert-registration! [event_id registration]
+  "If the event has open slots or room on the waiting list, inserts registration
+   with the appropriate waiting list status. Uses a serializable transaction to
+   make sure that the event can't be overbooked. The transaction is
+   automatically retried a few times if it fails. If the insertion succeeds, 
+   returns the data inserted (augmented with primary key and waiting list
+   status); otherwise returns nil."
+
+  (macros/try-times
+   max-transaction-attempts
+   (jdbc/with-db-transaction [tr-con (get-db-spec) :isolation :serializable]
+     (let [event (get-event-by-id event_id :connection tr-con)
+           participants (:body (get-participants event_id :connection tr-con))
+           event-full (>= (count (:participants participants))
+                             (:max_participants event))
+           waiting-list-full (>= (count (:waitingList participants))
+                                 (:max_waiting_list_length event))
+           registration (assoc registration :on_waiting_list event-full)]
+       (if (or (not (:registration_open event))
+               (and event-full waiting-list-full))
+         nil
+         (if-let [insert-result
+                  (first
+                   (jdbc/insert! tr-con :abhimata_registration registration))]
+           (assoc registration :registration_id insert-result)
+           nil))))))
                
 (defn register-for-event [submission-data]
   (try
@@ -218,11 +259,10 @@
                         :email user-email
                         :email_verification_code email-uuid
                         :cancellation_code cancellation-code}
-           insert-result (jdbc/insert! (get-db-spec) :abhimata_registration
-                                       insert-cols)]
-      (if (empty? insert-result)
-        { :status 403
-         :body "The event you tried to sign up for is fully booked (or there's a bug in the system)." }
+           insert-result (insert-registration! event_id insert-cols)]
+      (if (not insert-result)
+        {:status 403
+         :body "The event you tried to sign up for is either fully booked or not accepting registrations."}
         (do 
           (queue-verification-email user-email event_id email-uuid)
           (queue-cancellation-email user-email event_id cancellation-code)

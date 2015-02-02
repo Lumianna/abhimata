@@ -31,6 +31,7 @@ create table abhimata_registration
   submitted_form text not null,
   submission_date timestamp with time zone not null,
 --  tentatively_accepted boolean not null,
+  on_waiting_list boolean not null,
   cancelled boolean not null,
   confirmed boolean not null,
   constraint registration_pk primary key (registration_id),
@@ -70,24 +71,11 @@ from abhimata_event where abhimata_event.visible_to_public = true;
 
 
 create function abhimata_registration_trigger() returns trigger as $$
-declare
-  event_record record;
-  num_registrants integer;
 begin
   new.submission_date = current_timestamp;
   new.confirmed = false;
   new.email_verified = false;
-  select * into event_record from abhimata_event
-    where abhimata_event.event_id = new.event_id;
-  select count(*) into num_registrants from abhimata_registration
-    where abhimata_registration.event_id = new.event_id;
-
-  if num_registrants = event_record.max_participants + event_record.max_waiting_list_length then
-    raise notice 'Insertion aborted: waiting list full';
-    return null;
-  else
-    return new;
-  end if;
+  return new;
 end
 $$ language plpgsql;
 
