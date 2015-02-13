@@ -275,6 +275,8 @@
        :body "Invalid registration form (this is probably a bug in Abhimata)."})))
 
 (defn get-registration-info [uuid]
+  "Takes a cancellation code and returns some information about the registration
+corresponding to that code (or a 404 if no such registration is found)."
   (if-let [registration
            (jdbc/query
             (get-db-spec)
@@ -295,25 +297,76 @@
     {:status 404
      :body "No registration matching that cancellation uuid."}))
 
-(defn cancel-registration! [uuid]
-  (if-let [registration
+(defn queue-waiting-list-promotion-email!
+  [{:keys [event_id email cancellation_code] :as registration} conn]
+  (let [event (get-event-by-id event_id :connection conn)]
+    (queue-email 
+     {:to email,
+      :event_id event_id,
+      :subject
+      (str "A place in the event \"" (:title event) "\" is now available")
+      :body (str "You signed up for the waiting list of the event \""
+                 (:title event) "\". Due to a cancellation, a place in the "
+                 "event is now available and reserved for you. If you do not "
+                 "wish to participate, please cancel your registration using "
+                 "this link so that we can offer your place to someone else: "
+                 (make-cancellation-url cancellation_code))})))
+
+(defn promote-first-on-waiting-list! [event_id tr-con]
+  "Takes the first person on the waiting list, sets their waiting list 
+status to false, and sends them an email informing them about this. If the
+event has no waiting list, or the waiting list is empty, the method does
+nothing. The db connection parameter tr-con is not optional because this method
+is only called from cancel-registration!."
+  (if-let [first-on-waitlist
            (jdbc/query
-            (get-db-spec)
-            ["select * from abhimata_registration where cancellation_code = ?"
-             uuid]
+            tr-con
+            [(str "select * from abhimata_registration"
+                  " where on_waiting_list = true"
+                  " order by submission_date, registration_id")]
             :result-set-fn first)]
-    (let [changed-entries
-          (jdbc/update!
-           (get-db-spec)
-           :abhimata_registration
-           {:cancelled true}
-           ["cancellation_code = ?" uuid])]
-      (if (> (first changed-entries) 0)
-        (resp/response "cancellation successful")
-        {:status 500
-         :body "Cancellation failed (this shouldn't happen)"}))
-    {:status 404
-     :body "No registration matching that cancellation uuid."}))
+    (do
+      (jdbc/update!
+       tr-con
+       :abhimata_registration
+       {:on_waiting_list false}
+       ["registration_id = ?" (:registration_id first-on-waitlist)])
+      (queue-waiting-list-promotion-email! first-on-waitlist tr-con)
+      (future (flush-email-queue)))
+  nil))
+
+
+(defn cancel-registration! [uuid]
+  "Cancels the registration and offers the first person on the waiting list
+a place in the event (if the event has a waiting list and there is someone
+on it). Everything takes place in a serializable transaction that is retried 
+a few times."
+  (macros/try-times
+   max-transaction-attempts
+   (jdbc/with-db-transaction [tr-con (get-db-spec) :isolation :serializable]
+     (if-let [{:keys [event_id on_waiting_list] :as registration}
+              (jdbc/query
+               (get-db-spec)
+               [(str "select * from abhimata_registration"
+                     " where cancellation_code = ?"
+                     " and cancelled = false")
+                uuid]
+               :result-set-fn first)]
+       (let [changed-entries
+             (jdbc/update!
+              tr-con
+              :abhimata_registration
+              {:cancelled true}
+              ["cancellation_code = ?" uuid])]
+         (if (> (first changed-entries) 0)
+           (do
+             (when-not on_waiting_list
+               (promote-first-on-waiting-list! event_id tr-con))
+             (resp/response "cancellation successful"))
+           {:status 500
+            :body "Cancellation failed (this shouldn't happen)"}))
+       {:status 404
+        :body "No registration matching that cancellation uuid."}))))
 
 
 (defn fetch-admin-credentials [username]
