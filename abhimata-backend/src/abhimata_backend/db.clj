@@ -105,9 +105,14 @@
                         ["event_id = ?" (Integer. event-id)])))))
 
 (defn delete-event [event-id]
-  (resp/response (jdbc/delete! (get-db-spec) :abhimata_event
-                               ["event_id = ?" (Integer. event-id)])))
-
+  (macros/try-times
+   max-transaction-attempts
+   (jdbc/with-db-transaction [tr-con (get-db-spec) :isolation :serializable]
+     (let [event_id (Integer. event-id)]
+       (jdbc/delete! tr-con :abhimata_email ["event_id = ?" event_id])
+       (jdbc/delete! tr-con :abhimata_registration ["event_id = ?" event_id])
+       (resp/response
+        (jdbc/delete! tr-con :abhimata_event ["event_id = ?" event_id]))))))
 
 (defn make-event []
   (resp/response (jdbc/insert! (get-db-spec) :abhimata_event event/default-event)))
