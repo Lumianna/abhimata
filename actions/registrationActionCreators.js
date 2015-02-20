@@ -106,9 +106,35 @@ function cancel(uuid) {
   });
 }
 
+function verifyEmail(uuid) {
+  $.ajax({ 
+    type: "GET",
+    url: "verify-email/" + uuid,
+    success: function() { 
+      dispatcher.handleServerAction(
+        { 
+          type: actionTypes.VERIFY_EMAIL_SUCCESS,
+          uuid: uuid,
+        });
+    },
+    error: function(data, textStatus) { 
+      dispatcher.handleServerAction(
+        { 
+          type: actionTypes.VERIFY_EMAIL_FAIL,
+          uuid: uuid,
+          errorMessage: data,
+          statusCode: textStatus, 
+        });
+    },
+    dataType: "text",
+    contentType: "application/json; charset=utf-8",
+  });
+}
+
 module.exports = {
-  updateApplicationAnswer: updateApplicationAnswer,
-  submit: submit,
-  getCancellationInfo: getCancellationInfo,
   cancel: cancel,
+  getCancellationInfo: getCancellationInfo,
+  submit: submit,
+  updateApplicationAnswer: updateApplicationAnswer,
+  verifyEmail: verifyEmail,
 };

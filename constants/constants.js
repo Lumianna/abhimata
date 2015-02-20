@@ -40,6 +40,8 @@ module.exports = {
     GET_CANCELLATION_INFO_REQUEST: null,
     GET_CANCELLATION_INFO_SUCCESS: null,
     GET_CANCELLATION_INFO_FAIL: null,
+    VERIFY_EMAIL_SUCCESS: null,
+    VERIFY_EMAIL_FAIL: null,
     //admin authentication 
     REQUEST_LOGIN: null,
     REQUEST_LOGIN_SUCCESS: null,

@@ -34,7 +34,7 @@
   (GET "/logout" [] (friend/logout* (resp/response "logout ok")))
   (GET "/secret" req
        (friend/authorize #{:admin} (resp/response "auth ok")))
-  (GET "/verify-email/:uuid" [uuid] (db/verify-email uuid))
+  (GET "/verify-email/:uuid" [uuid] (db/verify-email! uuid))
   (GET "/cancel/:uuid" [uuid] (db/get-registration-info uuid))
   (POST "/cancel/:uuid" [uuid] (db/cancel-registration! uuid))
   (context "/events-public" []

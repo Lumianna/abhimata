@@ -135,10 +135,10 @@
        :sent false})))
 
 (defn make-email-verification-url [uuid]
-  (str (:backend-url (config/get-config)) "/verify-email/" uuid))
+  (str (:url (config/get-config)) "/verify-email/" uuid))
 
 (defn make-cancellation-url [uuid]
-  (str (:frontend-url (config/get-config)) "/cancel/" uuid))
+  (str (:url (config/get-config)) "/cancel/" uuid))
 
 (defn queue-cancellation-email [user-email event_id uuid]
   (let [event (get-event-by-id event_id)]
@@ -153,29 +153,16 @@
                  (make-cancellation-url uuid) " . Do not share this link "
                  "with anyone else.")})))
 
-(defn verify-email [uuid]
+(defn verify-email! [uuid]
   (let [update-res 
         (jdbc/update! (get-db-spec) :abhimata_registration
                       {:email_verified true}
                       ["email_verification_code = ? and email_verified = false" uuid])]
     (if (> (first update-res) 0)
       (resp/response
-       (hiccup/html
-        [:html
-         [:head
-          [:title "Your email has been verified."]]
-         [:body
-          [:h1 "Thank you for verifying your email."]
-          [:p "We have emailed you another link that you can use if you wish to cancel your application."]]]))
-
+       "Email successfully verified.")
       {:status 404
-       :body (hiccup/html
-              [:html
-               [:head
-                [:title "Invalid email verification link"]]
-               [:body
-                [:h1 "Invalid email verification link"]
-                [:p "We could not find an unverified email address corresponding to this link. Either you have already verified your email address, or there is something wrong with the link. Please contact the event managers."]]])})))
+       :body "No registration corresponding to that verification code."})))
 
 (defn send-email [{:keys [email body subject email_id]}]
   (try
