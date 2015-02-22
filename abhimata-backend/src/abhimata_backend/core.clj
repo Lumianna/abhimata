@@ -91,4 +91,6 @@
 (defn -main [cfgfile]
   (do
     (config/update-config-from-file cfgfile)
+    (db/start-processing-email-action-queue!)
+    (db/request-email-send!)
     (jetty/run-jetty #'app {:port (:port (config/get-config)) :join? false})))

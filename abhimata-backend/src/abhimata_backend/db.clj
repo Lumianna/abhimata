@@ -13,7 +13,8 @@
             [schema.core :as sc]
             [ring.util.response :as resp]
             [clojure.walk :as walk])
-  (:import java.sql.SQLException))
+  (:import java.sql.SQLException
+           java.util.concurrent.LinkedBlockingQueue))
 
 (def max-transaction-attempts 5)
 
@@ -182,7 +183,17 @@
     ;In that case sending the message will just be retried later.
     (catch Exception e (clojure.stacktrace/print-stack-trace e))))
 
-(defn flush-email-queue []
+
+;; To make sure that no email gets sent twice, emails are sent by a dedicated
+;; thread (see start-processing-email-queue! below). Other threads can request
+;; unsent emails to be sent now by calling request-email-send!.
+(def email-action-queue (LinkedBlockingQueue.))
+
+(defn request-email-send! []
+  (do
+    (.put email-action-queue :plz-send)))
+
+(defn send-unsent-emails! []
   (let [emails (jdbc/query (get-db-spec) 
                 [(str "select e.*, r.email"
                    " from abhimata_email e, abhimata_registration r"
@@ -191,6 +202,14 @@
                    " and e.registration_id = r.registration_id")])]
     (doall (map send-email emails))))
 
+;; LinkedBlockingQueue.take waits until an item is available in the queue,
+;; so this function will basically call send-unsent-emails! as soon as
+;; someone calls request-email-send!.
+(defn start-processing-email-action-queue! []
+  (future
+    (doseq [_ (repeatedly #(.take email-action-queue))]
+      (send-unsent-emails!))))
+ 
 (defn queue-verification-email [user-email event_id email-uuid]
   (queue-email 
    {:to user-email,
@@ -258,7 +277,7 @@
         (do 
           (queue-verification-email user-email event_id email-uuid)
           (queue-cancellation-email user-email event_id cancellation-code)
-          (future (flush-email-queue))
+          (request-email-send!)
           (resp/response "Your application has been submitted, but you will still need to verify your email address by clicking on the link that we just emailed you."))))
     (catch SQLException e (throw e))
     (catch Exception e
@@ -324,7 +343,7 @@ is only called from cancel-registration!."
        {:on_waiting_list false}
        ["registration_id = ?" (:registration_id first-on-waitlist)])
       (queue-waiting-list-promotion-email! first-on-waitlist tr-con)
-      (future (flush-email-queue)))
+      (request-email-send!))
   nil))
 
 
