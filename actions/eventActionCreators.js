@@ -81,7 +81,6 @@ function requestEventDetails (event_id) {
     type: "GET",
     url: url,
     success: function(data) { 
-      console.log(data);
       dispatcher.handleServerAction(
         { type: actionTypes.REQUEST_EVENT_DETAILS_SUCCESS,
           event: data });
@@ -94,7 +93,6 @@ function requestEventDetails (event_id) {
       if(data.status === 401) {
         authActions.loginExpired();
       }
-      console.log(data);
     },
     dataType: "json"
   });
