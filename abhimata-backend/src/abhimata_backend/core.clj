@@ -3,7 +3,7 @@
   (:require 
    [abhimata_backend.db :as db]
    [abhimata_backend.config :as config]
-   [cemerick.friend :as friend :as friend]
+   [cemerick.friend :as friend]
    (cemerick.friend [workflows :as workflows]
                     [credentials :as creds])
    [compojure.core :as compojure
@@ -30,8 +30,8 @@
     ))
 
 (defroutes app-routes
-  (GET "/welcome" [] "Hi there")
   (GET "/logout" [] (friend/logout* (resp/response "logout ok")))
+  (POST "/login" [] (resp/response "login ok"))
   (GET "/secret" req
        (friend/authorize #{:admin} (resp/response "auth ok")))
   (GET "/verify-email/:uuid" [uuid] (db/verify-email! uuid))
@@ -72,12 +72,11 @@
      {:allow-anon? true
       :redirect-on-auth? false
       :login-uri "/login"
-      :default-landing-uri "/welcome"
       :login-failure-handler failed-login-handler
       :unauthenticated-handler (fn [& args] {:status 401, :body "Login required"})
       :credential-fn #(creds/bcrypt-credential-fn 
                        db/fetch-admin-credentials %)
-      :workflows [(workflows/interactive-form)]})
+      :workflows [(workflows/interactive-form :redirect-on-auth? false)]})
     (handler/site)
     (wrap-db-error)
     (ringjson/wrap-json-params)
