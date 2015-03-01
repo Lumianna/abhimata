@@ -94,7 +94,7 @@
      (= type "radio") (make-radio-answer-schema alternatives)
      :else sc/Str)
    (if is-optional
-     (sc/Any)
+     sc/Any
      (cond
        (= type "radio") (sc/pred (fn [a] (not (= a no-radio-selected))))
        :else (sc/pred (comp not empty?))))))
