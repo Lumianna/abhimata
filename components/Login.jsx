@@ -7,23 +7,23 @@ var authActions = require('../actions/authActionCreators.js');
 var Login = React.createClass({
   mixins: [Router.Navigation], 
 
-  getInitialState : function() {
+  getInitialState: function() {
     return { 
              username : "", 
              password : "",
              error : null };
   },
   
-  login : function() {
+  login: function() {
     authActions.login(this.state.username, this.state.password);
   },
   
-  componentDidMount : function() {
+  componentDidMount: function() {
     authStore.addChangeListener(this._onChange);
     this._onChange();
   },
 
-  componentWillUnmount : function() {
+  componentWillUnmount: function() {
     authStore.removeChangeListener(this._onChange);
   },
 
@@ -33,12 +33,16 @@ var Login = React.createClass({
     }
   },
   
-  updateUsername : function(event) {
+  updateUsername: function(event) {
     this.setState({username : event.target.value});
   },
 
-  updatePassword : function(event) {
+  updatePassword: function(event) {
     this.setState({password : event.target.value});
+  },
+
+  preventDefault: function(event) {
+    event.preventDefault();
   },
 
   render : function() {
@@ -48,13 +52,13 @@ var Login = React.createClass({
     }
     
     return (
-      <form>
-      {errorMessage}
-      <input type="text" placeholder="Username" 
-      value={this.state.username} onChange={this.updateUsername}/>
-      <input type="password" placeholder="Password" 
-      value={this.state.password} onChange={this.updatePassword}/>
-      <button type="submit" onClick={this.login}>Log in</button> 
+      <form onSubmit={this.preventDefault}>
+        {errorMessage}
+        <input type="text" placeholder="Username" 
+               value={this.state.username} onChange={this.updateUsername}/>
+        <input type="password" placeholder="Password" 
+               value={this.state.password} onChange={this.updatePassword}/>
+        <button type="submit" onClick={this.login}>Log in</button> 
       </form> );
     
   }
