@@ -74,9 +74,9 @@
         (group-by :on_waiting_list not-cancelled)]
         
   (resp/response
-   {:participants participants
-    :waitingList waiting-list
-    :cancelled cancelled})))
+   {:participants (vec participants)
+    :waitingList (vec waiting-list)
+    :cancelled (vec cancelled)})))
 
 (defn get-event-by-id [id & {:keys [connection]
                               :or {connection (get-db-spec)}}]
@@ -86,9 +86,13 @@
    :result-set-fn first))
 
 (defn get-event [id]
-  (let [event (get-event-by-id (Integer. id))]
+  (let [event_id (Integer. id)
+        event (get-event-by-id event_id)
+        {registrations :body} (get-participants event_id)]
     (if event
-      (resp/response (unstringify-registration-form event))
+      (resp/response
+       (assoc (unstringify-registration-form event)
+              :registrations registrations))
       {:status 404, 
        :body (str "Event " id " does not exist.")})))
 

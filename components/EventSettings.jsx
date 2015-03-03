@@ -1,6 +1,5 @@
 var React = require('react');
 
-var $ = require('jquery');
 var Router = require('react-router');
 var RouteHandler = Router.RouteHandler;
 var Link = Router.Link;
@@ -10,6 +9,7 @@ var eventActionCreators = require('../actions/eventActionCreators.js');
 var eventDraftStore = require('../stores/eventDraftStore.js');
 
 var EditableForm = require('../components/editableform.jsx');
+var EventParticipants = require('../components/EventParticipants.jsx');
 
 var EventSettings = React.createClass({
   mixins: [AuthenticatedRoute, Router.State], 
@@ -77,6 +77,9 @@ var EventSettingsLinks = React.createClass({
         </Link>
         <Link to="registrationform" params={linkParams}>
           Sign-up form
+        </Link>
+        <Link to="participants" params={linkParams}>
+          Participants
         </Link>
         <Link to="delete" params={linkParams}>
           Delete event 
@@ -220,4 +223,5 @@ module.exports = {
   EventGeneral: EventGeneral,
   RegistrationForm: RegistrationForm,
   DeleteData: DeleteData,
+  EventParticipants: EventParticipants,
 };

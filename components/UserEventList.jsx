@@ -32,10 +32,6 @@ var UserEventList = React.createClass({
     publicEventStore.removeChangeListener(this._onChange);
   },
   
-  createNewEvent: function() {
-    eventActionCreators.createEvent();
-  },
-
   render: function() {
     var events = _.map(this.state.events, function(event) {
       var openPlaces = Math.max(0, event.max_participants - event.num_participants); 
@@ -72,7 +68,8 @@ var UserEventList = React.createClass({
             {events}
           </tbody>
         </table>
-      </div>);
+      </div>
+    );
   }
 });
 
