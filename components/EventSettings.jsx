@@ -11,15 +11,13 @@ var eventDraftStore = require('../stores/eventDraftStore.js');
 var EditableForm = require('../components/editableform.jsx');
 var EventParticipants = require('../components/EventParticipants.jsx');
 
+var Loading = require('./Loading.jsx');
+
 var EventSettings = React.createClass({
   mixins: [AuthenticatedRoute, Router.State], 
 
   getInitialState: function() {
-    return {
-      title: "",
-      errors: {},
-      registration_form: [],
-    };
+    return null;
   },
   
   eventId: function() {
@@ -47,12 +45,17 @@ var EventSettings = React.createClass({
   },
   
   render: function() {
+    if(!this.state) {
+      return (<Loading/>);
+    }
+
     if(this.state.error) {
       return ( 
         <div>
           <p>Error: {this.state.error}</p>
           <Link to="/admin/events">Back to event list.</Link>
-        </div>);
+        </div>
+      );
     }
   
     return (
@@ -121,6 +124,10 @@ var ValidatedTextInput = React.createClass({
    participants, etc. */
 var EventGeneral = React.createClass({
   render: function() {
+    if(!this.props.event) {
+      return (<Loading/>);
+    }
+
     return (
       <form>
         <label>
@@ -169,6 +176,10 @@ var EventGeneral = React.createClass({
 
 var RegistrationForm = React.createClass({
   render : function() {
+    if(!this.props.event) {
+      return (<Loading/>);
+    }
+
     var questions = this.props.event.registration_form.order.map(
       function(key, index) { 
         var question = this.props.event.registration_form.questions[key]; 
