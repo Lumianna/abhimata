@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var moment = require('moment');
 var React = require('react');
 
 var Router = require('react-router');
@@ -17,6 +18,9 @@ function renderParticipants(participants) {
           <td>
             {participant.email_verified ? "Yes" : "No"}
           </td>
+          <td>
+            {moment(participant.submission_date).format("D. M")}
+          </td>
         </tr>
       );
     });
@@ -27,6 +31,7 @@ function renderParticipants(participants) {
         <tr>
           <th>Email</th>
           <th>Email verified?</th>
+          <th>Submission date</th>
         </tr>
       </thead>
       <tbody>
