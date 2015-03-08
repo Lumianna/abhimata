@@ -3,7 +3,8 @@
             [schema.core :as sc])
   (:gen-class))
 
-(def email-key 0)
+(def name-key 0)
+(def email-key 1)
 
 (def no-radio-selected -1)
 
@@ -25,9 +26,19 @@
    (sc/pred (fn is-positive [key] (> key 0)))))
 
 (sc/defschema EmailField
-  "Schema for the email question (which is unique in that every form always
+  "Schema for the email question (which is special in that every form always
    has one and the key is always email-key)."
   {(sc/required-key "key") (sc/eq email-key)
+   (sc/required-key "type") (sc/eq "text")
+   (sc/required-key "index") NonNegInt
+   (sc/required-key "label") sc/Str
+   (sc/required-key "isDeletable") (sc/eq false)
+   (sc/required-key "isResponseOptional") (sc/eq false)})
+
+(sc/defschema NameField
+  "Schema for the name question (which is special in that every form always
+   has one and the key is always name-key)."
+  {(sc/required-key "key") (sc/eq name-key)
    (sc/required-key "type") (sc/eq "text")
    (sc/required-key "index") NonNegInt
    (sc/required-key "label") sc/Str
@@ -65,6 +76,7 @@
    {(sc/required-key "order") [sc/Int]
     (sc/required-key "questions")
     {(sc/required-key (str email-key)) EmailField
+     (sc/required-key (str name-key)) NameField
      NonNegIntString RegistrationFormField}}
 
    ;; Each key of :questions should map to a value in :order
@@ -139,11 +151,21 @@
    "isDeletable" false
    "isResponseOptional" false
    "key" email-key
+   "index" 1})
+
+(def default-name-field
+  {"type" "text"
+   "label" "Name"
+   "isDeletable" false
+   "isResponseOptional" false
+   "key" name-key
    "index" 0})
 
+
 (def default-registration-form
-  {"questions"  {(str email-key) default-email-field},
-   "order"  [email-key] })
+  {"questions"  {(str email-key) default-email-field
+                 (str name-key) default-name-field},
+   "order"  [name-key email-key] })
 
 (def default-event
   {:title "Untitled event"
@@ -151,4 +173,5 @@
    :max_waiting_list_length 40
    :visible_to_public false
    :registration_open false
+   :registrations {}
    :registration_form (json/write-str default-registration-form) })

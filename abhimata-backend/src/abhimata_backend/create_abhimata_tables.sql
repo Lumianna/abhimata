@@ -23,6 +23,7 @@ create table abhimata_admin
 create table abhimata_registration
 (
   registration_id serial,
+  name varchar(2000) not null,
   email varchar(2000) not null,
   email_verified boolean not null,
   email_verification_code varchar(1000) unique not null,

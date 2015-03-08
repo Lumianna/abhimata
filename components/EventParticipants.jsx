@@ -13,13 +13,16 @@ function renderParticipants(participants) {
       return ( 
         <tr key={participant.registration_id}> 
           <td>
+            {participant.name}
+          </td>
+          <td>
             {participant.email}
           </td>
           <td>
             {participant.email_verified ? "Yes" : "No"}
           </td>
           <td>
-            {moment(participant.submission_date).format("D. M")}
+            {moment(participant.submission_date).format("D. M hh:mm")}
           </td>
         </tr>
       );
@@ -29,9 +32,10 @@ function renderParticipants(participants) {
     <table>
       <thead>
         <tr>
+          <th>Name</th>
           <th>Email</th>
           <th>Email verified?</th>
-          <th>Submission date</th>
+          <th>Submission time</th>
         </tr>
       </thead>
       <tbody>

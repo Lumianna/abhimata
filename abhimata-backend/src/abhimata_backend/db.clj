@@ -85,7 +85,7 @@
    ["select * from abhimata_event where event_id = ?" id]
    :result-set-fn first))
 
-(defn get-event [id]
+(defn get-full-event-data [id]
   (let [event_id (Integer. id)
         event (get-event-by-id event_id)
         {registrations :body} (get-participants event_id)]
@@ -101,7 +101,7 @@
   "Update an event in the database."
   (let [keywordized-data (walk/keywordize-keys event-data)
         db-ready-data (stringify-registration-form
-                       (dissoc keywordized-data :event_id))]
+                       (dissoc keywordized-data :event_id :registrations))]
        (if (sc/check event/Event db-ready-data)
          {:status 403
           :body "Invalid event data; this is probably a bug in Abhimata."}
@@ -266,12 +266,14 @@
                            registration-form)
                           submission-data)
            user-email (submitted-form (str event/email-key))
+           user-name  (submitted-form (str event/name-key))
            email-uuid (random-uuid)
            cancellation-code (random-uuid)
            insert-cols {:event_id event_id
                         :submitted_form (json/write-str submitted-form)
                         :cancelled false
                         :email user-email
+                        :name user-name
                         :email_verification_code email-uuid
                         :cancellation_code cancellation-code}
            insert-result (insert-registration! event_id insert-cols)]

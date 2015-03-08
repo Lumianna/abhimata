@@ -23,7 +23,7 @@
   (GET "/" [] (db/get-events-private))
   (POST "/" [] (db/make-event))
   (context "/:id" [id] 
-    (GET "/" [] (db/get-event id) )
+    (GET "/" [] (db/get-full-event-data id) )
     (DELETE "/" [] (db/delete-event id) )
     (POST "/" {event-data :json-params} (db/save-event id event-data))
     (GET "/participants" [] (db/get-participants id))
