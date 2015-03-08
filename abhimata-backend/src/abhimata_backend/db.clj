@@ -25,19 +25,18 @@
 ;the registration form needs to be turned into a string before it's
 ;stored into the database.
 
-(defn stringify-registration-form [event-data]
-  (let [stringified-form (json/write-str (:registration_form event-data))]
-    (assoc event-data :registration_form stringified-form)))
+(defn stringify-json-field [field-key event-data]
+  (let [stringified-form (json/write-str (field-key event-data))]
+    (assoc event-data field-key stringified-form)))
 
-(defn unstringify-registration-form [db-event-query]
-  (let [unstringified-form (json/read-str (:registration_form db-event-query))]
-    (assoc db-event-query :registration_form unstringified-form)))
+(defn unstringify-json-field [field-key db-event-query]
+  (let [unstringified-form (json/read-str (field-key db-event-query))]
+    (assoc db-event-query field-key unstringified-form)))
 
 
 (defn get-public-event-list []
   (resp/response
-   (map
-    unstringify-registration-form 
+   (map (partial unstringify-json-field :registration_form)
     (jdbc/query
      (get-db-spec)
      ["select * from abhimata_public_events"]))))
@@ -50,24 +49,24 @@
         ["select * from abhimata_public_events where event_id = ?"
          (Integer. id)]
         :result-set-fn first)]
-    (resp/response (unstringify-registration-form event))
+    (resp/response (unstringify-json-field :registration_form event))
     {:status 404
      :body "Event does not exist."}))
 
 
 (defn get-events-private []
   (resp/response
-   (map
-    unstringify-registration-form 
+   (map (partial unstringify-json-field :registration_form)
     (jdbc/query (get-db-spec) ["select * from abhimata_event"]))))
 
 (defn get-participants [id & {:keys [connection]
                               :or {connection (get-db-spec)}}]
   (let [applications
-        (jdbc/query
-         connection 
-         ["select * from abhimata_registration where event_id = ?" 
-          (Integer. id)])
+        (map (partial unstringify-json-field :submitted_form)
+             (jdbc/query
+              connection 
+              ["select * from abhimata_registration where event_id = ?" 
+               (Integer. id)]))
         {not-cancelled false cancelled true}
         (group-by :cancelled applications)
         {participants false waiting-list true}
@@ -91,7 +90,7 @@
         {registrations :body} (get-participants event_id)]
     (if event
       (resp/response
-       (assoc (unstringify-registration-form event)
+       (assoc (unstringify-json-field :registration_form event)
               :registrations registrations))
       {:status 404, 
        :body (str "Event " id " does not exist.")})))
@@ -100,7 +99,8 @@
 (defn save-event [event-id event-data]
   "Update an event in the database."
   (let [keywordized-data (walk/keywordize-keys event-data)
-        db-ready-data (stringify-registration-form
+        db-ready-data (stringify-json-field
+                       :registration_form
                        (dissoc keywordized-data :event_id :registrations))]
        (if (sc/check event/Event db-ready-data)
          {:status 403

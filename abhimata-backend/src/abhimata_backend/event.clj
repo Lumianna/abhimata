@@ -173,5 +173,4 @@
    :max_waiting_list_length 40
    :visible_to_public false
    :registration_open false
-   :registrations {}
    :registration_form (json/write-str default-registration-form) })
