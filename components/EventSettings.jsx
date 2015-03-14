@@ -13,6 +13,8 @@ var EventParticipants = require('../components/EventParticipants.jsx');
 
 var Loading = require('./Loading.jsx');
 
+var POLLING_INTERVAL = 60000;
+
 var EventSettings = React.createClass({
   mixins: [AuthenticatedRoute, Router.State], 
 
@@ -34,10 +36,16 @@ var EventSettings = React.createClass({
   componentDidMount: function() {
     eventDraftStore.addChangeListener(this._onChange);
     eventActionCreators.requestEventDetails(this.eventId());
+    var that = this;
+    this.pollerId = setInterval(function() {
+      eventActionCreators.requestEventDetails(that.eventId());
+    }, POLLING_INTERVAL);
+      
   },
   
   componentWillUnmount: function() {
     eventDraftStore.removeChangeListener(this._onChange);
+    clearInterval(this.pollerId);
   },
   
   saveEvent: function() {
