@@ -65,6 +65,14 @@ var EventSettings = React.createClass({
         </div>
       );
     }
+
+    var saveButton = null;
+
+    if(this.state.hasUnsavedChanges) {
+      saveButton = (
+        <button onClick={this.saveEvent}>Save changes</button>
+      );
+    }
   
     return (
       <div className="event-settings">
@@ -72,7 +80,7 @@ var EventSettings = React.createClass({
         <Link to="/admin/events">Back to list of events</Link>
         <EventSettingsLinks eventId={this.getParams().eventId}/>
         <RouteHandler event={this.state}/>
-        <button onClick={this.saveEvent}>Save changes</button>
+        {saveButton}
     </div>
     );
   }
