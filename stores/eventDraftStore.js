@@ -108,6 +108,10 @@ var actionHandler = function(payload) {
       eventDraftStore.emitChange(act.event.event_id);
       break;
 
+    case actionTypes.SAVE_EVENT_SUCCESS:
+      eventDraft.hasUnsavedChanges = false;
+      break;
+
     default:
       //do nothing
       break;
