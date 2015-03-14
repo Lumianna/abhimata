@@ -150,6 +150,8 @@ function saveEvent (event_id) {
           type: actionTypes.SAVE_EVENT_SUCCESS,
           event_id: event_id,
         });
+
+        requestEventDetails(event_id);
       },
       error: failureHandler.bind(null, "Saving to server failed."),
       contentType: "application/json; charset=utf-8"
