@@ -33,7 +33,7 @@ function renderParticipants(participants, emptyMessage) {
           {participant.email_verified ? "Yes" : "No"}
         </td>
         <td>
-          {moment(participant.submission_date).format("D.M YYYY hh:mm")}
+          {moment(participant.submission_date).format("D.M YYYY HH:mm")}
         </td>
       </tr>
     );
