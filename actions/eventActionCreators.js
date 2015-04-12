@@ -127,6 +127,14 @@ function updateEventProperty (event_id, propertyName, value) {
     });
 }
 
+function validateEventProperty (event_id, propertyName) {
+  dispatcher.handleViewAction( 
+    { type: actionTypes.VALIDATE_EVENT_PROPERTY,
+      event_id: event_id,
+      property: propertyName,
+    });
+}
+
 function saveEvent (event_id) {
   var url = "events-private/" + event_id;
   var eventData = eventDraftStore.validateEventDraft(event_id);
@@ -213,6 +221,7 @@ module.exports = {
   requestEventDetails: requestEventDetails,
   createEvent: createEvent,
   updateEventProperty: updateEventProperty,
+  validateEventProperty: validateEventProperty,
   saveEvent: saveEvent,
   deleteEvent: deleteEvent,
   addQuestion: addQuestion,

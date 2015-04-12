@@ -21,6 +21,7 @@ module.exports = {
     CREATE_EVENT_SUCCESS: null,
     CREATE_EVENT_FAIL: null,
     UPDATE_EVENT_PROPERTY: null,
+    VALIDATE_EVENT_PROPERTY: null,
     SAVE_EVENT_SUCCESS: null,
     SAVE_EVENT_FAIL: null,
     DELETE_EVENT_SUCCESS: null,

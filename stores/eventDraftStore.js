@@ -5,20 +5,34 @@ var EditableForm = require('../utils/EditableForm.js');
 var formFieldParsers = require('../utils/formFieldParsers.js');
 var _ = require('lodash');
 
+var util = require('../utils/misc.js');
+var validation = require('../utils/validation.js');
+
 var _eventDrafts = {};
 
 // All the event properties that need parsing and validation
-var _eventPropertyParsers = {
+var _eventSchema = {
   max_participants: formFieldParsers.parsePositiveInteger,
   max_waiting_list_length: formFieldParsers.parsePositiveInteger,
+//  email_reminders: {
+//  DEFAULT: {
+//    send_date: formFieldParsers.parseDate,
+//  }
+//}, 
 };
 
 
+function stringifyProp(schema, obj, propChain) {
+  console.log(propChain);
+  console.log(obj);
+  return obj.toString();
+}
+
+
 function makeEventDraft(event) {
-  var draft = _.cloneDeep(event);
-  _.each(_eventPropertyParsers, function(__, key) { 
-    draft[key] = draft[key] + ""; 
-  });
+  var draft = validation.mapOverSchemaProps(_eventSchema, event, [],
+                                            stringifyProp);
+
   draft.hasUnsavedChanges = false;
   draft.errors = {};
   
@@ -27,21 +41,12 @@ function makeEventDraft(event) {
 
 
 function validateEventDraft(draft) {
-  if(!_.isEmpty(draft.errors)) {
+  var event = validation.parseAndValidate(_eventSchema, draft);
+
+  if(validation.isValidationError(event)) {
+    console.log(validatedDraft.message);
     return null;
   }
-  
-  var parsedFields = _.mapValues(_eventPropertyParsers, function(parser, key) {
-    return parser(draft[key], draft).value;
-  });
-  
-  if(!_.all(parsedFields)) {
-    return null;
-  }
-  
-  var event = _.cloneDeep(draft);
-  
-  _.extend(event, parsedFields);
 
   delete event.errors;
   delete event.hasUnsavedChanges;
@@ -54,9 +59,29 @@ var actionHandler = function(payload) {
   var eventDraft = _eventDrafts[act.event_id];
   switch(act.type) {
     case actionTypes.UPDATE_EVENT_PROPERTY:
+      util.setNestedProp(eventDraft, act.property, act.value);
+      eventDraft.hasUnsavedChanges = true;
+
+      eventDraftStore.emitChange(act.event_id);
+      break;
+
+    case actionTypes.VALIDATE_EVENT_PROPERTY:
+      var value = util.getNestedProp(eventDraft, act.property);
+      var parsedVal = validation.parseSingleProp(_eventSchema,
+                                                 act.property, value);
+
+      if(parsedVal.error) {
+        util.setNestedPropSafely(eventDraft.errors, act.property, parsedVal.error);
+      }
+
+      eventDraftStore.emitChange(act.event_id);
+
+      break;
+
+    case actionTypes.UPDATE_EMAIL_REMINDER:
       eventDraft[act.property] = act.value;
-      var error = _eventPropertyParsers[act.property] &&
-        _eventPropertyParsers[act.property](act.value).error;
+      var error = _eventSchema[act.property] &&
+        _eventSchema[act.property](act.value).error;
       if(error) {
         eventDraft.errors[act.property] = error;
       } else {
@@ -66,6 +91,7 @@ var actionHandler = function(payload) {
 
       eventDraftStore.emitChange(act.event_id);
       break;
+
 
     case actionTypes.ADD_REGISTRATION_FORM_QUESTION:
       EditableForm.addQuestion(eventDraft.registration_form,

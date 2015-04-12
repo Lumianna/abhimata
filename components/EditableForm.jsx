@@ -1,7 +1,5 @@
 var React = require('react');
 
-var $ = require('jquery');
-
 var recognizedFormElements = [
   { type : "text", 
     description : "Small textbox"},

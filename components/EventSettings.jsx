@@ -100,6 +100,9 @@ var EventSettingsLinks = React.createClass({
         <Link to="participants" params={linkParams}>
           Participants
         </Link>
+        {/*<Link to="emailreminders" params={linkParams}>
+          Participants
+        </Link>*/}
         <Link to="delete" params={linkParams}>
           Delete event 
         </Link>
@@ -128,7 +131,8 @@ var ValidatedTextInput = React.createClass({
       <label>
         {this.props.label} 
         <input type="text" value={this.props.value}
-               onChange={this.props.onChange}/>
+               onChange={this.props.onChange}
+               onBlur={this.props.onBlur}/>
         <span className=".error"> {this.props.error}</span>
       </label>
     );
@@ -155,12 +159,14 @@ var EventGeneral = React.createClass({
           label="Maximum number of participants"
           value={this.props.event.max_participants}
           error={this.props.event.errors.max_participants}
-          onChange={this._onChange.bind(null, "max_participants")}/>
+          onChange={this._onChange.bind(null, "max_participants")}
+          onBlur={this._onBlur.bind(null, "max_participants")}/>
         <ValidatedTextInput 
           label="Maximum length of waiting list"
           value={this.props.event.max_waiting_list_length}
           error={this.props.event.errors.max_waiting_list_length}
-          onChange={this._onChange.bind(null, "max_waiting_list_length")}/>
+          onChange={this._onChange.bind(null, "max_waiting_list_length")}
+          onBlur={this._onBlur.bind(null, "max_waiting_list_length")}/>
         <label>
           Visible to public
           <input type="checkbox" 
@@ -181,6 +187,12 @@ var EventGeneral = React.createClass({
                                             propertyName,
                                             event.target.value);
   },
+
+  _onBlur: function(propertyName, event) {
+    eventActionCreators.validateEventProperty(this.props.event.event_id,
+                                              propertyName);
+  },
+
   
   _onCheckboxClick: function(propertyName, event) {
     eventActionCreators.updateEventProperty(this.props.event.event_id,
