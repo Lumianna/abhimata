@@ -60,7 +60,7 @@ var UserEventList = React.createClass({
           <thead>
             <tr>
               <th>{/* Sign up link*/}</th>
-              <th>{/*Name */}</th>
+              <th>Event name</th>
               <th>Places available</th>
             </tr>
           </thead>

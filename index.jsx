@@ -31,7 +31,9 @@ var Admin = require('./components/Admin.jsx');
 var App = React.createClass({
   render: function() {
     return (
-      <RouteHandler/>
+      <div className="abhimata-container">
+        <RouteHandler/>
+      </div>
     );
   }
 });
