@@ -1,8 +1,8 @@
 var Router = require('react-router');
 var React = require('react');
 
-var authStore = require('../stores/authStore.js');
-var authActions = require('../actions/authActionCreators.js');
+var AuthStore = require('../stores/AuthStore.js');
+var AuthActions = require('../actions/AuthActions.js');
 
 var Login = React.createClass({
   mixins: [Router.Navigation], 
@@ -15,20 +15,20 @@ var Login = React.createClass({
   },
   
   login: function() {
-    authActions.login(this.state.username, this.state.password);
+    AuthActions.login(this.state.username, this.state.password);
   },
   
   componentDidMount: function() {
-    authStore.addChangeListener(this._onChange);
+    AuthStore.listen(this._onChange);
     this._onChange();
   },
 
   componentWillUnmount: function() {
-    authStore.removeChangeListener(this._onChange);
+    AuthStore.unlisten(this._onChange);
   },
 
   _onChange : function() {
-    if(authStore.userIsAuthenticated()) {
+    if(AuthStore.getState().userIsAuthenticated) {
       this.transitionTo('/admin/events');
     }
   },

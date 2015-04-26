@@ -5,8 +5,8 @@ var RouteHandler = Router.RouteHandler;
 var Link = Router.Link;
 
 var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
-var eventActionCreators = require('../actions/eventActionCreators.js');
-var eventDraftStore = require('../stores/eventDraftStore.js');
+var EventActions = require('../actions/EventActions.js');
+var EventDraftStore = require('../stores/EventDraftStore.js');
 
 var EditableForm = require('../components/editableform.jsx');
 var EventParticipants = require('../components/EventParticipants.jsx');
@@ -27,29 +27,26 @@ var EventSettings = React.createClass({
   },
   
   _onChange: function(updated_event_id) {
-    if(updated_event_id === this.eventId())
-    {
-      this.setState(eventDraftStore.getEventDraft(updated_event_id));
-    }
+    this.setState(EventDraftStore.getEventDraft(this.eventId()));
   },
   
   componentDidMount: function() {
-    eventDraftStore.addChangeListener(this._onChange);
-    eventActionCreators.requestEventDetails(this.eventId());
+    EventDraftStore.listen(this._onChange);
+    EventActions.requestEventDetails(this.eventId());
     var that = this;
     this.pollerId = setInterval(function() {
-      eventActionCreators.requestEventDetails(that.eventId());
+      EventActions.requestEventDetails(that.eventId());
     }, POLLING_INTERVAL);
       
   },
   
   componentWillUnmount: function() {
-    eventDraftStore.removeChangeListener(this._onChange);
+    EventDraftStore.unlisten(this._onChange);
     clearInterval(this.pollerId);
   },
   
   saveEvent: function() {
-    eventActionCreators.saveEvent(this.eventId());
+    EventActions.saveEvent(this.eventId());
   },
   
   render: function() {
@@ -114,7 +111,7 @@ var DeleteData = React.createClass({
   mixins: [Router.Navigation], 
 
   deleteEvent: function() {
-    eventActionCreators.deleteEvent(this.props.event.event_id);
+    EventActions.deleteEvent(this.props.event.event_id);
     this.transitionTo('/admin/events');
   },
   render: function() {
@@ -183,21 +180,27 @@ var EventGeneral = React.createClass({
   },
 
   _onChange: function(propertyName, event) {
-    eventActionCreators.updateEventProperty(this.props.event.event_id,
-                                            propertyName,
-                                            event.target.value);
+    EventActions.updateEventProperty({
+      event_id: this.props.event.event_id,
+      property: propertyName,
+      value: event.target.value
+    });
   },
 
   _onBlur: function(propertyName, event) {
-    eventActionCreators.validateEventProperty(this.props.event.event_id,
-                                              propertyName);
+    EventActions.validateEventProperty({
+      event_id: this.props.event.event_id,
+      property: propertyName
+    });
   },
 
   
   _onCheckboxClick: function(propertyName, event) {
-    eventActionCreators.updateEventProperty(this.props.event.event_id,
-                                            propertyName,
-                                            event.target.checked);
+    EventActions.updateEventProperty({
+      eventId: this.props.event.event_id,
+      propertyName: propertyName,
+      value: event.target.checked
+    });
   },
 
 });
@@ -225,14 +228,14 @@ var RegistrationForm = React.createClass({
   },
 
   addQuestion: function(type) {
-    eventActionCreators.addQuestion({
+    EventActions.addQuestion({
       event_id: this.props.event.event_id,
       questionType: type,
     });
   },
 
   moveQuestion: function(key, index) {
-    eventActionCreators.moveQuestion({
+    EventActions.moveQuestion({
       event_id: this.props.event.event_id,
       key: key,
       toIndex: index,
@@ -240,7 +243,7 @@ var RegistrationForm = React.createClass({
   },
  
   updateQuestionProperty: function(key, field, value) {
-    eventActionCreators.updateQuestionProperty({
+    EventActions.updateQuestionProperty({
       event_id: this.props.event.event_id,
       key: key,
       property: field,
@@ -249,7 +252,7 @@ var RegistrationForm = React.createClass({
   },
   
   deleteQuestion: function(key) {
-    eventActionCreators.deleteQuestion({
+    EventActions.deleteQuestion({
       event_id: this.props.event.event_id,
       key: key,
     });

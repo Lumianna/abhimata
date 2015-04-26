@@ -1,37 +1,37 @@
 var React = require('react');
 var Router = require('react-router');
 
-var cancellationStore = require('../stores/cancellationStore.js');
+var CancellationStore = require('../stores/CancellationStore.js');
 var itemStatus = require('../constants/constants.js').itemStatus;
 var Loading = require('./Loading.jsx');
-var registrationActionCreators = require('../actions/registrationActionCreators.js');
+var RegistrationActions = require('../actions/RegistrationActions.js');
 
 var Cancellation = React.createClass({
   mixins: [ Router.State ],
   
   getInitialState: function() {
     return {
-      info: cancellationStore.getInfo(this.getParams().uuid)
+      info: CancellationStore.getInfo(this.getParams().uuid)
     };
   },
 
   updateInfo: function() {
     this.setState({
-      info: cancellationStore.getInfo(this.getParams().uuid)
+      info: CancellationStore.getInfo(this.getParams().uuid)
     });
   },
 
   cancel: function() {
-    registrationActionCreators.cancel(this.getParams().uuid);
+    RegistrationActions.cancel(this.getParams().uuid);
   },
 
   componentWillMount: function() {
-    cancellationStore.addChangeListener(this.updateInfo);
-    registrationActionCreators.getCancellationInfo(this.getParams().uuid);
+    CancellationStore.listen(this.updateInfo);
+    RegistrationActions.getCancellationInfo(this.getParams().uuid);
   },
 
   componentDidUnmount: function() {
-    cancellationStore.removeChangeListener(this.updateInfo);
+    CancellationStore.unlisten(this.updateInfo);
   },
 
   render: function() {

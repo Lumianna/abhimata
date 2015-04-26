@@ -5,10 +5,10 @@ var Router = require('react-router');
 var Link = Router.Link;
 
 var itemStatus = require('../constants/constants.js').itemStatus;
-var eventActionCreators = require('../actions/eventActionCreators.js');
-var publicEventStore = require('../stores/publicEventStore.js');
-var eventApplicationStore = require('../stores/eventApplicationStore.js');
-var registrationActionCreators = require('../actions/registrationActionCreators.js');
+var EventActions = require('../actions/EventActions.js');
+var PublicEventStore = require('../stores/PublicEventStore.js');
+var EventApplicationStore = require('../stores/EventApplicationStore.js');
+var RegistrationActions = require('../actions/RegistrationActions.js');
 
 var Loading = require('./Loading.jsx');
 
@@ -199,9 +199,9 @@ var EventRegistration = React.createClass({
   getInitialState: function() {
     var event_id = parseInt(this.getParams().eventId, 10);
     return { 
-      event: publicEventStore.getEvent(event_id),
+      event: PublicEventStore.getEvent(event_id),
       event_id: event_id,
-      draft: eventApplicationStore.getDraft(event_id) 
+      draft: EventApplicationStore.getDraft(event_id) 
     };
   },
   
@@ -213,33 +213,37 @@ var EventRegistration = React.createClass({
   
   updateDraft: function() {
     this.setState({ 
-      draft: eventApplicationStore.getDraft(this.state.event_id)
+      draft: EventApplicationStore.getDraft(this.state.event_id)
     });
   },
 
   updateEvent: function() {
     this.setState({ 
-      event: publicEventStore.getEvent(this.state.event_id)
+      event: PublicEventStore.getEvent(this.state.event_id)
     });
   },
   
   componentDidMount: function() {
-    eventApplicationStore.addChangeListener(this.updateDraft);
-    publicEventStore.addChangeListener(this.updateEvent);
-    eventActionCreators.requestPublicEvent(this.state.event_id);
+    EventApplicationStore.listen(this.updateDraft);
+    PublicEventStore.listen(this.updateEvent);
+    EventActions.requestPublicEvent(this.state.event_id);
   },
   
   componentWillUnmount: function() {
-    eventApplicationStore.removeChangeListener(this.updateDraft);
-    publicEventStore.removeChangeListener(this.updateEvent);
+    EventApplicationStore.unlisten(this.updateDraft);
+    PublicEventStore.unlisten(this.updateEvent);
   },
 
   updateAnswer: function(key, value) {
-    registrationActionCreators.updateApplicationAnswer(this.state.event_id, key, value);
+    RegistrationActions.updateApplicationAnswer({
+      event_id: this.state.event_id,
+      key: key,
+      value: value
+    });
   },
 
   submit: function() {
-    registrationActionCreators.submit(this.state.event_id);
+    RegistrationActions.submit(this.state.event_id, this.state.draft);
   },
 
   render: function() {

@@ -1,33 +1,33 @@
 var React = require('react');
 var Router = require('react-router');
 
-var verificationStore = require('../stores/emailVerificationStore.js');
+var EmailVerificationStore = require('../stores/EmailVerificationStore.js');
 var itemStatus = require('../constants/constants.js').itemStatus;
 var Loading = require('./Loading.jsx');
-var registrationActionCreators = require('../actions/registrationActionCreators.js');
+var RegistrationActions = require('../actions/RegistrationActions.js');
 
 var EmailVerification = React.createClass({
   mixins: [ Router.State ],
   
   getInitialState: function() {
     return {
-      info: verificationStore.getInfo(this.getParams().uuid)
+      info: EmailVerificationStore.getInfo(this.getParams().uuid)
     };
   },
 
   updateInfo: function() {
     this.setState({
-      info: verificationStore.getInfo(this.getParams().uuid)
+      info: EmailVerificationStore.getInfo(this.getParams().uuid)
     });
   },
 
   componentWillMount: function() {
-    verificationStore.addChangeListener(this.updateInfo);
-    registrationActionCreators.verifyEmail(this.getParams().uuid);
+    EmailVerificationStore.listen(this.updateInfo);
+    RegistrationActions.verifyEmail(this.getParams().uuid);
   },
 
   componentDidUnmount: function() {
-    verificationStore.removeChangeListener(this.updateInfo);
+    EmailVerificationStore.unlisten(this.updateInfo);
   },
 
   render: function() {

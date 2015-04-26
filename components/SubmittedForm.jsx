@@ -5,10 +5,6 @@ var Router = require('react-router');
 var Link = Router.Link;
 
 var itemStatus = require('../constants/constants.js').itemStatus;
-var eventActionCreators = require('../actions/eventActionCreators.js');
-var publicEventStore = require('../stores/publicEventStore.js');
-var eventApplicationStore = require('../stores/eventApplicationStore.js');
-var registrationActionCreators = require('../actions/registrationActionCreators.js');
 
 var Loading = require('./Loading.jsx');
 

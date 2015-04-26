@@ -1,7 +1,7 @@
 /** @jsx React.DOM */
 var React = require('react');
-var $ = require('jquery');
-var pkg = require('./package.json');
+
+var alt = require('./alt.js');
 
 var events = require('events');
 
@@ -15,7 +15,7 @@ var RouteHandler = Router.RouteHandler;
 
 //my modules
 require('./main.less');
-var authActions = require('./actions/authActionCreators.js');
+var AuthActions = require('./actions/AuthActions.js');
 var EditableForm = require('./components/EditableForm.jsx');
 var EventRegistration = require('./components/EventRegistration.jsx');
 var EventParticipants = require('./components/EventParticipants.jsx');
@@ -63,7 +63,7 @@ var routes = (
   </Route>
 );
 
-authActions.testAuth();
+AuthActions.testAuth();
 
 Router.run(routes, function(Handler) {
   React.render(<Handler/>, document.body);

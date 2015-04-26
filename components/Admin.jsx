@@ -1,7 +1,7 @@
 var React = require('react');
 var Router = require('react-router');
 var RouteHandler = Router.RouteHandler;
-var authStore = require('../stores/authStore.js');
+var AuthStore = require('../stores/AuthStore.js');
 
 // A top-level component for the admin interface; it exists only to
 // initiate a transition to the login screen if the admin's login expires
@@ -12,17 +12,17 @@ var Admin = React.createClass({
   mixins: [Router.Navigation], 
   
   _onAuthChange: function() {
-    if(!authStore.userIsAuthenticated()) {
+    if(!AuthStore.getState().userIsAuthenticated) {
       this.transitionTo('/admin/login');
     }
   },
   
   componentDidMount: function() {
-    authStore.addChangeListener(this._onAuthChange);
+    AuthStore.listen(this._onAuthChange);
   },
 
   componentWillUnmount: function() {
-    authStore.removeChangeListener(this._onAuthChange);
+    AuthStore.unlisten(this._onAuthChange);
   },
 
   render: function() {

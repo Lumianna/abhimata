@@ -5,8 +5,8 @@ var Link = Router.Link;
 
 var $ = require('jquery');
 var _ = require('lodash');
-var eventActionCreators = require('../actions/eventActionCreators.js');
-var publicEventStore = require('../stores/publicEventStore.js');
+var EventActions = require('../actions/EventActions.js');
+var PublicEventStore = require('../stores/PublicEventStore.js');
 
 var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
 
@@ -16,12 +16,12 @@ var UserEventList = React.createClass({
   },
   
   componentDidMount: function() {
-    publicEventStore.addChangeListener(this._onChange);
-    eventActionCreators.requestPublicEventList();
+    PublicEventStore.listen(this._onChange);
+    EventActions.requestPublicEventList();
   },
   
   getStateFromStores: function() {
-    return { events: publicEventStore.getEvents() };
+    return { events: PublicEventStore.getEvents() };
   },
   
   _onChange: function() {
@@ -29,7 +29,7 @@ var UserEventList = React.createClass({
   },
 
   componentWillUnmount: function() {
-    publicEventStore.removeChangeListener(this._onChange);
+    PublicEventStore.unlisten(this._onChange);
   },
   
   render: function() {

@@ -1,11 +1,11 @@
-var authActions = require('../actions/authActionCreators.js');
+var AuthActions = require('../actions/AuthActions.js');
 var authStore = require('../stores/authStore.js');
 var Router = require('react-router');
 
 var AuthenticatedRoute = {
   statics: {
     willTransitionTo: function (transition) {
-      if (!authStore.userIsAuthenticated()) {
+      if (!authStore.getState().userIsAuthenticated) {
         transition.redirect('/admin/login');
       }
     }
