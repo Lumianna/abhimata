@@ -18,13 +18,13 @@ function EmailVerificationStore() {
   });
 }
 
-EmailVerificationStore.prototype.onVerifyEmailSucceeded = function() {
+EmailVerificationStore.prototype.onVerifyEmailSucceeded = function(payload) {
   _info[payload.uuid] = {
     emailIsVerified: true
   };
 };
 
-EmailVerificationStore.prototype.onVerifyEmailFailed = function() {
+EmailVerificationStore.prototype.onVerifyEmailFailed = function(payload) {
   _info[payload.uuid] = itemStatus.NOT_AVAILABLE;
 };
 

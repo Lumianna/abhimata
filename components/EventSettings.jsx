@@ -197,8 +197,8 @@ var EventGeneral = React.createClass({
   
   _onCheckboxClick: function(propertyName, event) {
     EventActions.updateEventProperty({
-      eventId: this.props.event.event_id,
-      propertyName: propertyName,
+      event_id: this.props.event.event_id,
+      property: propertyName,
       value: event.target.checked
     });
   },
