@@ -27,7 +27,7 @@
     (DELETE "/" [] (db/delete-event id) )
     (POST "/" {event-data :json-params} (db/save-event id event-data))
     (GET "/participants" [] (db/get-participants id))
-    ))
+    (GET "/participants.pdf" [] (db/get-participants-pdf id))))
 
 (defroutes app-routes
   (GET "/logout" [] (friend/logout* (resp/response "logout ok")))

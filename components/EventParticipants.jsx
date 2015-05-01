@@ -58,8 +58,14 @@ function renderParticipants(participants, emptyMessage) {
 
 var EventParticipants = React.createClass({
   render: function() {
+    var pdfUrl = 'events-private/' +
+                 this.props.event.event_id + '/participants.pdf';
     return ( 
       <div>
+        <a href={pdfUrl}
+           download="participants.pdf">
+          Download forms submitted by participants as a PDF.
+        </a>
         <h2>Participants</h2>
         {renderParticipants(this.props.event.registrations.participants,
                             "No applications yet.")}

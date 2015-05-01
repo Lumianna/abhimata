@@ -3,15 +3,18 @@
   (:require [abhimata_backend.event :as event]
             [abhimata_backend.config :as config]
             [abhimata_backend.macros :as macros]
+            [abhimata_backend.export :as export]
             [clojure.stacktrace]
             [clojure.java.jdbc :as jdbc]
             [clojure.data.json :as json]
+            [clj-pdf.core :as pdf]
             [clj-time.core :as time]
             [clj-time.coerce :as coercetime]
             [postal.core :as postal]
             [hiccup.core :as hiccup]
             [schema.core :as sc]
             [ring.util.response :as resp]
+            [ring.util.io :as ring-io]
             [clojure.walk :as walk])
   (:import java.sql.SQLException
            java.util.concurrent.LinkedBlockingQueue))
@@ -83,6 +86,21 @@
    connection
    ["select * from abhimata_event where event_id = ?" id]
    :result-set-fn first))
+
+
+(defn get-participants-pdf [id]
+  (let [participants (:participants (:body (get-participants id)))
+        submitted-forms (map :submitted_form participants)
+        event (unstringify-json-field :registration_form
+                                      (get-event-by-id (Integer. id)))
+        registration-form (:registration_form event)
+        pdf-doc (export/make-participant-pdf registration-form submitted-forms)]
+    {:headers {"Content-Type" "application/pdf"}
+     :body
+     (ring-io/piped-input-stream
+      (fn [out-stream]
+        (pdf/pdf (concat [{}] pdf-doc)
+                 out-stream)))})) 
 
 (defn get-full-event-data [id]
   (let [event_id (Integer. id)
