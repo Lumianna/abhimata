@@ -3,7 +3,7 @@
   (:require [abhimata_backend.event :as event]
             [abhimata_backend.config :as config]
             [abhimata_backend.macros :as macros]
-            [abhimata_backend.export :as export]
+            [abhimata_backend.pdfexport :as export]
             [clojure.stacktrace]
             [clojure.java.jdbc :as jdbc]
             [clojure.data.json :as json]
@@ -95,7 +95,8 @@
                                       (get-event-by-id (Integer. id)))
         registration-form (:registration_form event)
         pdf-doc (export/make-participant-pdf registration-form submitted-forms)]
-    {:headers {"Content-Type" "application/pdf"}
+    {:headers {"Content-Type" "application/pdf",
+               "Content-Disposition" "attachment"}
      :body
      (ring-io/piped-input-stream
       (fn [out-stream]
