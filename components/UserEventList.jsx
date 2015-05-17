@@ -41,7 +41,7 @@ var UserEventList = React.createClass({
           <td>
             <Link to="event-registration" 
                   params={{eventId: event.event_id}}> 
-              {openPlaces > 0 ? "Sign up" : "Sign up for waiting list"}
+              {openPlaces > 0 ? "Sign up" : "Join the waiting list"}
             </Link> 
           </td>
           <td>

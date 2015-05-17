@@ -286,10 +286,21 @@ var EventRegistration = React.createClass({
       </button>
     );
 
+    var signup;
+    if(this.state.event.max_participants > this.state.event.num_participants)
+    {
+      signup = "Sign up for ";
+    } else {
+      signup = "Join the waiting list for ";
+    }
+
     return (
       <div className="event-registration">
         <Link to="/">Back to list of events</Link>
-        <h1>{this.state.title}</h1> 
+        <h1>
+          {signup}
+          <em>{this.state.event.title}</em>
+        </h1> 
         {serverError}
         {content}
         {this.state.draft.submissionComplete ? null : submissionButton}
