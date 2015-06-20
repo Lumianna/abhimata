@@ -1,4 +1,4 @@
-(ns abhimata_backend.event
+(ns abhimata_backend.schemas
   (:require [clojure.data.json :as json]
             [schema.core :as sc])
   (:gen-class))

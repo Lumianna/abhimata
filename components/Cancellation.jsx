@@ -27,7 +27,7 @@ var Cancellation = React.createClass({
 
   componentWillMount: function() {
     CancellationStore.listen(this.updateInfo);
-    RegistrationActions.getCancellationInfo(this.getParams().uuid);
+    RegistrationActions.requestCancellationInfo(this.getParams().uuid);
   },
 
   componentDidUnmount: function() {

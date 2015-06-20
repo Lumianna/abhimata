@@ -6,5 +6,8 @@
 
 (defn get-config [] (deref config))
 
-(defn update-config-from-file [filename] 
+(defn get-db-spec []
+  (:db-spec (get-config)))
+
+(defn update-config-from-file! [filename] 
   (reset! config (edn/read-string (slurp filename))))
