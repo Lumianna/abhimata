@@ -145,6 +145,44 @@ var EventGeneral = React.createClass({
       return (<Loading/>);
     }
 
+    var optionalStatuses = [
+      {
+        key: "visible_to_public",
+        text: "Visible to public",
+      },
+      {
+        key: "registration_open",
+        text: "Registration is open",
+      },
+      {
+        key: "applications_need_screening",
+        text: "Applications for this event need to be screened by the organizers",
+      },
+      {
+        key: "has_fee",
+        text: "This event has an entry fee",
+      },
+      {
+        key: "has_registration_fee",
+        text: "This event has a registration fee",
+      },
+    ];
+
+    var that = this;
+    var checkboxes = _.map(optionalStatuses, function(status) {
+      return (
+        <div key={status.key}>
+          <label htmlFor={status.key}>
+            {status.text}
+          </label>
+          <input type="checkbox" 
+                 id={status.key}
+                 checked={that.props.event[status.key]}
+                 onChange={that._onCheckboxClick.bind(null, status.key)}/>
+        </div>
+      );
+    });
+
     return (
       <form>
         <label>
@@ -164,19 +202,9 @@ var EventGeneral = React.createClass({
           error={this.props.event.errors.max_waiting_list_length}
           onChange={this._onChange.bind(null, "max_waiting_list_length")}
           onBlur={this._onBlur.bind(null, "max_waiting_list_length")}/>
-        <label>
-          Visible to public
-          <input type="checkbox" 
-                 checked={this.props.event.visible_to_public}
-                 onChange={this._onCheckboxClick.bind(null, "visible_to_public")}/>
-        </label>
-        <label>
-          Registration open
-          <input type="checkbox" 
-                 checked={this.props.event.registration_open}
-                 onChange={this._onCheckboxClick.bind(null, "registration_open")}/>
-        </label>
-      </form> );
+        {checkboxes}
+      </form>
+    );
   },
 
   _onChange: function(propertyName, event) {

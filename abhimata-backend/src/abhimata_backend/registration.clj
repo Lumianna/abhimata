@@ -94,7 +94,6 @@
            cancellation-code (random-uuid)
            insert-cols {:event_id event_id
                         :submitted_form (json/write-str submitted-form)
-                        :cancelled false
                         :email user-email
                         :name user-name
                         :email_verification_code email-uuid
@@ -220,3 +219,23 @@ a few times."
       {:status 404
        :body "No registration corresponding to that verification code."})))
 
+(sc/defschema ParticipantStatus
+  "A valid participant status"
+  (sc/pred #{"application_screened"
+             "registration_fee_paid"
+             "full_fee_paid"}))
+
+(sc/defschema ParticipantStatusUpdate
+  "A status update should update a single field and set it to true or false"
+  { ParticipantStatus sc/Bool })
+
+(defn update-participant-status [id_str status-update]
+  (let [_ (sc/validate ParticipantStatusUpdate status-update)
+        registration_id (Integer. id_str)
+        update-res (jdbc/update!
+                    (config/get-db-spec) :abhimata_registration
+                    status-update
+                    ["registration_id = ?" registration_id])]
+    (if (> (first update-res) 0)
+      {:status 200}
+      {:status 500})))

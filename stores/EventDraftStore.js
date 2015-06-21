@@ -5,6 +5,7 @@ var _ = require('lodash');
 var alt = require('../alt.js');
 
 var EventActions = require('../actions/EventActions.js');
+var RegistrationActions = require('../actions/RegistrationActions.js');
 
 var util = require('../utils/misc.js');
 var validation = require('../utils/validation.js');
@@ -53,6 +54,13 @@ function validateEventDraft(event_id) {
 
 function EventDraftStore() {
   this.bindActions(EventActions);
+  this.bindListeners({
+    handleParticipantStatus: [
+      RegistrationActions.updateParticipantStatus,
+      RegistrationActions.updateParticipantStatusSucceeded,
+      RegistrationActions.updateParticipantStatusFailed,
+    ]
+  });
 
   this.exportPublicMethods({
     getEventDraft: function(event_id) {
@@ -148,6 +156,21 @@ EventDraftStore.prototype.onSaveEventSucceeded = function(payload) {
   var eventDraft = _eventDrafts[payload.event_id];
 
   eventDraft.hasUnsavedChanges = false;
+};
+
+// RegistrationActions
+
+EventDraftStore.prototype.handleParticipantStatus =
+function(payload) {
+  var draft = _eventDrafts[payload.eventId];
+  if(draft) {
+    var participant = _.find(draft.registrations.participants, function(p) {
+      return p.registration_id === payload.participantId;
+    });
+    participant[payload.property] = payload.value;
+  } else {
+    return false;
+  }
 };
   
 module.exports = alt.createStore(EventDraftStore, 'EventDraftStore');

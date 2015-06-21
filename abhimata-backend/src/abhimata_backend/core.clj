@@ -29,6 +29,10 @@
     (DELETE "/" [] (events/delete-event id) )
     (POST "/" {event-data :json-params} (events/save-event id event-data))
     (GET "/participants" [] (events/get-participants id))
+    (POST "/participants/:registration_id"
+        {{registration_id :registration_id} :params
+         status-update :json-params}
+      (registration/update-participant-status registration_id status-update))
     (GET "/participants.pdf" [] (events/get-participants-pdf id))))
 
 (defroutes app-routes

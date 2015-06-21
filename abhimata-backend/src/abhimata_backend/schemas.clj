@@ -95,8 +95,6 @@
 (defn make-radio-answer-schema [alternatives]
   (apply sc/enum no-radio-selected (range (count alternatives))))
          
-  
-
 (defn make-answer-schema [{type "type"
                            alternatives "alternatives"
                            is-optional "isResponseOptional"}]
@@ -139,6 +137,9 @@
    :max_waiting_list_length PosInt
    :visible_to_public sc/Bool
    :registration_open sc/Bool
+   :has_registration_fee sc/Bool
+   :has_fee sc/Bool
+   :applications_need_screening sc/Bool
    :registration_form
    (sc/either
     RegistrationForm
@@ -172,5 +173,8 @@
    :max_participants 40
    :max_waiting_list_length 40
    :visible_to_public false
+   :has_registration_fee false
+   :has_fee false
+   :applications_need_screening false
    :registration_open false
    :registration_form (json/write-str default-registration-form) })

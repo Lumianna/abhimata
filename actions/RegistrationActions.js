@@ -12,6 +12,8 @@ function RegistrationActions() {
     'requestCancellationInfoFailed',
     'cancelRegistrationSucceeded',
     'cancelRegistrationFailed',
+    'updateParticipantStatusSucceeded',
+    'updateParticipantStatusFailed',
     'verifyEmailSucceeded',
     'verifyEmailFailed'
   );
@@ -121,5 +123,46 @@ RegistrationActions.prototype.verifyEmail = function (uuid) {
     contentType: "application/json; charset=utf-8",
   });
 };
+
+RegistrationActions.prototype.updateParticipantStatus =
+function (eventId, participantId, property, value) {
+  var that = this;
+  var data = {};
+  data[property] = value;
+
+  var payload = {
+    eventId: eventId,
+    participantId: participantId,
+    property: property,
+    value: value
+  };
+
+  var draft = require('../stores/EventDraftStore.js').getEventDraft(eventId);
+  var originalValue = _.find(draft.registrations.participants, function(p) {
+    return p.registration_id === participantId;
+  })[property];
+                               
+  this.dispatch(payload);
+  
+  $.ajax({ 
+    type: "POST",
+    url: "events-private/" + eventId + "/participants/" + participantId,
+    data: JSON.stringify(data),
+    success: function(data) { 
+      console.log(payload);
+      that.actions.updateParticipantStatusSucceeded(payload);
+    },
+    error: function(data, textStatus) { 
+      console.log(textStatus);
+      var errorPayload = _.merge({}, payload, {
+        value: originalValue
+      });
+      that.actions.updateParticipantStatusFailed(errorPayload);
+    },
+    dataType: "text",
+    contentType: "application/json; charset=utf-8",
+  });
+};
+
 
 module.exports = alt.createActions(RegistrationActions);

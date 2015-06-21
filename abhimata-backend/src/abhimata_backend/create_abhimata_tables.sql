@@ -6,6 +6,9 @@ create table abhimata_event
   max_waiting_list_length integer not null,
   visible_to_public boolean not null,
   registration_open boolean not null,
+  applications_need_screening boolean not null,
+  has_registration_fee boolean not null,
+  has_fee boolean not null,
   registration_form text not null,
   constraint event_pk primary key (event_id),
   constraint positive_max_participants CHECK (max_participants > 0),
@@ -34,7 +37,10 @@ create table abhimata_registration
 --  tentatively_accepted boolean not null,
   on_waiting_list boolean not null,
   cancelled boolean not null,
-  confirmed boolean not null,
+  application_screened boolean not null,
+  registration_fee_paid boolean not null,
+  full_fee_paid boolean not null,
+  notes varchar(2000) not null,
   constraint registration_pk primary key (registration_id),
   constraint registration_event_id_fk 
     foreign key(event_id) references abhimata_event(event_id)
@@ -74,8 +80,12 @@ from abhimata_event where abhimata_event.visible_to_public = true;
 create function abhimata_registration_trigger() returns trigger as $$
 begin
   new.submission_date = current_timestamp;
-  new.confirmed = false;
+  new.cancelled = false;
   new.email_verified = false;
+  new.notes = '';
+  new.application_screened = false;
+  new.registration_fee_paid = false;
+  new.full_fee_paid = false;
   return new;
 end
 $$ language plpgsql;
