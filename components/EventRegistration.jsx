@@ -259,6 +259,15 @@ var EventRegistration = React.createClass({
         </div>
       );
     }
+
+    if(!this.state.event.registration_open) {
+      return (
+        <div>
+          <p>This event is currently not accepting applications.</p>
+          <Link to="/">Back to list of events</Link>
+        </div>
+      );
+    }
                     
     var disabled = _.any(this.state.draft.questions, "error");
     var content;
