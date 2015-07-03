@@ -27,24 +27,24 @@
 (defn pdf-submitted-form [registration-form submitted-form]
   (let [order (registration-form "order")
         questions (registration-form "questions")]
-    (concat
-     [[:pagebreak]]
-     (vector
-      (apply
-       concat
-       (map
-        (fn [question-key]
-          (let [str-key (str question-key)
-                question (questions str-key)
-                response (submitted-form str-key)]
-            [(pdf-question question)
-             (pdf-response question response)
-             [:spacer 2]]))
-        order))))))
+    (vector
+     (apply
+      concat
+      (map
+       (fn [question-key]
+         (let [str-key (str question-key)
+               question (questions str-key)
+               response (submitted-form str-key)]
+           [(pdf-question question)
+            (pdf-response question response)
+            [:spacer 2]]))
+       order)))))
 
 (defn make-participant-pdf [registration-form submissions]
   (apply
    concat
-   (map
-    (partial pdf-submitted-form registration-form)
-    submissions)))
+   (interpose
+    [[:pad-until-even]]
+    (map
+     (partial pdf-submitted-form registration-form)
+     submissions))))

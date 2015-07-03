@@ -85,13 +85,14 @@
         event (unstringify-json-field :registration_form
                                       (get-event-by-id (Integer. id)))
         registration-form (:registration_form event)
-        pdf-doc (export/make-participant-pdf registration-form submitted-forms)]
+        pdf-doc (export/make-participant-pdf registration-form submitted-forms)
+        _ (prn pdf-doc)]
     {:headers {"Content-Type" "application/pdf",
                "Content-Disposition" "attachment"}
      :body
      (ring-io/piped-input-stream
       (fn [out-stream]
-        (pdf/pdf (concat [{}] pdf-doc)
+        (pdf/pdf (vec (concat [{}] pdf-doc))
                  out-stream)))})) 
 
 (defn get-full-event-data [id]
