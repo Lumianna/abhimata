@@ -85,8 +85,7 @@
         event (unstringify-json-field :registration_form
                                       (get-event-by-id (Integer. id)))
         registration-form (:registration_form event)
-        pdf-doc (export/make-participant-pdf registration-form submitted-forms)
-        _ (prn pdf-doc)]
+        pdf-doc (export/make-participant-pdf registration-form submitted-forms)]
     {:headers {"Content-Type" "application/pdf",
                "Content-Disposition" "attachment"}
      :body

@@ -5,7 +5,7 @@
   :plugins [[cider/cider-nrepl "0.7.0-SNAPSHOT"]]
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/data.json "0.2.5"]
-                 [clj-pdf "2.0.5"]
+                 [clj-pdf "2.0.6"]
                  [org.clojure/java.jdbc "0.3.6"]
                  [prismatic/schema "0.3.3"]
                  [clj-time "0.8.0"]

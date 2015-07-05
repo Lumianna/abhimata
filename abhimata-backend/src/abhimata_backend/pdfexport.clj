@@ -44,7 +44,7 @@
   (apply
    concat
    (interpose
-    [[:pad-until-even]]
+    [[:clear-double-page]]
     (map
      (partial pdf-submitted-form registration-form)
      submissions))))
