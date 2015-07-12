@@ -47,13 +47,20 @@ var findIndexByKey = function(form, key) {
 // EXPOSED FUNCTIONS 
 
 
-var addQuestion = function(form, type) {
+var addQuestion = function(form, type, index) {
   var newQuestion = makeQuestion(type);
   var key = nextAvailableKey(form);
   newQuestion.key = key;
   
   form.questions[key] = newQuestion;
   form.order.push(key);
+
+  console.log(type);
+  console.log(index);
+
+  if(_.isNumber(index)) {
+    moveQuestion(form, key, index);
+  }
 };
 
 

@@ -1,5 +1,5 @@
 var PrivateEventStore = require('./PrivateEventStore.js');
-var EditableForm = require('../utils/EditableForm.js');
+var EditableForm = require('../utils/editableForm.js');
 var formFieldParsers = require('../utils/formFieldParsers.js');
 var _ = require('lodash');
 var alt = require('../alt.js');
@@ -113,7 +113,8 @@ EventDraftStore.prototype.onAddQuestion = function(payload) {
   var eventDraft = _eventDrafts[payload.event_id];
 
   EditableForm.addQuestion(eventDraft.registration_form,
-                           payload.questionType);
+                           payload.questionType,
+                           payload.index);
   eventDraft.hasUnsavedChanges = true;
 };
 

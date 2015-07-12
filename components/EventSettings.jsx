@@ -67,7 +67,8 @@ var EventSettings = React.createClass({
 
     if(this.state.hasUnsavedChanges) {
       saveButton = (
-        <button onClick={this.saveEvent}>Save changes</button>
+        <button onClick={this.saveEvent}
+                className="save-changes">Save changes</button>
       );
     }
   
@@ -255,10 +256,11 @@ var RegistrationForm = React.createClass({
     );
   },
 
-  addQuestion: function(type) {
+  addQuestion: function(index, type) {
     EventActions.addQuestion({
       event_id: this.props.event.event_id,
       questionType: type,
+      index: index,
     });
   },
 

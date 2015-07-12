@@ -226,27 +226,55 @@ var EditableCheckbox = React.createClass({
 
 // Component for selecting a form element to be added.
 var FormElementSelector = React.createClass({
+  getInitialState: function() {
+    return {
+      open: false,
+    };
+  },
 
-  addFormElement : function(type) {
+  addFormElement: function(type) {
+    this.close();
     this.props.onSelection(type);
   },
 
-  render : function() {
-    var buttons = this.props.formElements.map(function(elem) {
-      var clickHandler = this.addFormElement.bind(this, elem.type);
-      return ( <label key={elem.type}> 
+  open: function() {
+    this.setState({ open: true });
+  },
+
+  close: function() {
+    this.setState({ open: false });
+  },
+
+  render: function() {
+    if(!this.state.open) {
+      return (
+        <button className="form-element-selector closed"
+                onClick={this.open}>
+          Add new question here
+        </button>
+      );
+    }
+    else {
+      var buttons = this.props.formElements.map(function(elem) {
+        var clickHandler = this.addFormElement.bind(this, elem.type);
+        return ( <label key={elem.type}> 
         <button onClick={clickHandler}>
           {elem.description}
         </button>
         </label>
-             );
-    }.bind(this));
-    return (
-      <div className="form-element-selector">
-        <h2> Add a new question: </h2>
-        {buttons}
-      </div>
-    );
+        );
+      }.bind(this));
+      return (
+        <div className="form-element-selector open">
+          <h2> Add a new question: </h2>
+          {buttons}
+          <button onClick={this.close}
+                  className="cancel">
+            Cancel
+          </button>
+        </div>
+      );
+    }
   }
 });
 
@@ -256,45 +284,58 @@ var EditableForm = React.createClass({
   render: function() {
     var components = this.props.elements.map(function(elem, index) {
       var onEdit = this.props.editQuestion.bind(null, elem.key);
+      var component;
+
       switch(elem.type) {
         case  "textarea" :
-          return ( 
+          component = ( 
             <EditableTextArea element={elem}
-                              key={elem.key}
                               deleteQuestion={this.props.deleteQuestion}
                               moveQuestion={this.props.moveQuestion}
                               onEdit={onEdit} /> );
+          break;
         case  "text" :
-          return ( 
+          component = ( 
             <EditableText element={elem} 
-                          key={elem.key}
                           deleteQuestion={this.props.deleteQuestion}
                           moveQuestion={this.props.moveQuestion}
                           onEdit={onEdit} /> );
+          break;
         case "radio" :
-          return ( 
+          component = ( 
             <EditableRadioButton element={elem} 
-                                 key={elem.key}
                                  deleteQuestion={this.props.deleteQuestion}
                                  moveQuestion={this.props.moveQuestion}
                                  onEdit={onEdit} /> );
+          break;
         case "checkbox" :
-          return ( 
+          component = ( 
             <EditableCheckbox element={elem} 
-                              key={elem.key}
                               deleteQuestion={this.props.deleteQuestion}
                               moveQuestion={this.props.moveQuestion}
                               onEdit={onEdit} /> );
+          break;
         default :
           console.log("Warning: unrecognized editable form element");
-          return null;
+          component = null;
+          break;
+      }
+
+      if(component) {
+        component = (
+          <div key={elem.key}>
+            {component}
+            <FormElementSelector formElements={recognizedFormElements} 
+                                 onSelection={this.props.addQuestion.bind(null, index + 1)}/>
+          </div>
+        );
+
+        return component;
       }
     }.bind(this));
 
     return (
       <div className="editableForm"> 
-        <FormElementSelector formElements={recognizedFormElements} 
-                             onSelection={this.props.addQuestion}/>
         {components}
       </div>
     );
