@@ -10,16 +10,16 @@ var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
 var RegistrationActions = require('../actions/RegistrationActions.js');
 
 var statuses = {
-  "registration_fee_paid": {
-    eventProp: "has_registration_fee",
+  "deposit_paid": {
+    eventProp: "has_deposit",
     text: "Registration fee paid",
   },
   "application_screened": {
     eventProp: "applications_need_screening",
     text: "Application screened",
   },
-  "full_fee_paid": {
-    eventProp: "has_fee",
+  "registration_fee_paid": {
+    eventProp: "has_registration_fee",
     text: "Full fee paid",
   },
 };

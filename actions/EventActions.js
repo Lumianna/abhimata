@@ -163,6 +163,8 @@ EventActions.prototype.saveEvent = function(event_id) {
     });
   };
 
+  console.log(eventData);
+
   if(!eventData) {
     failureHandler("Invalid event data; this is probably a bug.");
   } else {

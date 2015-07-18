@@ -10,12 +10,14 @@ function RegistrationActions() {
     'submitFailed',
     'requestCancellationInfoSucceeded',
     'requestCancellationInfoFailed',
+    'requestCancellationEmailSucceeded',
+    'requestCancellationEmailFailed',
     'cancelRegistrationSucceeded',
     'cancelRegistrationFailed',
     'updateParticipantStatusSucceeded',
     'updateParticipantStatusFailed',
-    'verifyEmailSucceeded',
-    'verifyEmailFailed'
+    'getRegistrationStatusSucceeded',
+    'getRegistrationStatusFailed'
   );
 }
 
@@ -53,30 +55,31 @@ RegistrationActions.prototype.submit = function (event_id, draft) {
   });
 };
 
-RegistrationActions.prototype.requestCancellationInfo = function (uuid) {
+RegistrationActions.prototype.requestCancellationEmail = function (uuid) {
   this.dispatch(uuid);
   var that = this;
 
   $.ajax({ 
     type: "GET",
-    url: "cancel/" + uuid,
+    url: "request-cancellation-email/" + uuid,
     success: function(data) { 
-      that.actions.requestCancellationInfoSucceeded({ 
-          uuid: uuid,
-          info: data,
+      that.actions.requestCancellationEmailSucceeded({ 
+        uuid: uuid,
+        info: data,
       });
     },
     error: function(data, textStatus) { 
-      that.actions.requestCancellationInfoFailed({ 
-          uuid: uuid,
-          errorMessage: data,
-          statusCode: textStatus, 
+      that.actions.requestCancellationEmailFailed({ 
+        uuid: uuid,
+        errorMessage: data,
+        statusCode: textStatus, 
       });
     },
-    dataType: "json",
+    dataType: "text",
     contentType: "application/json; charset=utf-8",
   });
 };
+
 
 RegistrationActions.prototype.cancel = function(uuid) {
   this.dispatch(uuid);
@@ -89,6 +92,8 @@ RegistrationActions.prototype.cancel = function(uuid) {
       that.actions.cancelRegistrationSucceeded({
         uuid: uuid,
       });
+
+      that.actions.getRegistrationStatusByCancellationUUID(uuid);
     },
     error: function(data, textStatus) { 
       that.actions.cancelRegistrationFailed({
@@ -102,27 +107,52 @@ RegistrationActions.prototype.cancel = function(uuid) {
   });
 };
 
-RegistrationActions.prototype.verifyEmail = function (uuid) {
+RegistrationActions.prototype.getRegistrationStatus = function (uuid) {
   var that = this;
   $.ajax({ 
     type: "GET",
-    url: "verify-email/" + uuid,
-    success: function() { 
-      that.actions.verifyEmailSucceeded({
+    url: "registration-status/" + uuid,
+    success: function(data) { 
+      that.actions.getRegistrationStatusSucceeded({
         uuid: uuid,
+        statusData: data,
       });
     },
     error: function(data, textStatus) { 
-      that.actions.verifyEmailFailed({
+      that.actions.getRegistrationStatusFailed({
         uuid: uuid,
         errorMessage: data,
         statusCode: textStatus, 
       });
     },
-    dataType: "text",
+    dataType: "json",
     contentType: "application/json; charset=utf-8",
   });
 };
+
+RegistrationActions.prototype.getRegistrationStatusByCancellationUUID = function (uuid) {
+  var that = this;
+  $.ajax({ 
+    type: "GET",
+    url: "cancel/" + uuid,
+    success: function(data) { 
+      that.actions.getRegistrationStatusSucceeded({
+        uuid: uuid,
+        statusData: data,
+      });
+    },
+    error: function(data, textStatus) { 
+      that.actions.getRegistrationStatusFailed({
+        uuid: uuid,
+        errorMessage: data,
+        statusCode: textStatus, 
+      });
+    },
+    dataType: "json",
+    contentType: "application/json; charset=utf-8",
+  });
+};
+
 
 RegistrationActions.prototype.updateParticipantStatus =
 function (eventId, participantId, property, value) {

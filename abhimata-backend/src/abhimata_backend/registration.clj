@@ -27,31 +27,48 @@
 (defn random-uuid []
   (str (java.util.UUID/randomUUID)))
 
-(defn make-email-verification-url [uuid]
-  (str (:url (config/get-config)) "/verify-email/" uuid))
+(defn make-registration-status-url [uuid]
+  (str (:url (config/get-config)) "/registration-status/" uuid))
 
 (defn make-cancellation-url [uuid]
   (str (:url (config/get-config)) "/cancel/" uuid))
 
-(defn send-cancellation-email! [user-email event_id uuid]
+#_(defn send-cancellation-email! [user-email event_id uuid]
   (let [event (events/get-event-by-id event_id)]
     (email/send-email! 
      {:to user-email,
-      :event_id event_id,
       :subject "If you need to cancel your registration"
-      :body (str "Thank you for registering for the event \""
-                 (:title event) "\". If you later find that you "
-                 "need to cancel your "
-                 "registration, you can use this link: "
+      :body (str "To cancel your registration for the event\""
+                 (:title event) "\", please use this link:" 
                  (make-cancellation-url uuid) " . Do not share this link "
                  "with anyone else.")})))
+
+(defn request-cancellation-email! [verification-uuid]
+  (let [registration (jdbc/query
+                      (config/get-db-spec)
+                      [(str "select * from abhimata_registration "
+                            "where email_verification_code = ?")
+                       verification-uuid]
+                      :result-set-fn first)
+        event (events/get-event-by-id (:event_id registration))]
+    (email/send-email! 
+     {:to (:email registration),
+      :event_id (:event_id registration)
+      :subject "Link for cancelling your registration"
+      :body (str "If you wish to cancel your registration for the event \""
+                 (:title event) "\", please use this link:"
+                 (make-cancellation-url (:cancellation_code registration))
+                 " . If you still want to participate, ignore this email. Do not"
+                 " share this link with anyone else.")})
+    (email/flush-emails!)
+    (resp/response "OK")))
 
 (defn send-verification-email! [user-email event_id email-uuid]
   (email/send-email! 
    {:to user-email,
     :event_id event_id,
     :subject "Please verify your email address"
-    :body (str "Please click on the following link to verify your email address: " (make-email-verification-url email-uuid) )}))
+    :body (str "Please click on the following link to verify your email address: " (make-registration-status-url email-uuid) )}))
 
 (defn insert-registration! [event_id registration]
   "If the event has open slots or room on the waiting list, inserts registration
@@ -104,37 +121,53 @@
          :body "The event you tried to sign up for is either fully booked or not accepting registrations."}
         (do 
           (send-verification-email! user-email event_id email-uuid)
-          (send-cancellation-email! user-email event_id cancellation-code)
           (email/flush-emails!)
-          (resp/response "Your application has been submitted, but you will still need to verify your email address by clicking on the link that we just emailed you."))))
+          (resp/response "Your application has been successfully submitted, but you will still need to verify your email address by clicking on the link that we just emailed you."))))
     (catch SQLException e (throw e))
     (catch Exception e
       (.printStackTrace e)
       {:status 403
        :body "Invalid registration form (this is probably a bug in Abhimata)."})))
 
-(defn get-registration-info [uuid]
-  "Takes a cancellation code and returns some information about the registration
+(defn get-registration-info [verification-uuid]
+  "Takes an email verification UUID and returns some information about the registration
 corresponding to that code (or a 404 if no such registration is found)."
   (if-let [registration
            (jdbc/query
             (config/get-db-spec)
-            ["select * from abhimata_registration where cancellation_code = ?"
-             uuid]
+            ["select * from abhimata_registration where email_verification_code = ?"
+             verification-uuid]
             :result-set-fn first)]
-    (let [event-title
-          (:title
+    (let [event
+          (jdbc/query
+           (config/get-db-spec)
+           [(str "select title,"
+                 " applications_need_screening,"
+                 " has_registration_fee,"
+                 " has_deposit "
+                 "from abhimata_event where event_id = ?")
+            (:event_id registration)]
+           :result-set-fn first)]
+      (resp/response
+       {:event event
+        :alreadyCancelled (:cancelled registration)
+        :applicationScreened (:application_screened registration)
+        :depositPaid (:deposit_paid registration)
+        :registrationFeePaid (:registration_fee_paid registration)
+        :onWaitingList (:on_waiting_list registration)}))
+    {:status 404
+     :body "No registration matching that verification code was found."}))
+
+(defn get-registration-info-by-cancel-uuid [cancellation-uuid]
+(if-let [registration
            (jdbc/query
             (config/get-db-spec)
-            ["select title from abhimata_event where event_id = ?"
-             (:event_id registration)]
-            :result-set-fn first))]
-      (resp/response
-       {:eventTitle event-title
-        :alreadyCancelled (:cancelled registration)
-        :onWaitingList false}))
+            ["select * from abhimata_registration where cancellation_code = ?"
+             cancellation-uuid]
+            :result-set-fn first)]
+    (get-registration-info (:email_verification_code registration))
     {:status 404
-     :body "No registration matching that cancellation uuid."}))
+     :body "No registration matching that cancellation code was found."}))
 
 (defn send-waiting-list-promotion-email!
   [{:keys [event_id email cancellation_code] :as registration} conn]
@@ -208,22 +241,21 @@ a few times."
         :body "No registration matching that cancellation uuid."}))))
 
 
-(defn verify-email! [uuid]
+(defn verify-email-and-get-registration-info! [uuid]
   (let [update-res 
         (jdbc/update! (config/get-db-spec) :abhimata_registration
                       {:email_verified true}
-                      ["email_verification_code = ? and email_verified = false" uuid])]
+                      ["email_verification_code = ?" uuid])]
     (if (> (first update-res) 0)
-      (resp/response
-       "Email successfully verified.")
+      (get-registration-info uuid)
       {:status 404
-       :body "No registration corresponding to that verification code."})))
+       :body "No registration corresponding to that verification code was found."})))
 
 (sc/defschema ParticipantStatus
   "A valid participant status"
   (sc/pred #{"application_screened"
              "registration_fee_paid"
-             "full_fee_paid"}))
+             "deposit_paid"}))
 
 (sc/defschema ParticipantStatusUpdate
   "A status update should update a single field and set it to true or false"

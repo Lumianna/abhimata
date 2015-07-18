@@ -8,7 +8,7 @@ create table abhimata_event
   registration_open boolean not null,
   applications_need_screening boolean not null,
   has_registration_fee boolean not null,
-  has_fee boolean not null,
+  has_deposit boolean not null,
   registration_form text not null,
   constraint event_pk primary key (event_id),
   constraint positive_max_participants CHECK (max_participants > 0),
@@ -38,8 +38,8 @@ create table abhimata_registration
   on_waiting_list boolean not null,
   cancelled boolean not null,
   application_screened boolean not null,
+  deposit_paid boolean not null,
   registration_fee_paid boolean not null,
-  full_fee_paid boolean not null,
   notes varchar(2000) not null,
   constraint registration_pk primary key (registration_id),
   constraint registration_event_id_fk 
@@ -84,8 +84,8 @@ begin
   new.email_verified = false;
   new.notes = '';
   new.application_screened = false;
+  new.deposit_paid = false;
   new.registration_fee_paid = false;
-  new.full_fee_paid = false;
   return new;
 end
 $$ language plpgsql;

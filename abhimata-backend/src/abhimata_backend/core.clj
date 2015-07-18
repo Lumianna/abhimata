@@ -40,8 +40,9 @@
   (POST "/login" [] (resp/response "login ok"))
   (GET "/secret" req
        (friend/authorize #{:admin} (resp/response "auth ok")))
-  (GET "/verify-email/:uuid" [uuid] (registration/verify-email! uuid))
-  (GET "/cancel/:uuid" [uuid] (registration/get-registration-info uuid))
+  (GET "/registration-status/:uuid" [uuid] (registration/verify-email-and-get-registration-info! uuid))
+  (GET "/request-cancellation-email/:uuid" [uuid] (registration/request-cancellation-email! uuid))
+  (GET "/cancel/:uuid" [uuid] (registration/get-registration-info-by-cancel-uuid uuid))
   (POST "/cancel/:uuid" [uuid] (registration/cancel-registration! uuid))
   (context "/events-public" []
     (GET "/" [] (events/get-public-event-list))

@@ -160,12 +160,12 @@ var EventGeneral = React.createClass({
         text: "Applications for this event need to be screened by the organizers",
       },
       {
-        key: "has_fee",
-        text: "This event has an entry fee",
-      },
-      {
         key: "has_registration_fee",
         text: "This event has a registration fee",
+      },
+      {
+        key: "has_deposit",
+        text: "This event has a deposit (in addition to the registration fee) that you need to pay as soon as you register",
       },
     ];
 
