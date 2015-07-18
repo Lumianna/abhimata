@@ -76,6 +76,26 @@ select
   registration_open
 from abhimata_event where abhimata_event.visible_to_public = true;
 
+-- Prevent the registration form from being edited if registration is open
+-- or forms have already been submitted
+create function abhimata_guard_registration_form() returns trigger as $$
+declare
+  num_registrants integer;
+begin
+  select count(*) into num_registrants from abhimata_registration
+    where abhimata_registration.event_id = old.event_id;
+  if old.registration_open or num_registrants > 0 then
+    new.registration_form = old.registration_form;
+  end if;
+
+  return new;
+end
+$$ language plpgsql;
+
+create trigger trig_abhimata_event_guard_registration_form
+before update on abhimata_event
+for each row
+execute procedure abhimata_guard_registration_form();
 
 create function abhimata_registration_trigger() returns trigger as $$
 begin
