@@ -7,23 +7,25 @@ var itemStatus = require('../constants/constants.js').itemStatus;
 var Loading = require('./Loading.jsx');
 var RegistrationActions = require('../actions/RegistrationActions.js');
 
+var Bootstrap = require('react-bootstrap');
+
 var STATUSES = {
-  applicationScreened: {
+    applicationScreened: {
     showIf: 'applications_need_screening',
     done: 'We have read and approved your application.',
-    pending: 'We have not read your application yet.',
+    pending: "We haven't read your application yet. (You don't need to do anything; we'll get around to it eventually!)",
   },
 
   registrationFeePaid: {
     showIf: 'has_registration_fee',
-    done: 'You have paid the registration fee',
-    pending: 'You have not paid the registration fee (or your payment has not been processed yet).',
+    done: 'You have paid the registration fee.',
+    pending: "You haven't paid the registration fee yet (or we haven't had time to process it).",
   },
 
   depositPaid: {
     showIf: 'has_deposit',
     done: 'You have paid the deposit.',
-    pending: 'You have not paid the deposit (or your payment has not been processed yet). Note that we will not reserve a place in the event for you until you have paid the deposit.',
+    pending: "You haven't paid the deposit yet (or we haven't had time to process it). Note that you won't be considered registered for the event until you pay the deposit.",
   },
 };
 
@@ -36,17 +38,25 @@ function renderStatuses(statusData) {
     }
 
     var statusText = statusIsOk ? statusConfig.done : statusConfig.pending;
+    var classList = "registration-status";
+    var bsStyle = statusIsOk ? "success" : "warning";
+
+    if(statusIsOk) {
+      classList += " ok";
+    } else {
+      classList += " pending";
+    }
+
     return (
-      <li key={status}>
+      <Bootstrap.Alert key={status}
+                       bsStyle={bsStyle}>
         {statusText}
-      </li>
+      </Bootstrap.Alert>
     );
   });
 
   return (
-    <ul>
-      {statusItems}
-    </ul>
+    {statusItems}
   );
 }
   
@@ -93,8 +103,10 @@ var RegistrationStatus = React.createClass({
       );
     }
 
+    var event = this.state.status.event;
+
     var eventTitle = (
-      <em>{this.state.status.event.title}</em>
+      <em>{event.title}</em>
     );
     
     var intro;
@@ -107,7 +119,17 @@ var RegistrationStatus = React.createClass({
     } else {
       intro = (
         <p>
-          You have registered for the event {eventTitle}.
+          You have signed up for the event {eventTitle}.
+        </p>
+      );
+    }
+
+    var paymentInfo = null;
+    if (event.has_registration_fee || event.has_deposit) {
+      paymentInfo = (
+        <p>
+          Please consult the event's webpage for details about payments
+          and deadlines.
         </p>
       );
     }
@@ -117,12 +139,14 @@ var RegistrationStatus = React.createClass({
         <h1>The status of your application</h1>
         {intro}
         {renderStatuses(this.state.status)}
+        {paymentInfo}
 
         <h2>Cancelling your registration</h2>
         <p>If you cannot participate in the event, you can cancel your application by clicking on the button below. An email will be sent to the email address you used to register with a link that you can use to cancel your application.</p>
-        <button onClick={this.requestCancellationEmail}>
+        <Bootstrap.Button onClick={this.requestCancellationEmail}
+                          bsStyle="primary">
           Email cancellation link
-        </button>
+        </Bootstrap.Button>
       </div>
     );
   }

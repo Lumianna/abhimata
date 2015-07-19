@@ -6,6 +6,8 @@ var itemStatus = require('../constants/constants.js').itemStatus;
 var Loading = require('./Loading.jsx');
 var RegistrationActions = require('../actions/RegistrationActions.js');
 
+var Bootstrap = require('react-bootstrap');
+
 var Cancellation = React.createClass({
   mixins: [ Router.State ],
   
@@ -61,7 +63,10 @@ var Cancellation = React.createClass({
         <div>
           <p>You are currently {registered} for the event <em>{this.state.info.event.title}</em>. Are you sure you want to
             cancel your registration?</p>
-          <button onClick={this.cancel}>Yes, I want to cancel</button>
+          <Bootstrap.Button onClick={this.cancel}
+                            bsStyle="danger">
+            Yes, I want to cancel
+          </Bootstrap.Button>
         </div>
       );
     }

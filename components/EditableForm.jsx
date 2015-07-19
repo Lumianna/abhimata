@@ -1,4 +1,5 @@
 var React = require('react');
+var Bootstrap = require('react-bootstrap');
 
 var recognizedFormElements = [
   { type : "text", 
@@ -40,28 +41,31 @@ var GeneralEditControls = React.createClass({
     if(this.props.element.isDeletable) {
       deletableOnlyControls = (
         <div>
-          <label>
-            Answering is optional 
-            <input type="checkbox" 
-                   onChange={this.handleIsOptionalChange}
-                   checked={this.props.element.isResponseOptional}/>
-          </label>
-          <button onClick={this.deleteQuestion}>
+          <Bootstrap.Button onClick={this.deleteQuestion}>
             Delete question
-          </button>
+          </Bootstrap.Button>
+          <Bootstrap.Input type="checkbox" 
+                           label="Answering is optional"
+                           onChange={this.handleIsOptionalChange}
+                           checked={this.props.element.isResponseOptional}/>
         </div>
       );
     }
 
     return (
       <div>
-        <label> 
-          Question title 
-          <input type="text" onChange={this.handleTitleChange} 
-                 value={this.props.element.label}/>
-        </label>
-        <button onClick={this.moveUp}>Move question up</button>
-        <button onClick={this.moveDown}>Move question down</button>
+        <Bootstrap.Input type="text"
+                         label="Question title"
+                         onChange={this.handleTitleChange} 
+                         value={this.props.element.label}/>
+        <Bootstrap.Button className="move-question-button"
+                          onClick={this.moveUp}>
+          Move question up
+        </Bootstrap.Button>
+        <Bootstrap.Button className="move-question-button"
+                          onClick={this.moveDown}>
+          Move question down
+        </Bootstrap.Button>
         {deletableOnlyControls}
       </div> 
     );
@@ -77,10 +81,9 @@ var EditableTextArea = React.createClass({
     return (
       <div className="editable-textarea editable-form-element">
         <div className="preview">
-          <label htmlFor={labelIdPreview}> 
-            {this.props.element.label} 
-          </label>
-          <textarea id={labelIdPreview} rows="4"/>
+          <Bootstrap.Input label={this.props.element.label}
+                           type="textarea"
+                           rows="4"/>
         </div>
         <div className="edit-controls">
           <GeneralEditControls element={this.props.element} 
@@ -103,10 +106,8 @@ var EditableText = React.createClass({
     return (
       <div className="editable-text editable-form-element">
         <div className="preview">
-          <label htmlFor={labelIdPreview}> 
-            {this.props.element.label} 
-          </label>
-          <input type="text" id={labelIdPreview} />
+          <Bootstrap.Input type="text"
+                           label={this.props.element.label} />
         </div>
         <div className="edit-controls">
           <GeneralEditControls element={this.props.element} 
@@ -131,7 +132,7 @@ var EditableRadioButton = React.createClass({
     this.props.onEdit("alternatives", parsedAlts);
   },
   
-  render : function() {
+  render: function() {
     var labelIdPreview = "preview" + this.props.element.key;
     var labelIdTitle = "title" + this.props.element.key;
     var labelIdAlts = "alternatives" + this.props.element.key;
@@ -141,12 +142,13 @@ var EditableRadioButton = React.createClass({
     
     var radioButtons = this.props.element.alternatives.map(
       function(alternative, index) {
-        return ( 
-          <label key={index}> 
-            {alternative} 
-            <input type="radio" value={alternative} 
-                   name={radioName} /> 
-          </label> );
+        return (
+          <Bootstrap.Input type="radio"
+                           key={index}
+                           label={alternative}
+                           value={alternative} 
+                           name={radioName} /> 
+        );
       }.bind(this));
     return (
       <div className="editable-text editable-form-element">
@@ -164,8 +166,11 @@ var EditableRadioButton = React.createClass({
                                deleteQuestion={this.props.deleteQuestion}
                                onEdit={this.props.onEdit} /> 
 
-          <label htmlFor="labelIdAlts"> Alternatives </label>
-          <textarea id={labelIdAlts} rows={this.props.element.alternatives.length} onChange={this.handleAltsEdit} value={altsStr}/>
+          <Bootstrap.Input rows={this.props.element.alternatives.length}
+                           type="textarea"
+                           label="Alternatives"
+                           onChange={this.handleAltsEdit}
+                           value={altsStr}/>
         </div>
       </div> );
   }
@@ -195,11 +200,12 @@ var EditableCheckbox = React.createClass({
     var checkboxes = this.props.element.alternatives.map(
       function(alternative, index) {
         return ( 
-          <label key={index}> 
-            {alternative} 
-            <input type="checkbox" value={alternative} 
-                   name={checkboxName} /> 
-          </label> );
+          <Bootstrap.Input type="checkbox"
+                           key={index}
+                           label={alternative}
+                           value={alternative} 
+                           name={checkboxName} /> 
+        );
       }.bind(this));
     return (
       <div className="editable-checkbox editable-form-element">
@@ -217,8 +223,11 @@ var EditableCheckbox = React.createClass({
                                deleteQuestion={this.props.deleteQuestion}
                                onEdit={this.props.onEdit} /> 
 
-          <label htmlFor="labelIdAlts"> Alternatives </label>
-          <textarea id={labelIdAlts} rows={this.props.element.alternatives.length} onChange={this.handleAltsEdit} value={altsStr}/>
+          <Bootstrap.Input label="Alternatives"
+                           type="textarea"
+                           rows={this.props.element.alternatives.length}
+                           onChange={this.handleAltsEdit}
+                           value={altsStr}/>
         </div>
       </div> );
   }
@@ -248,19 +257,19 @@ var FormElementSelector = React.createClass({
   render: function() {
     if(!this.state.open) {
       return (
-        <button className="form-element-selector closed"
-                onClick={this.open}>
+        <Bootstrap.Button className="form-element-selector closed"
+                          onClick={this.open}>
           Add new question here
-        </button>
+        </Bootstrap.Button>
       );
     }
     else {
       var buttons = this.props.formElements.map(function(elem) {
         var clickHandler = this.addFormElement.bind(this, elem.type);
         return ( <label key={elem.type}> 
-        <button onClick={clickHandler}>
+        <Bootstrap.Button onClick={clickHandler}>
           {elem.description}
-        </button>
+        </Bootstrap.Button>
         </label>
         );
       }.bind(this));
@@ -268,10 +277,10 @@ var FormElementSelector = React.createClass({
         <div className="form-element-selector open">
           <h2> Add a new question: </h2>
           {buttons}
-          <button onClick={this.close}
-                  className="cancel">
+          <Bootstrap.Button onClick={this.close}
+                            className="cancel">
             Cancel
-          </button>
+          </Bootstrap.Button>
         </div>
       );
     }

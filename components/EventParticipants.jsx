@@ -6,13 +6,15 @@ var Router = require('react-router');
 var RouteHandler = Router.RouteHandler;
 var Link = Router.Link;
 
+var Bootstrap = require('react-bootstrap');
+
 var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
 var RegistrationActions = require('../actions/RegistrationActions.js');
 
 var statuses = {
   "deposit_paid": {
     eventProp: "has_deposit",
-    text: "Registration fee paid",
+    text: "Deposit paid",
   },
   "application_screened": {
     eventProp: "applications_need_screening",
@@ -92,7 +94,7 @@ function renderParticipants(participants, event, emptyMessage) {
   });
 
   return ( 
-    <table>
+    <Bootstrap.Table>
       <thead>
         <tr>
           <th>Name</th>
@@ -105,7 +107,7 @@ function renderParticipants(participants, event, emptyMessage) {
       <tbody>
         {rows}
       </tbody>
-    </table>
+    </Bootstrap.Table>
   );
 }
 

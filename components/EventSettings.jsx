@@ -4,6 +4,10 @@ var Router = require('react-router');
 var RouteHandler = Router.RouteHandler;
 var Link = Router.Link;
 
+var Bootstrap = require('react-bootstrap');
+
+var RRBootstrap = require('react-router-bootstrap');
+
 var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
 var EventActions = require('../actions/EventActions.js');
 var EventDraftStore = require('../stores/EventDraftStore.js');
@@ -67,8 +71,11 @@ var EventSettings = React.createClass({
 
     if(this.state.hasUnsavedChanges) {
       saveButton = (
-        <button onClick={this.saveEvent}
-                className="save-changes">Save changes</button>
+        <Bootstrap.Button onClick={this.saveEvent}
+                          bsStyle="primary"
+                          className="save-changes">
+          Save changes
+        </Bootstrap.Button>
       );
     }
 
@@ -88,23 +95,25 @@ var EventSettingsLinks = React.createClass({
   render: function() { 
     var linkParams = { eventId : this.props.eventId };
     return (
-      <div className="event-settings-dashboard">
-        <Link to="general" params={linkParams}>
-          General settings
-        </Link>
-        <Link to="registrationform" params={linkParams}>
-          Sign-up form
-        </Link>
-        <Link to="participants" params={linkParams}>
-          Participants
-        </Link>
-        {/*<Link to="emailreminders" params={linkParams}>
-          Participants
-        </Link>*/}
-        <Link to="delete" params={linkParams}>
-          Delete event 
-        </Link>
-      </div> );
+      <Bootstrap.Navbar>
+        <Bootstrap.Nav>
+          <RRBootstrap.NavItemLink to="general" params={linkParams}>
+            General settings
+          </RRBootstrap.NavItemLink>
+          <RRBootstrap.NavItemLink to="registrationform" params={linkParams}>
+            Sign-up form
+          </RRBootstrap.NavItemLink>
+          <RRBootstrap.NavItemLink to="participants" params={linkParams}>
+            Participants
+          </RRBootstrap.NavItemLink>
+          {/*<RRBootstrap.NavItemLink to="emailreminders" params={linkParams}>
+              Participants
+              </RRBootstrap.NavItemLink>*/}
+              <RRBootstrap.NavItemLink to="delete" params={linkParams}>
+                Delete event 
+              </RRBootstrap.NavItemLink>
+        </Bootstrap.Nav>
+      </Bootstrap.Navbar> );
   }
 });
 
@@ -117,7 +126,10 @@ var DeleteData = React.createClass({
   },
   render: function() {
     return (
-      <button onClick={this.deleteEvent}>Delete event and all data</button>
+      <Bootstrap.Button bsStyle="danger"
+                        onClick={this.deleteEvent}>
+        Delete event and all data
+      </Bootstrap.Button>
       );
   }
 });
@@ -126,13 +138,13 @@ var DeleteData = React.createClass({
 var ValidatedTextInput = React.createClass({ 
   render: function() {
     return( 
-      <label>
-        {this.props.label} 
-        <input type="text" value={this.props.value}
-               onChange={this.props.onChange}
-               onBlur={this.props.onBlur}/>
-        <span className=".error"> {this.props.error}</span>
-      </label>
+      <div>
+        <Bootstrap.Input type="text" value={this.props.value}
+                         label={this.props.label}
+                         onChange={this.props.onChange}
+                         onBlur={this.props.onBlur}/>
+        <span className="error"> {this.props.error}</span>
+      </div>
     );
   }
 });
@@ -173,24 +185,20 @@ var EventGeneral = React.createClass({
     var checkboxes = _.map(optionalStatuses, function(status) {
       return (
         <div key={status.key}>
-          <label htmlFor={status.key}>
-            {status.text}
-          </label>
-          <input type="checkbox" 
-                 id={status.key}
-                 checked={that.props.event[status.key]}
-                 onChange={that._onCheckboxClick.bind(null, status.key)}/>
+          <Bootstrap.Input type="checkbox" 
+                           label={status.text}
+                           checked={that.props.event[status.key]}
+                           onChange={that._onCheckboxClick.bind(null, status.key)}/>
         </div>
       );
     });
 
     return (
       <form>
-        <label>
-          Event title
-          <input type="text" value={this.props.event.title}
-               onChange={this._onChange.bind(null, "title")}/>
-        </label>
+        <Bootstrap.Input type="text"
+                         label="Event title"
+                         value={this.props.event.title}
+                         onChange={this._onChange.bind(null, "title")}/>
         <ValidatedTextInput 
           label="Maximum number of participants"
           value={this.props.event.max_participants}

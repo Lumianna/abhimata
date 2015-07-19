@@ -91,6 +91,8 @@ EventDraftStore.prototype.onValidateEventProperty = function(payload) {
 
   if(parsedVal.error) {
     util.setNestedPropSafely(eventDraft.errors, payload.property, parsedVal.error);
+  } else {
+    util.deleteNestedProp(eventDraft.errors, payload.property);
   }
 };
 

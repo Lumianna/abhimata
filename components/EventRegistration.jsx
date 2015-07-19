@@ -10,16 +10,18 @@ var PublicEventStore = require('../stores/PublicEventStore.js');
 var EventApplicationStore = require('../stores/EventApplicationStore.js');
 var RegistrationActions = require('../actions/RegistrationActions.js');
 
+var Bootstrap = require('react-bootstrap');
+
 var Loading = require('./Loading.jsx');
 
 var TextArea = React.createClass({
   render: function() {
-    var id = _.uniqueId("textarea");
     return(  
-      <textarea rows="4" 
-                id={this.props.id}
-                value={this.props.value}
-                onChange={this.onChange}/>
+      <Bootstrap.Input type="textarea"
+                       rows="4" 
+                       label={this.props.label}
+                       value={this.props.value}
+                       onChange={this.onChange}/>
     );
   },
   
@@ -30,12 +32,11 @@ var TextArea = React.createClass({
 
 var TextInput = React.createClass({
   render: function() {
-    var id = _.uniqueId("textinput");
     return(  
-      <input type="text" 
-             id={this.props.id}
-             value={this.props.value}
-             onChange={this.onChange}/>
+      <Bootstrap.Input type="text" 
+                       label={this.props.label}
+                       value={this.props.value}
+                       onChange={this.onChange}/>
     );
   },
   
@@ -50,17 +51,12 @@ var CheckboxGroup = React.createClass({
     var checkboxes = _.map(
       this.props.alternatives,
       function(alternative, index) {
-        var id = _.uniqueId("checkbox");
         return ( 
-          <div key={index}>
-            <input type="checkbox" 
-                   id={id}
-                   onChange={this.onChange.bind(null, index)}
-                   checked={this.props.value[index]} /> 
-            <label htmlFor={id}> 
-              {alternative} 
-            </label> 
-          </div>
+          <Bootstrap.Input type="checkbox" 
+                           key={index}
+                           label={alternative}
+                           onChange={this.onChange.bind(null, index)}
+                           checked={this.props.value[index]} /> 
         );
       }.bind(this));
 
@@ -86,19 +82,14 @@ var RadioGroup = React.createClass({
     var radioButtons = _.map(
       this.props.alternatives, 
       function(alternative, index) {
-        var id = _.uniqueId("radio");
         return ( 
-          <div key={index}>
-            <input type="radio" 
-                   value={alternative} 
-                   name={name}
-                   id={id}
-                   checked={index === this.props.value ? true : null}
-                   onChange={this.onChange.bind(this, index)}/> 
-            <label htmlFor={id}> 
-              {alternative} 
-            </label> 
-          </div>
+          <Bootstrap.Input type="radio" 
+                           value={alternative} 
+                           name={name}
+                           key={index}
+                           label={alternative}
+                           checked={index === this.props.value ? true : null}
+                           onChange={this.onChange.bind(this, index)}/> 
         );
       }.bind(this));
 
@@ -129,28 +120,38 @@ function renderForm(state, updateFunc) {
   return _.map(questions, function(question) {
     var key = question.key;
     var id = _.uniqueId("formquestion");
-    var isRequired = question.isResponseOptional ? "" : " (required)";
+
+
+    var isRequired = ""; // question.isResponseOptional ? "" : " (answer required)";
+
+    var labelText = question.label + isRequired;
     var label = (
         <label key={question.key}
+               className="control-label"
                htmlFor={id}>
-          {question.label + isRequired}
+          {labelText}
         </label> 
     );
 
     var onChange = updateFunc.bind(null, question.key);
     var input;
+    var bsStyle = null; //state.draft.questions[key].error ? "error" : null;
     switch(question.type) {
       case  "textarea" :
+        label = null;
         input = (
-          <TextArea id={id}
+          <TextArea label={labelText}
+                    bsStyle={bsStyle}
                     value={state.draft.questions[key].value}
                     onChange={onChange}/>
         );
         break;
 
       case  "text" :
+        label = null;
         input = ( 
-          <TextInput id={id}
+          <TextInput label={question.label + isRequired}
+                     bsStyle={bsStyle}
                      value={state.draft.questions[key].value}
                      onChange={onChange}/>
         );
@@ -179,9 +180,10 @@ function renderForm(state, updateFunc) {
         console.log("Warning: unrecognized editable form element");
         return null;
     }
-    
+
+   
     return (
-      <div className="form-question"
+      <div className={"form-question"}
            key={question.key}>
         {label}
         {input}
@@ -290,9 +292,11 @@ var EventRegistration = React.createClass({
     }
     
     var submissionButton = (
-      <button disabled={disabled} onClick={this.submit}>
+      <Bootstrap.Button disabled={disabled}
+                        bsStyle="primary"
+                        onClick={this.submit}>
         Submit application
-      </button>
+      </Bootstrap.Button>
     );
 
     var signup;
