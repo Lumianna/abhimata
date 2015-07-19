@@ -71,7 +71,7 @@ var EventSettings = React.createClass({
                 className="save-changes">Save changes</button>
       );
     }
-  
+
     return (
       <div className="event-settings">
         <Link to="/admin/events">Back to list of events</Link>
@@ -234,10 +234,32 @@ var EventGeneral = React.createClass({
 
 });
 
+function hasSubmissions(event) {
+  return (!_.isEmpty(event.registrations.participants) ||
+    !_.isEmpty(event.registrations.cancelled) ||
+    !_.isEmpty(event.registrations.waitingList));
+}
+
 var RegistrationForm = React.createClass({
   render : function() {
     if(!this.props.event) {
       return (<Loading/>);
+    }
+
+    if(hasSubmissions(this.props.event)) {
+      return (
+        <p>
+          Someone has already registered for this event, so you can no longer edit the form.
+        </p>
+      );
+    }
+
+    if(this.props.event.registration_open) {
+      return (
+        <p>
+          You can't edit the registration form while registration is open. As long as no one has registered for the event, you can make the form editable again by closing registration.
+        </p>
+      );
     }
 
     var questions = this.props.event.registration_form.order.map(
