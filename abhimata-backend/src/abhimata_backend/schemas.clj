@@ -133,6 +133,7 @@
   "Schema for an event."
 
   {:title sc/Str
+   :owner sc/Str
    :max_participants PosInt
    :max_waiting_list_length PosInt
    :visible_to_public sc/Bool

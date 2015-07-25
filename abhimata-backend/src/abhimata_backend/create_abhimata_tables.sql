@@ -2,6 +2,7 @@ create table abhimata_event
 (
   event_id serial,
   title varchar(2000) not null,
+  owner varchar(50) not null,
   max_participants integer not null,
   max_waiting_list_length integer not null,
   visible_to_public boolean not null,
@@ -11,6 +12,7 @@ create table abhimata_event
   has_deposit boolean not null,
   registration_form text not null,
   constraint event_pk primary key (event_id),
+  constraint event_owner_fk foreign key(owner) references abhimata_admin(username),
   constraint positive_max_participants CHECK (max_participants > 0),
   constraint positive_max_waiting_list_length CHECK (max_waiting_list_length > 0)
 );

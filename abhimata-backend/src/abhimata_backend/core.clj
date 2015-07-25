@@ -9,7 +9,7 @@
    (cemerick.friend [workflows :as workflows]
                     [credentials :as creds])
    [compojure.core :as compojure
-    :refer (GET POST DELETE ANY defroutes context)]
+    :refer (GET POST DELETE ANY routes defroutes context)]
    [clojure.java.jdbc :as jdbc]
    [clojure.string :as string]
    [ring.adapter.jetty :as jetty]
@@ -21,19 +21,40 @@
               [route :as route]))
   (:import java.sql.SQLException))
 
+(defn fetch-admin-credentials [username]
+  "Fetches admin credentials in the form expected by friend's
+   bcrypt-credential-fn"
+  (let [query-results (jdbc/query (config/get-db-spec) 
+                       ["select * from abhimata_admin where username = ?" 
+                        username])]
+    (if (empty? query-results) 
+      nil
+      (assoc (into {} query-results) :roles #{:admin (keyword username)}))))
+
+(defn add-user [username password]
+  "Adds user to abhimata_admin"
+  (jdbc/insert! (config/get-db-spec) :abhimata_admin
+                {:username username
+                 :password (creds/hash-bcrypt password)}))
+
+(defn event-id-routes [id]
+  (routes
+   (GET "/" [] (events/get-full-event-data id) )
+   (DELETE "/" [] (events/delete-event id) )
+   (POST "/" {event-data :json-params} (events/save-event id event-data))
+   (GET "/participants" [] (events/get-participants id))
+   (POST "/participants/:registration_id"
+       {{registration_id :registration_id} :params
+        status-update :json-params}
+     (registration/update-participant-status registration_id status-update))
+   (GET "/participants.pdf" [] (events/get-participants-pdf id))))
+
 (defroutes admin-routes
-  (GET "/" [] (events/get-events-private))
-  (POST "/" [] (events/make-event))
+  (GET "/" req (events/get-events-private (friend/current-authentication req)))
+  (POST "/" req (events/make-event (friend/current-authentication req)))
   (context "/:id" [id] 
-    (GET "/" [] (events/get-full-event-data id) )
-    (DELETE "/" [] (events/delete-event id) )
-    (POST "/" {event-data :json-params} (events/save-event id event-data))
-    (GET "/participants" [] (events/get-participants id))
-    (POST "/participants/:registration_id"
-        {{registration_id :registration_id} :params
-         status-update :json-params}
-      (registration/update-participant-status registration_id status-update))
-    (GET "/participants.pdf" [] (events/get-participants-pdf id))))
+    (friend/wrap-authorize (event-id-routes id)
+                           #{ (events/get-event-owner-role id) })))
 
 (defroutes app-routes
   (GET "/logout" [] (friend/logout* (resp/response "logout ok")))
@@ -82,7 +103,7 @@
       :login-failure-handler failed-login-handler
       :unauthenticated-handler (fn [& args] {:status 401, :body "Login required"})
       :credential-fn #(creds/bcrypt-credential-fn 
-                       events/fetch-admin-credentials %)
+                       fetch-admin-credentials %)
       :workflows [(workflows/interactive-form :redirect-on-auth? false)]})
     (handler/site)
     (wrap-db-error)

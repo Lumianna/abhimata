@@ -27,6 +27,19 @@
   (let [unstringified-form (json/read-str (field-key db-event-query))]
     (assoc db-event-query field-key unstringified-form)))
 
+(defn get-event-by-id [id & {:keys [connection]
+                              :or {connection (config/get-db-spec)}}]
+  (jdbc/query 
+   connection
+   ["select * from abhimata_event where event_id = ?" id]
+   :result-set-fn first))
+
+(defn get-event-owner [event-id]
+  (:owner (get-event-by-id (Integer. event-id))))
+
+(defn get-event-owner-role [event-id]
+  (keyword (get-event-owner event-id)))
+
 
 (defn get-public-event-list []
   (resp/response
@@ -48,10 +61,13 @@
      :body "Event does not exist."}))
 
 
-(defn get-events-private []
-  (resp/response
-   (map (partial unstringify-json-field :registration_form)
-    (jdbc/query (config/get-db-spec) ["select * from abhimata_event"]))))
+(defn get-events-private [current-auth]
+  (let [owner (:username current-auth)]
+    (resp/response
+     (map (partial unstringify-json-field :registration_form)
+          (jdbc/query (config/get-db-spec)
+                      [(str "select * from abhimata_event "
+                            "where owner = ?") owner])))))
 
 (defn get-participants [id & {:keys [connection]
                               :or {connection (config/get-db-spec)}}]
@@ -70,14 +86,6 @@
    {:participants (vec participants)
     :waitingList (vec waiting-list)
     :cancelled (vec cancelled)})))
-
-(defn get-event-by-id [id & {:keys [connection]
-                              :or {connection (config/get-db-spec)}}]
-  (jdbc/query 
-   connection
-   ["select * from abhimata_event where event_id = ?" id]
-   :result-set-fn first))
-
 
 (defn get-participants-pdf [id]
   (let [participants (:participants (:body (get-participants id)))
@@ -129,15 +137,7 @@
        (resp/response
         (jdbc/delete! tr-con :abhimata_event ["event_id = ?" event_id]))))))
 
-(defn make-event []
-  (resp/response (jdbc/insert! (config/get-db-spec) :abhimata_event schemas/default-event)))
-
-(defn fetch-admin-credentials [username]
-  "Fetches admin credentials in the form expected by friend's
-   bcrypt-credential-fn"
-  (let [query-results (jdbc/query (config/get-db-spec) 
-                       ["select * from abhimata_admin where username = ?" 
-                        username])]
-    (if (empty? query-results) 
-      nil
-      (assoc (into {} query-results) :roles #{:admin}))))
+(defn make-event [current-auth]
+  (let [owner (:username current-auth)
+        event (assoc schemas/default-event :owner owner)]
+  (resp/response (jdbc/insert! (config/get-db-spec) :abhimata_event event))))
