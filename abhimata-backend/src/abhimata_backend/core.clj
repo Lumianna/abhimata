@@ -21,6 +21,14 @@
               [route :as route]))
   (:import java.sql.SQLException))
 
+(defn get-root-roles []
+  "The root user gets the roles of every user"
+  (let [usernames (jdbc/query (config/get-db-spec)
+                              ["select username from abhimata_admin"])
+        get-role (fn [x] (keyword (:username x)))]
+
+    (into #{:root :admin} (map get-role usernames))))
+
 (defn fetch-admin-credentials [username]
   "Fetches admin credentials in the form expected by friend's
    bcrypt-credential-fn"
@@ -30,7 +38,9 @@
                        :result-set-fn first)]
     (if-not user
       nil
-      (assoc user :roles #{:admin (keyword username)}))))
+      (if (= username "root")
+        (assoc user :roles (get-root-roles))
+        (assoc user :roles #{:admin (keyword username)})))))
 
 (defn add-user [username password]
   "Adds user to abhimata_admin"
@@ -41,9 +51,7 @@
 (defn event-id-routes [id]
   (routes
    (GET "/" [] (events/get-full-event-data id) )
-   (friend/wrap-authorize
-    (DELETE "/" [] (events/delete-event id))
-    #{ :root })
+   (DELETE "/" [] (friend/authorize #{:root} (events/delete-event id)))
    (POST "/" {event-data :json-params} (events/save-event id event-data))
    (GET "/participants" [] (events/get-participants id))
    (POST "/participants/:registration_id"

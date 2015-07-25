@@ -62,12 +62,15 @@
 
 
 (defn get-events-private [current-auth]
-  (let [owner (:username current-auth)]
+  (let [owner (:username current-auth)
+        query-str (if (= owner "root")
+                    ["select * from abhimata_event"]
+                    [(str "select * from abhimata_event "
+                          "where owner = ?") owner])]
     (resp/response
      (map (partial unstringify-json-field :registration_form)
           (jdbc/query (config/get-db-spec)
-                      [(str "select * from abhimata_event "
-                            "where owner = ?") owner])))))
+                      query-str)))))
 
 (defn get-participants [id & {:keys [connection]
                               :or {connection (config/get-db-spec)}}]
