@@ -10,6 +10,7 @@ var RRBootstrap = require('react-router-bootstrap');
 
 var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
 var EventActions = require('../actions/EventActions.js');
+var AuthActions = require('../actions/AuthActions.js');
 var EventDraftStore = require('../stores/EventDraftStore.js');
 
 var EditableForm = require('../components/editableform.jsx');
@@ -112,6 +113,9 @@ var EventSettingsLinks = React.createClass({
               <RRBootstrap.NavItemLink to="delete" params={linkParams}>
                 Delete event 
               </RRBootstrap.NavItemLink>
+              <Bootstrap.NavItem onSelect={AuthActions.logout}>
+                Log out
+              </Bootstrap.NavItem>
         </Bootstrap.Nav>
       </Bootstrap.Navbar> );
   }

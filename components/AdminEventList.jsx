@@ -9,6 +9,7 @@ var RRBootstrap = require('react-router-bootstrap');
 var $ = require('jquery');
 var _ = require('lodash');
 var EventActions = require('../actions/EventActions.js');
+var AuthActions = require('../actions/AuthActions.js');
 var PrivateEventStore = require('../stores/PrivateEventStore.js');
 
 var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
@@ -61,7 +62,11 @@ var AdminEventList = React.createClass({
                           bsStyle="primary">
           Create new event
         </Bootstrap.Button>
-      </div>);
+        <Bootstrap.Button onClick={AuthActions.logout}>
+          Log out
+        </Bootstrap.Button>
+      </div>
+    );
   }
 });
 

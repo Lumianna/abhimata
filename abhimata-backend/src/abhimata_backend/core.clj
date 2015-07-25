@@ -24,12 +24,13 @@
 (defn fetch-admin-credentials [username]
   "Fetches admin credentials in the form expected by friend's
    bcrypt-credential-fn"
-  (let [query-results (jdbc/query (config/get-db-spec) 
+  (let [user (jdbc/query (config/get-db-spec) 
                        ["select * from abhimata_admin where username = ?" 
-                        username])]
-    (if (empty? query-results) 
+                        username]
+                       :result-set-fn first)]
+    (if-not user
       nil
-      (assoc (into {} query-results) :roles #{:admin (keyword username)}))))
+      (assoc user :roles #{:admin (keyword username)}))))
 
 (defn add-user [username password]
   "Adds user to abhimata_admin"
@@ -40,7 +41,9 @@
 (defn event-id-routes [id]
   (routes
    (GET "/" [] (events/get-full-event-data id) )
-   (DELETE "/" [] (events/delete-event id) )
+   (friend/wrap-authorize
+    (DELETE "/" [] (events/delete-event id))
+    #{ :root })
    (POST "/" {event-data :json-params} (events/save-event id event-data))
    (GET "/participants" [] (events/get-participants id))
    (POST "/participants/:registration_id"

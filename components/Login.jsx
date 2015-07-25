@@ -1,6 +1,8 @@
 var Router = require('react-router');
 var React = require('react');
 
+var Bootstrap = require('react-bootstrap');
+
 var AuthStore = require('../stores/AuthStore.js');
 var AuthActions = require('../actions/AuthActions.js');
 
@@ -52,14 +54,26 @@ var Login = React.createClass({
     }
     
     return (
-      <form onSubmit={this.preventDefault}>
-        {errorMessage}
-        <input type="text" placeholder="Username" 
-               value={this.state.username} onChange={this.updateUsername}/>
-        <input type="password" placeholder="Password" 
-               value={this.state.password} onChange={this.updatePassword}/>
-        <button type="submit" onClick={this.login}>Log in</button> 
-      </form> );
+      <div>
+        <h1>Abhimata</h1>
+        <form onSubmit={this.preventDefault}>
+          {errorMessage}
+          <Bootstrap.Input type="text"
+                           placeholder="Username" 
+                           value={this.state.username}
+                           onChange={this.updateUsername}/>
+          <Bootstrap.Input type="password"
+                           placeholder="Password" 
+                           value={this.state.password}
+                           onChange={this.updatePassword}/>
+          <Bootstrap.Button type="submit"
+                            bsStyle="primary"
+                            onClick={this.login}>
+            Log in
+          </Bootstrap.Button> 
+        </form> 
+      </div>
+    );
     
   }
 });
