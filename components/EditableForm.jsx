@@ -37,36 +37,41 @@ var GeneralEditControls = React.createClass({
   },
 
   render: function() {
-    var deletableOnlyControls = null;
+    var deleteButton = null;
+    var isOptionalCheckbox = null;
     if(this.props.element.isDeletable) {
-      deletableOnlyControls = (
-        <div>
-          <Bootstrap.Button onClick={this.deleteQuestion}>
-            Delete question
-          </Bootstrap.Button>
-          <Bootstrap.Input type="checkbox" 
-                           label="Answering is optional"
-                           onChange={this.handleIsOptionalChange}
-                           checked={this.props.element.isResponseOptional}/>
-        </div>
+      deleteButton = (
+        <Bootstrap.Button onClick={this.deleteQuestion}>
+          Delete
+        </Bootstrap.Button>
+      );
+
+      isOptionalCheckbox = (
+        <Bootstrap.Input type="checkbox" 
+                         label="Answering is optional"
+                         onChange={this.handleIsOptionalChange}
+                         checked={this.props.element.isResponseOptional}/>
       );
     }
 
     return (
-      <div>
+      <div className="general-edit-controls">
         <Bootstrap.Input type="text"
                          label="Question title"
                          onChange={this.handleTitleChange} 
                          value={this.props.element.label}/>
-        <Bootstrap.Button className="move-question-button"
+        {isOptionalCheckbox}
+        <div className="buttons">
+          <Bootstrap.Button className="move-question-up"
                           onClick={this.moveUp}>
-          Move question up
-        </Bootstrap.Button>
-        <Bootstrap.Button className="move-question-button"
-                          onClick={this.moveDown}>
-          Move question down
-        </Bootstrap.Button>
-        {deletableOnlyControls}
+            Up
+          </Bootstrap.Button>
+          <Bootstrap.Button className="move-question-down"
+                            onClick={this.moveDown}>
+            Down
+          </Bootstrap.Button>
+          {deleteButton}
+        </div>
       </div> 
     );
   }

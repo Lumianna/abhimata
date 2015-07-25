@@ -46,7 +46,7 @@
     color: @error-color;
   }
  
-  .editable-form .error {
+  .event-registration .form-question .error {
     position: relative;
     top: -10px;
   }
@@ -72,16 +72,32 @@
     }
     
     .preview {
-      max-width: 300px;
+      //max-width: 300px;
+      padding-right: 10px;
+      width: 33%;
       overflow: hidden;
     }
 
     
     .edit-controls {
+      width: 66%;
       border-left: 1px solid black;
-      margin-left: 20px;
       padding-left: 10px;
       vertical-align: top;
+
+      .general-edit-controls {
+        padding-top: 20px;
+        position: relative;
+        width: 100%;
+
+        .buttons {
+          display: flex;
+          position: absolute;
+          right: 0;
+          top: 0;
+        }
+      }
+
     }
   }
 

@@ -55,9 +55,6 @@ var addQuestion = function(form, type, index) {
   form.questions[key] = newQuestion;
   form.order.push(key);
 
-  console.log(type);
-  console.log(index);
-
   if(_.isNumber(index)) {
     moveQuestion(form, key, index);
   }
