@@ -96,10 +96,13 @@ var RegistrationStatus = React.createClass({
 
     if(this.state.status === itemStatus.NOT_AVAILABLE) {
       return (
-        <p className="error"> No registration corresponding to the code 
-          {" " + this.getParams().uuid} was found. Either the code is invalid or
-          there was a problem with the server. Please try again
-          later or contact the event managers. </p>
+        <div>
+          <h1>Registration not found</h1>
+          <p className="error"> No registration corresponding to the code 
+            {" " + this.getParams().uuid} was found. Either the code is invalid or
+            there was a problem with the server. Please try again
+            later or contact the event managers. </p>
+        </div>
       );
     }
 

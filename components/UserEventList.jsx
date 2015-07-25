@@ -8,6 +8,8 @@ var _ = require('lodash');
 var EventActions = require('../actions/EventActions.js');
 var PublicEventStore = require('../stores/PublicEventStore.js');
 
+var Bootstrap = require('react-bootstrap');
+
 var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
 
 var UserEventList = React.createClass({
@@ -68,7 +70,7 @@ var UserEventList = React.createClass({
     return ( 
       <div>
         <h1>Events</h1>
-        <table>
+        <Bootstrap.Table responsive>
           <thead>
             <tr>
               <th>Event name</th>
@@ -79,7 +81,7 @@ var UserEventList = React.createClass({
           <tbody>
             {events}
           </tbody>
-        </table>
+        </Bootstrap.Table>
       </div>
     );
   }

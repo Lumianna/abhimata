@@ -344,7 +344,7 @@ var EditableForm = React.createClass({
     }.bind(this));
 
     return (
-      <div className="editableForm"> 
+      <div className="editable-form"> 
         {components}
       </div>
     );

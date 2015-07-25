@@ -3,6 +3,9 @@ var React = require('react');
 var Router = require('react-router');
 var Link = Router.Link;
 
+var Bootstrap = require('react-bootstrap');
+var RRBootstrap = require('react-router-bootstrap');
+
 var $ = require('jquery');
 var _ = require('lodash');
 var EventActions = require('../actions/EventActions.js');
@@ -41,19 +44,23 @@ var AdminEventList = React.createClass({
   render: function() {
     var eventTitles = _.map(this.state.events, function(event) {
       return ( 
-        <li key={event.event_id}> 
-          <Link to="event" 
-                params={{eventId: event.event_id}}> 
-          {event.title} 
-          </Link> 
-        </li> );
+          <RRBootstrap.ListGroupItemLink to="event" 
+                                       key={event.event_id}
+                                       params={{eventId: event.event_id}}> 
+            {event.title} 
+          </RRBootstrap.ListGroupItemLink> );
     });
 
     return ( 
       <div>
         <h1>Events</h1>
-        <ul>{eventTitles}</ul> 
-        <button onClick={this.createNewEvent}>Create new event</button>
+        <Bootstrap.ListGroup>
+          {eventTitles}
+        </Bootstrap.ListGroup> 
+        <Bootstrap.Button onClick={this.createNewEvent}
+                          bsStyle="primary">
+          Create new event
+        </Bootstrap.Button>
       </div>);
   }
 });
