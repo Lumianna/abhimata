@@ -55,7 +55,9 @@ function renderStatuses(statusData) {
   });
 
   return (
-    {statusItems}
+    <div>
+      {statusItems}
+    </div>
   );
 }
   
