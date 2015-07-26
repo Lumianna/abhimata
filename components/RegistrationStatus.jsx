@@ -30,7 +30,6 @@ var STATUSES = {
 };
 
 function renderStatuses(statusData) {
-  console.log(statusData);
   var statusItems = _.map(statusData, function(statusIsOk, status) {
     var statusConfig = STATUSES[status];
     if(!statusConfig || !statusData.event[statusConfig.showIf]) {
@@ -137,6 +136,37 @@ var RegistrationStatus = React.createClass({
       );
     }
 
+    var emailButtonText;
+
+    if(this.state.status.cancellationEmailSent) {
+      emailButtonText = "Cancellation link emailed!";
+    } else if(this.state.status.cancellationEmailRequestPending) {
+      emailButtonText = "Emailing...";
+    } else {
+      emailButtonText = "Email cancellation link";
+    }
+
+    var buttonDisabled = this.state.status.cancellationEmailRequestPending ||
+                         this.state.status.cancellationEmailSent;
+
+    var cancellationLinkButton = (
+      <Bootstrap.Button onClick={this.requestCancellationEmail}
+                        disabled={buttonDisabled}
+                        bsStyle="primary">
+        {emailButtonText}
+      </Bootstrap.Button>
+    );
+
+    var cancellationEmailError = null;
+
+    if(this.state.status.cancellationEmailError) {
+      cancellationEmailError = (
+        <Bootstrap.Alert bsStyle="danger">
+          {this.state.status.cancellationEmailError}
+        </Bootstrap.Alert>
+      );
+    }
+
     return (
       <div>
         <h1>The status of your application</h1>
@@ -146,10 +176,8 @@ var RegistrationStatus = React.createClass({
 
         <h2>Cancelling your registration</h2>
         <p>If you cannot participate in the event, you can cancel your application by clicking on the button below. An email will be sent to the email address you used to register with a link that you can use to cancel your application.</p>
-        <Bootstrap.Button onClick={this.requestCancellationEmail}
-                          bsStyle="primary">
-          Email cancellation link
-        </Bootstrap.Button>
+        {cancellationEmailError}
+        {cancellationLinkButton}
       </div>
     );
   }

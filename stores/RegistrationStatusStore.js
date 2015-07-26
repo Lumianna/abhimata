@@ -39,10 +39,18 @@ RegistrationStatusStore.prototype.onRequestCancellationEmailSucceeded = function
   }
 };
 
-RegistrationStatusStore.prototype.onRequestCancellationEmailSucceeded = function(payload) {
-  if(_info[payload.uuid]) {
-    _info[payload.uuid].cancellationEmailRequestPending = false;
-    _info[payload.uuid].cancellationEmailError = payload.errorMessage;
+RegistrationStatusStore.prototype.onRequestCancellationEmailFailed = function(payload) {
+  var status = _info[payload.uuid];
+  if(status) {
+    var message = payload.errorMessage;
+
+    status.cancellationEmailRequestPending = false;
+    if(message.responseText) {
+      status.cancellationEmailError = message.responseText +
+        " (" + message.status + " " + message.statusText + ")";
+    } else {
+      status.cancellationEmailError = "Could not connect to the server. If your internet connection is working, the server might be down. Try again later.";
+    }
   }
 };
 

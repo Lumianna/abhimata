@@ -133,7 +133,6 @@ EventApplicationStore.prototype.onSubmitFailed = function(payload) {
   } else {
     draft.serverError = "Could not connect to the server. If your internet connection is working, the server might be down. You can try to press the submit button again later.";
   }
-  console.log(payload);
 };
 
 
