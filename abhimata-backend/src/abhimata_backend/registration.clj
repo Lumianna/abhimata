@@ -33,16 +33,6 @@
 (defn make-cancellation-url [uuid]
   (str (:url (config/get-config)) "/cancel/" uuid))
 
-#_(defn send-cancellation-email! [user-email event_id uuid]
-  (let [event (events/get-event-by-id event_id)]
-    (email/send-email! 
-     {:to user-email,
-      :subject "If you need to cancel your registration"
-      :body (str "To cancel your registration for the event\""
-                 (:title event) "\", please use this link:" 
-                 (make-cancellation-url uuid) " . Do not share this link "
-                 "with anyone else.")})))
-
 (defn request-cancellation-email! [verification-uuid]
   (let [registration (jdbc/query
                       (config/get-db-spec)
