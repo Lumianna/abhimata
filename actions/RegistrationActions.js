@@ -21,8 +21,11 @@ function RegistrationActions() {
   );
 }
 
-RegistrationActions.prototype.submit = function (event_id, draft) {
-  this.dispatch(draft);
+RegistrationActions.prototype.submit = function (event_id) {
+  this.dispatch(event_id);
+
+  var EventApplicationStore = require('../stores/EventApplicationStore.js');
+  var draft = EventApplicationStore.getDraft(event_id);
   
   var answers = _.mapValues(draft.questions, function(question) {
     return question.value;

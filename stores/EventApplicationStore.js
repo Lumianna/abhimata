@@ -107,9 +107,17 @@ EventApplicationStore.prototype.onRequestPublicEventSucceeded = function(payload
 };
 
 
+EventApplicationStore.prototype.onSubmit = function(event_id) {
+  var draft = _applications[event_id];
+  console.log(_applications);
+  draft.submitting = true;
+};
+
+
 EventApplicationStore.prototype.onSubmitSucceeded = function(payload) {
   var draft = _applications[payload.event_id];
 
+  draft.submitting = false;
   draft.submissionComplete = true;
   draft.serverError = null;
 };
@@ -117,7 +125,15 @@ EventApplicationStore.prototype.onSubmitSucceeded = function(payload) {
 EventApplicationStore.prototype.onSubmitFailed = function(payload) {
   var draft = _applications[payload.event_id];
 
-  draft.serverError = payload.errorMessage;
+  draft.submitting = false;
+  var message = payload.errorMessage;
+  if(message.responseText) {
+    draft.serverError = message.responseText +
+      " (" + message.status + " " + message.statusText + ")";
+  } else {
+    draft.serverError = "Could not connect to the server. If your internet connection is working, the server might be down. You can try to press the submit button again later.";
+  }
+  console.log(payload);
 };
 
 

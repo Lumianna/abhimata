@@ -245,7 +245,7 @@ var EventRegistration = React.createClass({
   },
 
   submit: function() {
-    RegistrationActions.submit(this.state.event_id, this.state.draft);
+    RegistrationActions.submit(this.state.event_id);
   },
 
   render: function() {
@@ -271,13 +271,18 @@ var EventRegistration = React.createClass({
       );
     }
                     
-    var disabled = _.any(this.state.draft.questions, "error");
+    var disabled = _.any(this.state.draft.questions, "error") ||
+                   this.state.draft.submitting;
     var content;
     var serverError = this.state.draft.serverError;
     var alreadySubmitted = this.state.draft.submissionComplete;
 
     if (serverError) {
-      serverError = (<p className="error"> {serverError} </p>);
+      serverError = (
+        <Bootstrap.Alert bsStyle="danger">
+          {serverError}
+        </Bootstrap.Alert>
+      );
     }
     
     if(alreadySubmitted) {
@@ -295,7 +300,7 @@ var EventRegistration = React.createClass({
       <Bootstrap.Button disabled={disabled}
                         bsStyle="primary"
                         onClick={this.submit}>
-        Submit application
+        {this.state.draft.submitting ? "Submitting..." : "Submit application"}
       </Bootstrap.Button>
     );
 
@@ -314,8 +319,8 @@ var EventRegistration = React.createClass({
           {signup}
           <em>{this.state.event.title}</em>
         </h1> 
-        {serverError}
         {content}
+        {serverError}
         {this.state.draft.submissionComplete ? null : submissionButton}
       </div>
     );
