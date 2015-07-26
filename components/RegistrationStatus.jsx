@@ -111,6 +111,15 @@ var RegistrationStatus = React.createClass({
       <em>{event.title}</em>
     );
     
+    if(this.state.status.alreadyCancelled) {
+      return (
+        <div>
+          <h1>The status of your application</h1>
+          Your registration for the event {eventTitle} has been cancelled. If you didn't cancel the registration yourself and still want to participate in the event, please contact the event organizers.
+        </div>
+      );
+    }
+
     var intro;
     if(this.state.status.onWaitingList) {
       intro = (
@@ -167,6 +176,7 @@ var RegistrationStatus = React.createClass({
       );
     }
 
+    console.log(this.state);
     return (
       <div>
         <h1>The status of your application</h1>
