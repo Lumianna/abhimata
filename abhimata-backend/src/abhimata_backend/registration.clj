@@ -60,6 +60,12 @@
     :subject "Please verify your email address"
     :body (str "Please click on the following link to verify your email address: " (make-registration-status-url email-uuid) )}))
 
+(defn close-registration! [tr-con event_id]
+  "Closes registration for the event"
+  (jdbc/update! tr-con :abhimata_event
+                {:registration_open false}
+                ["event_id = ?" event_id]))
+
 (defn insert-registration! [event_id registration]
   "If the event has open slots or room on the waiting list, inserts registration
    with the appropriate waiting list status. Uses a serializable transaction to
@@ -73,10 +79,15 @@
    (jdbc/with-db-transaction [tr-con (config/get-db-spec) :isolation :serializable]
      (let [event (events/get-event-by-id event_id :connection tr-con)
            participants (:body (events/get-participants event_id :connection tr-con))
-           event-full (>= (count (:participants participants))
-                          (:max_participants event))
-           waiting-list-full (>= (count (:waitingList participants))
-                                 (:max_waiting_list_length event))
+           event-places (- (:max_participants event)
+                          (count (:participants participants)))
+           event-full (<= event-places 0)
+           waiting-list-places (- (:max_waiting_list_length event)
+                                  (count (:waitingList participants)))
+           waiting-list-full (<= waiting-list-places 0)
+           exactly-one-place-left (or (and event-full (= waiting-list-places 1))
+                                      (and (= event-places 1)
+                                           waiting-list-full))
            registration (assoc registration :on_waiting_list event-full)]
        (if (or (not (:registration_open event))
                (and event-full waiting-list-full))
@@ -84,7 +95,10 @@
          (if-let [insert-result
                   (first
                    (jdbc/insert! tr-con :abhimata_registration registration))]
-           (assoc registration :registration_id insert-result)
+           (do
+             (when exactly-one-place-left
+               (close-registration! tr-con event_id))
+             (assoc registration :registration_id insert-result))
            nil))))))
 
 (defn register-for-event! [submission-data]
@@ -160,7 +174,7 @@ corresponding to that code (or a 404 if no such registration is found)."
      :body "No registration matching that cancellation code was found."}))
 
 (defn send-waiting-list-promotion-email!
-  [{:keys [event_id email cancellation_code] :as registration} conn]
+  [{:keys [event_id email email_verification_code] :as registration} conn]
   (let [event (events/get-event-by-id event_id :connection conn)]
     (email/send-email! 
      {:to email,
@@ -169,10 +183,10 @@ corresponding to that code (or a 404 if no such registration is found)."
       (str "A place in the event \"" (:title event) "\" is now available")
       :body (str "You signed up for the waiting list of the event \""
                  (:title event) "\". Due to a cancellation, a place in the "
-                 "event is now available and reserved for you. If you do not "
-                 "wish to participate, please cancel your registration using "
-                 "this link so that we can offer your place to someone else: "
-                 (make-cancellation-url cancellation_code))})))
+                 "event is now available and reserved for you. To see the "
+                 "status of your application, or to cancel your registration "
+                 "if you are unable to participate, use this link: "
+                 (make-registration-status-url email_verification_code))})))
 
 (defn promote-first-on-waiting-list! [event_id tr-con]
   "Takes the first person on the waiting list, sets their waiting list 
