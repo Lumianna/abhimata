@@ -47,7 +47,7 @@ var MovementControls = React.createClass({
     }
 
     return (
-      <div className="buttons">
+      <div className="movement-controls">
         <Bootstrap.Button className="move-question-up"
                           onClick={this.moveUp}>
           Up
@@ -326,13 +326,16 @@ var Paragraph = React.createClass({
           <p>{this.props.element.content}</p>
         </div>
         <div className="edit-controls">
-          <Bootstrap.Input type="textarea"
-                           value={this.props.element.content}
-                           onChange={this.handleContentChange}
-                           rows="4"/>
-          <MovementControls element={this.props.element} 
-                            moveQuestion={this.props.moveQuestion}
-                            deleteQuestion={this.props.deleteQuestion}/> 
+          <div className="general-edit-controls">
+            <Bootstrap.Input type="textarea"
+                             label="Paragraph content"
+                             value={this.props.element.content}
+                             onChange={this.handleContentChange}
+                             rows="4"/>
+            <MovementControls element={this.props.element} 
+                              moveQuestion={this.props.moveQuestion}
+                              deleteQuestion={this.props.deleteQuestion}/> 
+          </div>
         </div>
       </div> );
 
@@ -378,6 +381,8 @@ var EditableForm = React.createClass({
         case "paragraph":
           component = (
             <Paragraph element={elem}
+                       deleteQuestion={this.props.deleteQuestion}
+                       moveQuestion={this.props.moveQuestion}
                        onEdit={onEdit} />
           );
           break;
