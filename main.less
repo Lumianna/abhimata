@@ -45,7 +45,14 @@
   .error {
     color: @error-color;
   }
- 
+
+  .has-error .control-label,
+  .has-error .help-block,
+  .has-error .form-control {
+    color: @error-color;
+    border-color: @error-color;
+  }
+
   .event-registration .form-question .error {
     position: relative;
     top: -10px;

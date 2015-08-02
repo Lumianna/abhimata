@@ -36,7 +36,7 @@ function makeDraft(event) {
 
     draft.questions[question.key] = {
       value: response,
-      error: question.isResponseOptional ? null : ERR_ANSWER_REQUIRED,
+      error: null,
       question: question,
     };
   });
@@ -83,12 +83,25 @@ function EventApplicationStore() {
   });
 }
 
-EventApplicationStore.prototype.onUpdateApplicationAnswer = function(payload) {
+EventApplicationStore.prototype.onUpdateAnswer = function(payload) {
   var draft = _applications[payload.event_id];
 
   var question = draft.questions[payload.key];
   question.value = payload.value;
+};
+
+EventApplicationStore.prototype.onValidateAnswer = function(payload) {
+  var draft = _applications[payload.event_id];
+
+  var question = draft.questions[payload.key];
   question.error = getAnswerErrorState(question);
+};
+
+EventApplicationStore.prototype.onClearAnswerError = function(payload) {
+  var draft = _applications[payload.event_id];
+
+  var question = draft.questions[payload.key];
+  question.error = null;
 };
 
 EventApplicationStore.prototype.onRequestPublicEventListSucceeded = function(payload) {
@@ -109,8 +122,14 @@ EventApplicationStore.prototype.onRequestPublicEventSucceeded = function(payload
 
 EventApplicationStore.prototype.onSubmit = function(event_id) {
   var draft = _applications[event_id];
-  console.log(_applications);
-  draft.submitting = true;
+
+  _.each(draft.questions, function(question) {
+    question.error = getAnswerErrorState(question);
+  });
+
+  if(!_.any(draft.questions, "error")) {
+    draft.submitting = true;
+  }
 };
 
 

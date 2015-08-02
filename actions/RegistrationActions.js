@@ -5,7 +5,9 @@ var alt = require('../alt.js');
 
 function RegistrationActions() {
   this.generateActions(
-    'updateApplicationAnswer',
+    'updateAnswer',
+    'validateAnswer',
+    'clearAnswerError',
     'submitSucceeded',
     'submitFailed',
     'requestCancellationInfoSucceeded',
@@ -26,6 +28,11 @@ RegistrationActions.prototype.submit = function (event_id) {
 
   var EventApplicationStore = require('../stores/EventApplicationStore.js');
   var draft = EventApplicationStore.getDraft(event_id);
+
+  // Don't submit if the store says there are still errors
+  if(!draft.submitting) {
+    return;
+  }
   
   var answers = _.mapValues(draft.questions, function(question) {
     return question.value;

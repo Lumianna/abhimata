@@ -21,6 +21,9 @@ var TextArea = React.createClass({
                        rows="4" 
                        label={this.props.label}
                        value={this.props.value}
+                       bsStyle={this.props.bsStyle}
+                       onBlur={this.props.onBlur}
+                       onFocus={this.props.onFocus}
                        onChange={this.onChange}/>
     );
   },
@@ -36,6 +39,9 @@ var TextInput = React.createClass({
       <Bootstrap.Input type="text" 
                        label={this.props.label}
                        value={this.props.value}
+                       bsStyle={this.props.bsStyle}
+                       onBlur={this.props.onBlur}
+                       onFocus={this.props.onFocus}
                        onChange={this.onChange}/>
     );
   },
@@ -108,7 +114,7 @@ var RadioGroup = React.createClass({
 });
 
 
-function renderForm(state, updateFunc) {
+function renderForm(state, updateFunc, validateFunc, clearErrorFunc) {
   if(!state.draft.questions) {
     return null;
   }
@@ -133,50 +139,61 @@ function renderForm(state, updateFunc) {
         </label> 
     );
 
-    var onChange = updateFunc.bind(null, question.key);
+    var update = updateFunc.bind(null, question.key);
+    var validate = validateFunc.bind(null, question.key);
+    var clearError = clearErrorFunc.bind(null, question.key);
+    var updateAndValidate = function(value) {
+      updateFunc(question.key, value);
+      validateFunc(question.key);
+    };
+    
     var input;
-    var bsStyle = null; //state.draft.questions[key].error ? "error" : null;
+    var bsStyle = state.draft.questions[key].error ? "error" : null;
     switch(question.type) {
-      case  "textarea" :
+      case  "textarea":
         label = null;
         input = (
           <TextArea label={labelText}
                     bsStyle={bsStyle}
                     value={state.draft.questions[key].value}
-                    onChange={onChange}/>
+                    onBlur={validate}
+                    onFocus={clearError}
+                    onChange={update}/>
         );
         break;
 
-      case  "text" :
+      case  "text":
         label = null;
         input = ( 
           <TextInput label={question.label + isRequired}
                      bsStyle={bsStyle}
                      value={state.draft.questions[key].value}
-                     onChange={onChange}/>
+                     onBlur={validate}
+                     onFocus={clearError}
+                     onChange={update}/>
         );
         break;
 
-      case "radio" :
+      case "radio":
         input = ( 
           <RadioGroup alternatives={question.alternatives}
                       value={state.draft.questions[key].value}
                       id={id}
-                      onChange={onChange}/>
+                      onChange={updateAndValidate}/>
         );
         break;
         
-      case "checkbox" :
+      case "checkbox":
         input = ( 
           <CheckboxGroup alternatives={question.alternatives}
                          value={state.draft.questions[key].value}
                          id={id}
-                         onChange={onChange}/>
+                         onChange={updateAndValidate}/>
 
         );
         break;
 
-      default :
+      default:
         console.log("Warning: unrecognized editable form element");
         return null;
     }
@@ -237,10 +254,24 @@ var EventRegistration = React.createClass({
   },
 
   updateAnswer: function(key, value) {
-    RegistrationActions.updateApplicationAnswer({
+    RegistrationActions.updateAnswer({
       event_id: this.state.event_id,
       key: key,
       value: value
+    });
+  },
+
+  validateAnswer: function(key) {
+    RegistrationActions.validateAnswer({
+      event_id: this.state.event_id,
+      key: key,
+    });
+  },
+
+  clearAnswerError: function(key) {
+    RegistrationActions.clearAnswerError({
+      event_id: this.state.event_id,
+      key: key,
     });
   },
 
@@ -293,7 +324,8 @@ var EventRegistration = React.createClass({
       );
     }
     else {
-      content = renderForm(this.state, this.updateAnswer);
+      content = renderForm(this.state, this.updateAnswer,
+                           this.validateAnswer, this.clearAnswerError);
     }
     
     var submissionButton = (
