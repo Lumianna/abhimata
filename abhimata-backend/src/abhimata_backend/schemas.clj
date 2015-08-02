@@ -45,30 +45,40 @@
    (sc/required-key "isDeletable") (sc/eq false)
    (sc/required-key "isResponseOptional") (sc/eq false)})
 
-(sc/defschema GenericField
-  "All fields have these keys, and 'text' and 'textarea' fields
-   currently have no other keys."
+(sc/defschema GenericElement
+  "All form elements have these keys."
   {(sc/required-key "key") PosInt
    (sc/required-key "type") sc/Str
    (sc/required-key "index") NonNegInt
-   (sc/required-key "label") sc/Str
-   (sc/required-key "isDeletable") sc/Bool
-   (sc/required-key "isResponseOptional") sc/Bool})
+   (sc/required-key "isDeletable") sc/Bool})
 
-(sc/defschema EnumField
+(sc/defschema GenericQuestion
+  "All questions have these fields"
+  (assoc
+   GenericElement
+   (sc/required-key "label") sc/Str
+   (sc/required-key "isResponseOptional") sc/Bool))
+         
+(sc/defschema EnumQuestion
   "Field whose values come from a certain set of strings
    (currently radio groups and checkbox groups)"
-  (assoc GenericField
-    (sc/required-key "alternatives") [sc/Str]))
+  (assoc GenericQuestion
+         (sc/required-key "alternatives") [sc/Str]))
 
+(sc/defschema Paragraph
+  "Static paragraph of text (no user interaction)"
+  (assoc
+   GenericElement
+   (sc/required-key "content") sc/Str))
 
 (sc/defschema RegistrationFormField
   "Schema for a registration form field."
   (sc/conditional
-    (fn [f] (= (f "type") "text")) GenericField
-    (fn [f] (= (f "type") "textarea")) GenericField
-    (fn [f] (= (f "type") "radio")) EnumField
-    (fn [f] (= (f "type") "checkbox")) EnumField))
+    (fn [f] (= (f "type") "paragraph")) Paragraph
+    (fn [f] (= (f "type") "text")) GenericQuestion
+    (fn [f] (= (f "type") "textarea")) GenericQuestion
+    (fn [f] (= (f "type") "radio")) EnumQuestion
+    (fn [f] (= (f "type") "checkbox")) EnumQuestion))
 
 (sc/defschema RegistrationForm
   "Schema for an event registration form."
@@ -102,8 +112,9 @@
    (cond
      (= type "checkbox") (make-checkbox-answer-schema alternatives)
      (= type "radio") (make-radio-answer-schema alternatives)
+     (= type "paragraph") sc/Any 
      :else sc/Str)
-   (if is-optional
+   (if (or is-optional (= type "paragraph"))
      sc/Any
      (cond
        (= type "radio") (sc/pred (fn [a] (not (= a no-radio-selected))))

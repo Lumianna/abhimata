@@ -114,7 +114,7 @@ EventDraftStore.prototype.onUpdateEmailReminder = function(payload) {
 EventDraftStore.prototype.onAddQuestion = function(payload) {
   var eventDraft = _eventDrafts[payload.event_id];
 
-  EditableForm.addQuestion(eventDraft.registration_form,
+  EditableForm.addElement(eventDraft.registration_form,
                            payload.questionType,
                            payload.index);
   eventDraft.hasUnsavedChanges = true;
@@ -130,7 +130,7 @@ EventDraftStore.prototype.onUpdateQuestionProperty = function(payload) {
 EventDraftStore.prototype.onDeleteQuestion = function(payload) {
   var eventDraft = _eventDrafts[payload.event_id];
 
-  EditableForm.deleteQuestion(eventDraft.registration_form,
+  EditableForm.deleteElement(eventDraft.registration_form,
                               payload.key);
   eventDraft.hasUnsavedChanges = true;
 };
@@ -138,7 +138,7 @@ EventDraftStore.prototype.onDeleteQuestion = function(payload) {
 EventDraftStore.prototype.onMoveQuestion = function(payload) {
   var eventDraft = _eventDrafts[payload.event_id];
 
-  EditableForm.moveQuestion(eventDraft.registration_form, 
+  EditableForm.moveElement(eventDraft.registration_form, 
                              payload.key, payload.toIndex);
   eventDraft.hasUnsavedChanges = true;
 };

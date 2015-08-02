@@ -2,18 +2,27 @@ var React = require('react');
 var Bootstrap = require('react-bootstrap');
 
 var recognizedFormElements = [
-  { type : "text", 
-    description : "Small textbox"},
-  { type : "textarea", 
+  {
+    type: "text", 
+    description : "Small textbox"
+  },
+  {
+    type: "textarea", 
     description : "Big textbox"},
-  { type : "radio", 
+  {
+    type: "radio", 
     description : "Radio button" },
-  { type : "checkbox", 
-    description : "Checkbox" }
+  {
+    type: "checkbox", 
+    description : "Checkbox" },
+  {
+    type: "paragraph",
+    description: "Paragraph"
+  }
 ]; 
 
-var GeneralEditControls = React.createClass({
-  deleteQuestion: function() {
+var MovementControls = React.createClass({
+   deleteQuestion: function() {
     this.props.deleteQuestion(this.props.element.key);
   },
 
@@ -26,6 +35,34 @@ var GeneralEditControls = React.createClass({
     this.props.moveQuestion(this.props.element.key, 
                             this.props.element.index + 1);
   },
+ 
+  render: function() {
+    var deleteButton = null;
+    if(this.props.element.isDeletable) {
+      deleteButton = (
+        <Bootstrap.Button onClick={this.deleteQuestion}>
+          Delete
+        </Bootstrap.Button>
+      );
+    }
+
+    return (
+      <div className="buttons">
+        <Bootstrap.Button className="move-question-up"
+                          onClick={this.moveUp}>
+          Up
+        </Bootstrap.Button>
+        <Bootstrap.Button className="move-question-down"
+                          onClick={this.moveDown}>
+          Down
+        </Bootstrap.Button>
+        {deleteButton}
+      </div>
+    );
+  }
+  });
+
+var GeneralEditControls = React.createClass({
 
   handleTitleChange: function(event) {
     this.props.onEdit("label", event.target.value);
@@ -37,15 +74,8 @@ var GeneralEditControls = React.createClass({
   },
 
   render: function() {
-    var deleteButton = null;
     var isOptionalCheckbox = null;
     if(this.props.element.isDeletable) {
-      deleteButton = (
-        <Bootstrap.Button onClick={this.deleteQuestion}>
-          Delete
-        </Bootstrap.Button>
-      );
-
       isOptionalCheckbox = (
         <Bootstrap.Input type="checkbox" 
                          label="Answering is optional"
@@ -61,17 +91,9 @@ var GeneralEditControls = React.createClass({
                          onChange={this.handleTitleChange} 
                          value={this.props.element.label}/>
         {isOptionalCheckbox}
-        <div className="buttons">
-          <Bootstrap.Button className="move-question-up"
-                          onClick={this.moveUp}>
-            Up
-          </Bootstrap.Button>
-          <Bootstrap.Button className="move-question-down"
-                            onClick={this.moveDown}>
-            Down
-          </Bootstrap.Button>
-          {deleteButton}
-        </div>
+        <MovementControls element={this.props.element}
+                          deleteQuestion={this.props.deleteQuestion}
+                          moveQuestion={this.props.moveQuestion}/>
       </div> 
     );
   }
@@ -264,7 +286,7 @@ var FormElementSelector = React.createClass({
       return (
         <Bootstrap.Button className="form-element-selector closed"
                           onClick={this.open}>
-          Add new question here
+          Add new item here
         </Bootstrap.Button>
       );
     }
@@ -272,9 +294,10 @@ var FormElementSelector = React.createClass({
       var buttons = this.props.formElements.map(function(elem) {
         var clickHandler = this.addFormElement.bind(this, elem.type);
         return ( <label key={elem.type}> 
-        <Bootstrap.Button onClick={clickHandler}>
-          {elem.description}
-        </Bootstrap.Button>
+          <Bootstrap.Button onClick={clickHandler}
+                            bsStyle="primary">
+            {elem.description}
+          </Bootstrap.Button>
         </label>
         );
       }.bind(this));
@@ -292,9 +315,32 @@ var FormElementSelector = React.createClass({
   }
 });
 
+var Paragraph = React.createClass({
+  handleContentChange: function(event) {
+    this.props.onEdit("content", event.target.value);
+  },
+  render: function() {
+    return (
+      <div className="editable-paragraph editable-form-element">
+        <div className="preview">
+          <p>{this.props.element.content}</p>
+        </div>
+        <div className="edit-controls">
+          <Bootstrap.Input type="textarea"
+                           value={this.props.element.content}
+                           onChange={this.handleContentChange}
+                           rows="4"/>
+          <MovementControls element={this.props.element} 
+                            moveQuestion={this.props.moveQuestion}
+                            deleteQuestion={this.props.deleteQuestion}/> 
+        </div>
+      </div> );
+
+  }
+});
+
 
 var EditableForm = React.createClass({
-
   render: function() {
     var components = this.props.elements.map(function(elem, index) {
       var onEdit = this.props.editQuestion.bind(null, elem.key);
@@ -328,6 +374,12 @@ var EditableForm = React.createClass({
                               deleteQuestion={this.props.deleteQuestion}
                               moveQuestion={this.props.moveQuestion}
                               onEdit={onEdit} /> );
+          break;
+        case "paragraph":
+          component = (
+            <Paragraph element={elem}
+                       onEdit={onEdit} />
+          );
           break;
         default :
           console.log("Warning: unrecognized editable form element");

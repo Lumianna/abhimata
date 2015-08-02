@@ -30,6 +30,15 @@ var makeQuestion = function(type) {
   return elem;
 };
 
+var makeParagraph = function() {
+  var elem = {};
+  elem.type = "paragraph";
+  elem.content = "Content";
+  elem.isDeletable = true;
+
+  return elem;
+};
+
 
 // Generates a unique key.
 
@@ -47,28 +56,29 @@ var findIndexByKey = function(form, key) {
 // EXPOSED FUNCTIONS 
 
 
-var addQuestion = function(form, type, index) {
-  var newQuestion = makeQuestion(type);
+var addElement = function(form, type, index) {
+  var make = type === "paragraph" ? makeParagraph : makeQuestion;
+  var newElement = make(type);
   var key = nextAvailableKey(form);
-  newQuestion.key = key;
+  newElement.key = key;
   
-  form.questions[key] = newQuestion;
+  form.questions[key] = newElement;
   form.order.push(key);
 
   if(_.isNumber(index)) {
-    moveQuestion(form, key, index);
+    moveElement(form, key, index);
   }
 };
 
 
-var deleteQuestion = function(form, key) {
+var deleteElement = function(form, key) {
   delete form.questions[key];
   var index = findIndexByKey(form, key);
   form.order.splice(index, 1);
 };
 
 
-var moveQuestion = function(form, key, toIndex) {
+var moveElement = function(form, key, toIndex) {
   var fromIndex = findIndexByKey(form, key);
   
   if(toIndex !== fromIndex && toIndex >= 0 && toIndex < form.order.length)
@@ -79,7 +89,7 @@ var moveQuestion = function(form, key, toIndex) {
   
   
 module.exports = {
-  addQuestion: addQuestion,
-  deleteQuestion: deleteQuestion,
-  moveQuestion: moveQuestion,
+  addElement: addElement,
+  deleteElement: deleteElement,
+  moveElement: moveElement,
 };

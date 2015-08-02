@@ -192,6 +192,12 @@ function renderForm(state, updateFunc, validateFunc, clearErrorFunc) {
 
         );
         break;
+      case "paragraph":
+        label = null;
+        input = (
+          <p>{question.content}</p>
+        );
+        break;
 
       default:
         console.log("Warning: unrecognized editable form element");

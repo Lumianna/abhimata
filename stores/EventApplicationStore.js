@@ -23,15 +23,18 @@ function makeDraft(event) {
   _.each(event.registration_form.questions, function(question) {
     var response;
     switch(question.type) {
-      case "radio":
-        response = NO_RADIO_SELECTED;
-        break;
-      case "checkbox":
-        response = _.map(question.alternatives, function() { return false; });
-        break;
-      default:
-        response = "";
-        break;
+    case "radio":
+      response = NO_RADIO_SELECTED;
+      break;
+    case "checkbox":
+      response = _.map(question.alternatives, function() { return false; });
+      break;
+    case "paragraph":
+      response = null;
+      break;
+    default:
+      response = "";
+      break;
     }
 
     draft.questions[question.key] = {
@@ -48,7 +51,8 @@ function makeDraft(event) {
 // but could in principle check something else as well.
 
 function getAnswerErrorState(answer) {
-  if(answer.question.isResponseOptional) {
+  if(answer.question.isResponseOptional ||
+     answer.question.type === "paragraph") {
     return null;
   }
 

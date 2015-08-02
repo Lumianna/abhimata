@@ -18,6 +18,11 @@ function renderForm(registrationForm, submittedForm) {
   
   return _.map(fields, function(field) {
     var question = field.question;
+
+    if(question.type === "paragraph") {
+      return null;
+    }
+
     var key = question.key;
     var isRequired = question.isResponseOptional ? "" : " (required)";
     var header = (

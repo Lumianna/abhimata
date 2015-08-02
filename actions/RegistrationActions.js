@@ -23,7 +23,7 @@ function RegistrationActions() {
   );
 }
 
-RegistrationActions.prototype.submit = function (event_id) {
+RegistrationActions.prototype.submit = function(event_id) {
   this.dispatch(event_id);
 
   var EventApplicationStore = require('../stores/EventApplicationStore.js');
@@ -37,10 +37,13 @@ RegistrationActions.prototype.submit = function (event_id) {
   var answers = _.mapValues(draft.questions, function(question) {
     return question.value;
   });
+
   var data = { 
     event_id: event_id,
     submitted_form: answers,
   };
+
+  console.log(data);
 
   var that = this;
 

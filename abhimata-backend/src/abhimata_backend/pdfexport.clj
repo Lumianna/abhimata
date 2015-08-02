@@ -17,12 +17,15 @@
 (defn pdf-response [question response]
   (let [type (question "type")]
     (cond
+      (= type "paragraph") nil
       (= type "checkbox") (pdf-checkbox-response question response)
       (= type "radio") (pdf-radio-response question response)
       :else [:paragraph response])))
 
 (defn pdf-question [question]
-  [:heading (question "label")])
+  (if (= (question "type") "paragraph")
+    [:paragraph {:style :bold} (question "content")]
+    [:heading (question "label")]))
 
 (defn pdf-submitted-form [registration-form submitted-form]
   (let [order (registration-form "order")
