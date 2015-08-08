@@ -4,6 +4,8 @@
   :license {:name "GPL3" }
   :plugins [[cider/cider-nrepl "0.7.0-SNAPSHOT"]]
   :dependencies [[org.clojure/clojure "1.6.0"]
+                 [org.clojure/tools.logging "0.3.1"]
+                 [ch.qos.logback/logback-classic "1.1.3"]
                  [org.clojure/data.json "0.2.5"]
                  [clj-pdf "2.0.6"]
                  [org.clojure/java.jdbc "0.3.6"]

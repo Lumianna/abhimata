@@ -5,6 +5,7 @@
    [abhimata_backend.email :as email]
    [abhimata_backend.registration :as registration]
    [abhimata_backend.config :as config]
+   [clojure.tools.logging :as log]
    [cemerick.friend :as friend]
    (cemerick.friend [workflows :as workflows]
                     [credentials :as creds])
@@ -123,6 +124,7 @@
 
 (defn -main [cfgfile]
   (do
+    (log/info "Starting server")
     (config/update-config-from-file! cfgfile)
     (email/start-processing-email-action-queue!)
     (email/flush-emails!)

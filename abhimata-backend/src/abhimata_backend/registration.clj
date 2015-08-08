@@ -7,6 +7,7 @@
             [abhimata_backend.macros :as macros]
             [clojure.java.jdbc :as jdbc]
             [clojure.data.json :as json]
+            [clojure.tools.logging :as log]
             [schema.core :as sc]
             [ring.util.response :as resp]
             [ring.util.io :as ring-io]
@@ -62,9 +63,11 @@
 
 (defn close-registration! [tr-con event_id]
   "Closes registration for the event"
-  (jdbc/update! tr-con :abhimata_event
-                {:registration_open false}
-                ["event_id = ?" event_id]))
+  (do
+    (log/info "Closing registration for event " event_id)
+    (jdbc/update! tr-con :abhimata_event
+                  {:registration_open false}
+                  ["event_id = ?" event_id])))
 
 (defn insert-registration! [event_id registration]
   "If the event has open slots or room on the waiting list, inserts registration
@@ -106,6 +109,8 @@
     (let [{submitted-form "submitted_form"
            event_id "event_id"} submission-data
            registration-form (get-registration-form event_id)
+           ;; Validate the form before doing anything else; if this doesn't work,
+           ;; it's probably a bug in Abhimata
            _ (sc/validate (schemas/make-submitted-application-schema
                            registration-form)
                           submission-data)
@@ -124,12 +129,13 @@
         {:status 403
          :body "The event you tried to sign up for is either fully booked or not accepting registrations."}
         (do 
+          (log/info (str "User " user-email " registered for event " event_id))
           (send-verification-email! user-email event_id email-uuid)
           (email/flush-emails!)
           (resp/response "Your application has been successfully submitted, but you will still need to verify your email address by clicking on the link that we just emailed you."))))
     (catch SQLException e (throw e))
     (catch Exception e
-      (.printStackTrace e)
+      (log/error e (str "Exception while processing submission " submission-data))
       {:status 403
        :body "Invalid registration form (this is probably a bug in Abhimata)."})))
 
@@ -228,7 +234,8 @@ a few times."
                      " and cancelled = false")
                 uuid]
                :result-set-fn first)]
-       (let [changed-entries
+       (let [_ (log/info (str "Cancelling registration with uuid " uuid))
+             changed-entries
              (jdbc/update!
               tr-con
               :abhimata_registration

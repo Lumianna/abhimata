@@ -3,6 +3,7 @@
   (:require [abhimata_backend.config :as config]
             [abhimata_backend.macros :as macros]
             [clojure.stacktrace]
+            [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
             [clojure.data.json :as json]
             [clj-pdf.core :as pdf]
@@ -20,6 +21,7 @@
              :to email
              :body body
              :subject subject})]
+      (log/info (str "Trying to send email " email_id " to address " email))
       (if (= (:error send-result) :SUCCESS)
         (jdbc/update! (config/get-db-spec) :abhimata_email
           {:sent true}
@@ -27,7 +29,8 @@
         send-result))
     ;This should only fail if the SMTP server is down or something like that.
     ;In that case sending the message will just be retried later.
-    (catch Exception e (clojure.stacktrace/print-stack-trace e))))
+    (catch Exception e
+      (log/error e (str "could not send email " email_id )))))
 
 
 ;; To make sure that no email gets sent twice, emails are sent by a dedicated
@@ -51,6 +54,7 @@
 
 (defn flush-emails! []
   (do
+    (log/info "Flushing emails")
     (.put email-action-queue :plz-send)))
 
 (defn- send-unsent-emails! []
