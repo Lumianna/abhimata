@@ -37,7 +37,7 @@ create table abhimata_registration
   submitted_form text not null,
   submission_date timestamp with time zone not null,
 --  tentatively_accepted boolean not null,
-  on_waiting_list boolean not null,
+  notified_of_waiting_list_promotion boolean not null,
   cancelled boolean not null,
   application_screened boolean not null,
   deposit_paid boolean not null,

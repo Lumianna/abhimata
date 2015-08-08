@@ -72,18 +72,22 @@
           (jdbc/query (config/get-db-spec)
                       query-str)))))
 
-(defn get-participants [id & {:keys [connection]
+(defn get-participants [event_id & {:keys [connection]
                               :or {connection (config/get-db-spec)}}]
-  (let [applications
+  (let [event_id (Integer. event_id) 
+        event (get-event-by-id event_id :connection connection)
+        max_participants (:max_participants event)
+        applications
         (map (partial unstringify-json-field :submitted_form)
              (jdbc/query
               connection 
-              ["select * from abhimata_registration where event_id = ?" 
-               (Integer. id)]))
+              [(str "select * from abhimata_registration where event_id = ? "
+                    "order by submission_date, registration_id")
+               (Integer. event_id)]))
         {not-cancelled false cancelled true}
         (group-by :cancelled applications)
-        {participants false waiting-list true}
-        (group-by :on_waiting_list not-cancelled)]
+        participants (take max_participants not-cancelled)
+        waiting-list (drop max_participants not-cancelled)]
         
   (resp/response
    {:participants (vec participants)
@@ -117,18 +121,21 @@
        :body (str "Event " id " does not exist.")})))
 
 
-(defn save-event [event-id event-data]
+;; FIXME: should notify promoted people if participant number increased, but
+;; that results in a circular module dependency
+(defn save-event [event_id event-data]
   "Update an event in the database."
-  (let [keywordized-data (walk/keywordize-keys event-data)
+  (let [event_id (Integer. event_id)
+        keywordized-data (walk/keywordize-keys event-data)
         db-ready-data (stringify-json-field
                        :registration_form
                        (dissoc keywordized-data :event_id :registrations))]
        (if (sc/check schemas/Event db-ready-data)
          {:status 403
           :body "Invalid event data; this is probably a bug in Abhimata."}
-         (resp/response
           (jdbc/update! (config/get-db-spec) :abhimata_event db-ready-data
-                        ["event_id = ?" (Integer. event-id)])))))
+                        ["event_id = ?" (Integer. event_id)])
+          )))
 
 (defn delete-event [event-id]
   (macros/try-times

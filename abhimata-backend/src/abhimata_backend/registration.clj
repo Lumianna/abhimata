@@ -70,12 +70,11 @@
                   ["event_id = ?" event_id])))
 
 (defn insert-registration! [event_id registration]
-  "If the event has open slots or room on the waiting list, inserts registration
-   with the appropriate waiting list status. Uses a serializable transaction to
-   make sure that the event can't be overbooked. The transaction is
-   automatically retried a few times if it fails. If the insertion succeeds, 
-   returns the data inserted (augmented with primary key and waiting list
-   status); otherwise returns nil."
+  "If the event has open slots or room on the waiting list, inserts registration.
+   Uses a serializable transaction to make sure that the event can't be overbooked. 
+   The transaction is automatically retried a few times if it fails. If the 
+   insertion succeeds, returns the data inserted (augmented with primary key);
+   otherwise returns nil."
 
   (macros/try-times
    max-transaction-attempts
@@ -84,16 +83,18 @@
            participants (:body (events/get-participants event_id :connection tr-con))
            event-places (- (:max_participants event)
                           (count (:participants participants)))
-           event-full (<= event-places 0)
+           event-is-full (<= event-places 0)
            waiting-list-places (- (:max_waiting_list_length event)
                                   (count (:waitingList participants)))
-           waiting-list-full (<= waiting-list-places 0)
-           exactly-one-place-left (or (and event-full (= waiting-list-places 1))
+           waiting-list-is-full (<= waiting-list-places 0)
+           exactly-one-place-left (or (and event-is-full (= waiting-list-places 1))
                                       (and (= event-places 1)
-                                           waiting-list-full))
-           registration (assoc registration :on_waiting_list event-full)]
+                                           waiting-list-is-full))
+           ;; If the applicant doesn't go on the waiting list, we will never send
+           ;; them the waiting list promotion email
+           registration (assoc registration :notified_of_waiting_list_promotion (not event-is-full))]
        (if (or (not (:registration_open event))
-               (and event-full waiting-list-full))
+               (and event-is-full waiting-list-is-full))
          nil
          (if-let [insert-result
                   (first
@@ -148,23 +149,26 @@ corresponding to that code (or a 404 if no such registration is found)."
             ["select * from abhimata_registration where email_verification_code = ?"
              verification-uuid]
             :result-set-fn first)]
-    (let [event
-          (jdbc/query
-           (config/get-db-spec)
-           [(str "select title,"
-                 " applications_need_screening,"
-                 " has_registration_fee,"
-                 " has_deposit "
-                 "from abhimata_event where event_id = ?")
-            (:event_id registration)]
-           :result-set-fn first)]
+    (let [event_id (:event_id registration)
+          {waiting-list
+           :waitingList} (:body (events/get-participants event_id))
+          has-uuid (fn [reg] (= (:email_verification_code reg) verification-uuid))
+          event (jdbc/query
+                 (config/get-db-spec)
+                 [(str "select title,"
+                       " applications_need_screening,"
+                       " has_registration_fee,"
+                       " has_deposit "
+                       "from abhimata_event where event_id = ?")
+                  (:event_id registration)]
+                 :result-set-fn first)]
       (resp/response
        {:event event
         :alreadyCancelled (:cancelled registration)
         :applicationScreened (:application_screened registration)
         :depositPaid (:deposit_paid registration)
         :registrationFeePaid (:registration_fee_paid registration)
-        :onWaitingList (:on_waiting_list registration)}))
+        :onWaitingList (boolean (first (filter has-uuid waiting-list)))}))
     {:status 404
      :body "No registration matching that verification code was found."}))
 
@@ -194,28 +198,24 @@ corresponding to that code (or a 404 if no such registration is found)."
                  "if you are unable to participate, use this link: "
                  (make-registration-status-url email_verification_code))})))
 
-(defn promote-first-on-waiting-list! [event_id tr-con]
-  "Takes the first person on the waiting list, sets their waiting list 
-status to false, and sends them an email informing them about this. If the
-event has no waiting list, or the waiting list is empty, the method does
-nothing. The db connection parameter tr-con is not optional because this method
-is only called from cancel-registration!."
-  (if-let [first-on-waitlist
-           (jdbc/query
-            tr-con
-            [(str "select * from abhimata_registration"
-                  " where on_waiting_list = true"
-                  " order by submission_date, registration_id")]
-            :result-set-fn first)]
-    (do
+(defn notify-promoted-waiting-list-people! [event_id tr-con]
+  "Finds registered people who haven't been notified of promotion from the waiting 
+list, sends them the promotion email, and marks them as notified. Note that this is
+a no-op if no places have opened up in the event since this function was called 
+previously."
+  (let [{ participants
+         :participants } (:body
+                          (events/get-participants event_id :connection tr-con))
+         was-not-notified (fn [p] (not (:notified_of_waiting_list_promotion p)))
+         unnotified-participants (filter was-not-notified participants)]
+    (doseq [participant unnotified-participants]
       (jdbc/update!
        tr-con
        :abhimata_registration
-       {:on_waiting_list false}
-       ["registration_id = ?" (:registration_id first-on-waitlist)])
-      (send-waiting-list-promotion-email! first-on-waitlist tr-con)
-      (email/flush-emails!))
-    nil))
+       {:notified_of_waiting_list_promotion true}
+       ["registration_id = ?" (:registration_id participant)])
+      (send-waiting-list-promotion-email! participant tr-con))
+      (email/flush-emails!)))
 
 
 (defn cancel-registration! [uuid]
@@ -226,7 +226,7 @@ a few times."
   (macros/try-times
    max-transaction-attempts
    (jdbc/with-db-transaction [tr-con (config/get-db-spec) :isolation :serializable]
-     (if-let [{:keys [event_id on_waiting_list] :as registration}
+     (if-let [{:keys [event_id] :as registration}
               (jdbc/query
                (config/get-db-spec)
                [(str "select * from abhimata_registration"
@@ -243,8 +243,7 @@ a few times."
               ["cancellation_code = ?" uuid])]
          (if (> (first changed-entries) 0)
            (do
-             (when-not on_waiting_list
-               (promote-first-on-waiting-list! event_id tr-con))
+             (notify-promoted-waiting-list-people! event_id tr-con)
              (resp/response "cancellation successful"))
            {:status 500
             :body "Cancellation failed (this shouldn't happen)"}))
