@@ -198,23 +198,25 @@ corresponding to that code (or a 404 if no such registration is found)."
                  "if you are unable to participate, use this link: "
                  (make-registration-status-url email_verification_code))})))
 
-(defn notify-promoted-waiting-list-people! [event_id tr-con]
+(defn notify-promoted-waiting-list-people!
+  [event_id & {:keys [connection]
+               :or {connection (config/get-db-spec)}}]
   "Finds registered people who haven't been notified of promotion from the waiting 
 list, sends them the promotion email, and marks them as notified. Note that this is
 a no-op if no places have opened up in the event since this function was called 
 previously."
   (let [{ participants
          :participants } (:body
-                          (events/get-participants event_id :connection tr-con))
+                          (events/get-participants event_id :connection connection))
          was-not-notified (fn [p] (not (:notified_of_waiting_list_promotion p)))
          unnotified-participants (filter was-not-notified participants)]
     (doseq [participant unnotified-participants]
       (jdbc/update!
-       tr-con
+       connection
        :abhimata_registration
        {:notified_of_waiting_list_promotion true}
        ["registration_id = ?" (:registration_id participant)])
-      (send-waiting-list-promotion-email! participant tr-con))
+      (send-waiting-list-promotion-email! participant connection))
       (email/flush-emails!)))
 
 

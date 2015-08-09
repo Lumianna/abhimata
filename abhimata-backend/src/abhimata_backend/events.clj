@@ -10,8 +10,7 @@
             [clj-pdf.core :as pdf]
             [schema.core :as sc]
             [ring.util.response :as resp]
-            [ring.util.io :as ring-io]
-            [clojure.walk :as walk]))
+            [ring.util.io :as ring-io]))
 
 (def max-transaction-attempts 5)
 
@@ -119,23 +118,6 @@
               :registrations registrations))
       {:status 404, 
        :body (str "Event " id " does not exist.")})))
-
-
-;; FIXME: should notify promoted people if participant number increased, but
-;; that results in a circular module dependency
-(defn save-event [event_id event-data]
-  "Update an event in the database."
-  (let [event_id (Integer. event_id)
-        keywordized-data (walk/keywordize-keys event-data)
-        db-ready-data (stringify-json-field
-                       :registration_form
-                       (dissoc keywordized-data :event_id :registrations))]
-       (if (sc/check schemas/Event db-ready-data)
-         {:status 403
-          :body "Invalid event data; this is probably a bug in Abhimata."}
-          (jdbc/update! (config/get-db-spec) :abhimata_event db-ready-data
-                        ["event_id = ?" (Integer. event_id)])
-          )))
 
 (defn delete-event [event-id]
   (macros/try-times

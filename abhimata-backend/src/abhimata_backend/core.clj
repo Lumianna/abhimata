@@ -18,6 +18,9 @@
    [ring.middleware.keyword-params :as keyword-params]
    [clojure.data.json :as json]
    [ring.util.response :as resp]
+   [clojure.walk :as walk]
+   [schema.core :as sc]
+   [abhimata_backend.schemas :as schemas]
    (compojure [handler :as handler]
               [route :as route]))
   (:import java.sql.SQLException))
@@ -49,11 +52,33 @@
                 {:username username
                  :password (creds/hash-bcrypt password)}))
 
+;; TODO: save-event is here to avoid circular module dependencies (calls stuff from
+;; events and registration), but that's a bit of a hack
+(defn save-event [event_id event-data]
+  "Update an event in the database."
+  (let [event_id (Integer. event_id)
+        current-data (events/get-event-by-id event_id)
+        keywordized-data (walk/keywordize-keys event-data)
+        db-ready-data (events/stringify-json-field
+                       :registration_form
+                       (dissoc keywordized-data :event_id :registrations))]
+       (if (sc/check schemas/Event db-ready-data)
+         {:status 403
+          :body "Invalid event data; this is probably a bug in Abhimata."}
+         (do
+          (jdbc/update! (config/get-db-spec) :abhimata_event db-ready-data
+                        ["event_id = ?" event_id])
+          ;; If the number of participants was increased, we should notify people
+          ;; who just got promoted from the waiting list
+          (when (> (:max_participants db-ready-data) (:max_participants current-data))
+            (registration/notify-promoted-waiting-list-people! event_id))
+          (resp/response "event saved")))))
+
 (defn event-id-routes [id]
   (routes
    (GET "/" [] (events/get-full-event-data id) )
    (DELETE "/" [] (friend/authorize #{:root} (events/delete-event id)))
-   (POST "/" {event-data :json-params} (events/save-event id event-data))
+   (POST "/" {event-data :json-params} (save-event id event-data))
    (GET "/participants" [] (events/get-participants id))
    (POST "/participants/:registration_id"
        {{registration_id :registration_id} :params
@@ -103,6 +128,8 @@
                         (.getMessage e)
                         (string/join "\n" (.getStackTrace e))) 
             } ))))
+
+
 
 
 (def app
