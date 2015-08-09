@@ -46,7 +46,13 @@ function renderParticipants(participants, event, emptyMessage) {
 
   var relevantStatuses = getRelevantStatuses(event);
 
-  var rows = _.map(participants, function(participant) {
+  // Show latest applications first
+  var sortedParticipants = _.sortBy(participants, function(participant) {
+    var submissionTime = new Date(participant.submission_date);
+    return -submissionTime.getTime();
+  });
+
+  var rows = _.map(sortedParticipants, function(participant) {
     var linkParams = {
       registrationId: participant.registration_id,
       eventId: participant.event_id
