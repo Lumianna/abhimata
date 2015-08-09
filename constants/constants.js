@@ -23,4 +23,9 @@ module.exports = {
     LOADING: null,
     NOT_AVAILABLE: null,
   }),
+
+  specialQuestionKeys: {
+    NAME: 0,
+    EMAIL: 1,
+  }
 }; 
