@@ -216,7 +216,7 @@ previously."
        :abhimata_registration
        {:notified_of_waiting_list_promotion true}
        ["registration_id = ?" (:registration_id participant)])
-      (send-waiting-list-promotion-email! participant connection))
+      (send-waiting-list-promotion-email! participant :connection connection))
       (email/flush-emails!)))
 
 
@@ -245,7 +245,7 @@ a few times."
               ["cancellation_code = ?" uuid])]
          (if (> (first changed-entries) 0)
            (do
-             (notify-promoted-waiting-list-people! event_id tr-con)
+             (notify-promoted-waiting-list-people! event_id :connection tr-con)
              (resp/response "cancellation successful"))
            {:status 500
             :body "Cancellation failed (this shouldn't happen)"}))
