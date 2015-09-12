@@ -71,7 +71,7 @@
           ;; If the number of participants was increased, we should notify people
           ;; who just got promoted from the waiting list
           (when (> (:max_participants db-ready-data) (:max_participants current-data))
-            (registration/notify-promoted-waiting-list-people! event_id))
+            (registration/fill-empty-slots-from-waiting-list! event_id))
           (resp/response "event saved")))))
 
 (defn event-id-routes [id]

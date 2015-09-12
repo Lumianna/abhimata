@@ -71,22 +71,18 @@
           (jdbc/query (config/get-db-spec)
                       query-str)))))
 
-(defn get-participants [event_id & {:keys [connection]
+(defn get-participants [id & {:keys [connection]
                               :or {connection (config/get-db-spec)}}]
-  (let [event_id (Integer. event_id) 
-        event (get-event-by-id event_id :connection connection)
-        max_participants (:max_participants event)
-        applications
+  (let [applications
         (map (partial unstringify-json-field :submitted_form)
              (jdbc/query
               connection 
-              [(str "select * from abhimata_registration where event_id = ? "
-                    "order by submission_date, registration_id")
-               (Integer. event_id)]))
+              ["select * from abhimata_registration where event_id = ?" 
+               (Integer. id)]))
         {not-cancelled false cancelled true}
         (group-by :cancelled applications)
-        participants (take max_participants not-cancelled)
-        waiting-list (drop max_participants not-cancelled)]
+        {participants false waiting-list true}
+        (group-by :on_waiting_list not-cancelled)]
         
   (resp/response
    {:participants (vec participants)

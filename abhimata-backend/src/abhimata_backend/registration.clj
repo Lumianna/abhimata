@@ -90,9 +90,7 @@
            exactly-one-place-left (or (and event-is-full (= waiting-list-places 1))
                                       (and (= event-places 1)
                                            waiting-list-is-full))
-           ;; If the applicant doesn't go on the waiting list, we will never send
-           ;; them the waiting list promotion email
-           registration (assoc registration :notified_of_waiting_list_promotion (not event-is-full))]
+           registration (assoc registration :on_waiting_list event-is-full)]
        (if (or (not (:registration_open event))
                (and event-is-full waiting-list-is-full))
          nil
@@ -198,27 +196,32 @@ corresponding to that code (or a 404 if no such registration is found)."
                  "if you are unable to participate, use this link: "
                  (make-registration-status-url email_verification_code))})))
 
-(defn notify-promoted-waiting-list-people!
+(defn promote-person-on-waiting-list! [participant & {:keys [connection]
+                                                :or {connection (config/get-db-spec)}}]
+  (jdbc/update!
+   connection
+   :abhimata_registration
+   {:on_waiting_list false}
+   ["registration_id = ?" (:registration_id participant)])
+  (send-waiting-list-promotion-email! participant connection)
+  (email/flush-emails!))
+
+(defn fill-empty-slots-from-waiting-list!
   [event_id & {:keys [connection]
                :or {connection (config/get-db-spec)}}]
-  "Finds registered people who haven't been notified of promotion from the waiting 
-list, sends them the promotion email, and marks them as notified. Note that this is
-a no-op if no places have opened up in the event since this function was called 
-previously."
-  (let [{ participants
-         :participants } (:body
-                          (events/get-participants event_id :connection connection))
-         was-not-notified (fn [p] (not (:notified_of_waiting_list_promotion p)))
-         unnotified-participants (filter was-not-notified participants)]
-    (doseq [participant unnotified-participants]
-      (jdbc/update!
-       connection
-       :abhimata_registration
-       {:notified_of_waiting_list_promotion true}
-       ["registration_id = ?" (:registration_id participant)])
-      (send-waiting-list-promotion-email! participant :connection connection))
-      (email/flush-emails!)))
-
+  "Promotes people from the waiting list to fill vacant slots in the event and sends them an email to inform them about it. Does nothing if the event is already full."
+  (let [sorted-waiting-list
+        (jdbc/query
+         connection
+         [(str "select * from abhimata_registration"
+               " where on_waiting_list = true"
+               " order by submission_date, registration_id")])
+        { max_participants :max_participants } (events/get-event-by-id event_id :connection connection)
+        participants (:body (events/get-participants event_id :connection connection))
+        number-to-be-promoted (- max_participants (count (:participants participants)))]
+    (doseq [participant (take number-to-be-promoted sorted-waiting-list)]
+      (promote-person-on-waiting-list! participant :connection connection))
+    (email/flush-emails!)))
 
 (defn cancel-registration! [uuid]
   "Cancels the registration and offers the first person on the waiting list
@@ -245,7 +248,7 @@ a few times."
               ["cancellation_code = ?" uuid])]
          (if (> (first changed-entries) 0)
            (do
-             (notify-promoted-waiting-list-people! event_id :connection tr-con)
+             (fill-empty-slots-from-waiting-list! event_id :connection tr-con)
              (resp/response "cancellation successful"))
            {:status 500
             :body "Cancellation failed (this shouldn't happen)"}))
