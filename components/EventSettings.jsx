@@ -172,6 +172,10 @@ var EventGeneral = React.createClass({
         text: "Registration is open",
       },
       {
+        key: "automate_waiting_list",
+        text: "Automatically promote the first person on the waiting list as soon as there's an opening",
+      },
+      {
         key: "applications_need_screening",
         text: "Applications for this event need to be screened by the organizers",
       },

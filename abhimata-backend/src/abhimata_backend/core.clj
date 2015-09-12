@@ -3,6 +3,7 @@
   (:require 
    [abhimata_backend.events :as events]
    [abhimata_backend.email :as email]
+   [abhimata_backend.macros :as macros]
    [abhimata_backend.registration :as registration]
    [abhimata_backend.config :as config]
    [clojure.tools.logging :as log]
@@ -62,17 +63,17 @@
         db-ready-data (events/stringify-json-field
                        :registration_form
                        (dissoc keywordized-data :event_id :registrations))]
-       (if (sc/check schemas/Event db-ready-data)
-         {:status 403
-          :body "Invalid event data; this is probably a bug in Abhimata."}
-         (do
-          (jdbc/update! (config/get-db-spec) :abhimata_event db-ready-data
-                        ["event_id = ?" event_id])
-          ;; If the number of participants was increased, we should notify people
-          ;; who just got promoted from the waiting list
-          (when (> (:max_participants db-ready-data) (:max_participants current-data))
-            (registration/fill-empty-slots-from-waiting-list! event_id))
-          (resp/response "event saved")))))
+    (if (sc/check schemas/Event db-ready-data)
+      {:status 403
+       :body "Invalid event data; this is probably a bug in Abhimata."}
+      (do
+        (jdbc/update! (config/get-db-spec) :abhimata_event db-ready-data
+                      ["event_id = ?" event_id])
+        (macros/try-times
+         3
+         (jdbc/with-db-transaction [tr-con (config/get-db-spec) :isolation :serializable]
+           (registration/fill-empty-slots-from-waiting-list! event_id :connection tr-con)))
+        (resp/response "event saved")))))
 
 (defn event-id-routes [id]
   (routes

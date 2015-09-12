@@ -210,24 +210,23 @@ corresponding to that code (or a 404 if no such registration is found)."
   [event_id & {:keys [connection]
                :or {connection (config/get-db-spec)}}]
   "Promotes people from the waiting list to fill vacant slots in the event and sends them an email to inform them about it. Does nothing if the event is already full."
-  (let [sorted-waiting-list
-        (jdbc/query
-         connection
-         [(str "select * from abhimata_registration"
-               " where on_waiting_list = true"
-               " order by submission_date, registration_id")])
-        { max_participants :max_participants } (events/get-event-by-id event_id :connection connection)
+  (let [sorted-waiting-list (jdbc/query
+                             connection
+                             [(str "select * from abhimata_registration"
+                                   " where on_waiting_list = true"
+                                   " order by submission_date, registration_id")])
+        { :keys [max_participants automate_waiting_list] } (events/get-event-by-id
+                                                            event_id :connection connection)
         participants (:body (events/get-participants event_id :connection connection))
         number-to-be-promoted (- max_participants (count (:participants participants)))]
-    (doseq [participant (take number-to-be-promoted sorted-waiting-list)]
-      (promote-person-on-waiting-list! participant :connection connection))
-    (email/flush-emails!)))
+    (when automate_waiting_list
+      (doseq [participant (take number-to-be-promoted sorted-waiting-list)]
+        (promote-person-on-waiting-list! participant :connection connection))
+      (email/flush-emails!))))
 
 (defn cancel-registration! [uuid]
-  "Cancels the registration and offers the first person on the waiting list
-a place in the event (if the event has a waiting list and there is someone
-on it). Everything takes place in a serializable transaction that is retried 
-a few times."
+  "Cancels the registration and fills the open slot from the waiting list (if
+the event is configured for automatic waiting list handling)."
   (macros/try-times
    max-transaction-attempts
    (jdbc/with-db-transaction [tr-con (config/get-db-spec) :isolation :serializable]

@@ -149,6 +149,7 @@
    :max_waiting_list_length PosInt
    :visible_to_public sc/Bool
    :registration_open sc/Bool
+   :automate_waiting_list sc/Bool
    :has_registration_fee sc/Bool
    :has_deposit sc/Bool
    :applications_need_screening sc/Bool
@@ -185,6 +186,7 @@
    :max_participants 40
    :max_waiting_list_length 40
    :visible_to_public false
+   :automate_waiting_list true
    :has_deposit false
    :has_registration_fee false
    :applications_need_screening false

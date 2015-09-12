@@ -7,6 +7,7 @@ create table abhimata_event
   max_waiting_list_length integer not null,
   visible_to_public boolean not null,
   registration_open boolean not null,
+  automate_waiting_list boolean not null,
   applications_need_screening boolean not null,
   has_registration_fee boolean not null,
   has_deposit boolean not null,
