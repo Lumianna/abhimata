@@ -269,6 +269,9 @@ the event is configured for automatic waiting list handling)."
   "A valid participant status"
   (sc/pred #{"application_screened"
              "registration_fee_paid"
+             "cancelled"
+             "on_waiting_list"
+             "notes"
              "deposit_paid"}))
 
 (sc/defschema ParticipantStatusUpdate
@@ -276,12 +279,18 @@ the event is configured for automatic waiting list handling)."
   { ParticipantStatus sc/Bool })
 
 (defn update-participant-status [id_str status-update]
-  (let [_ (sc/validate ParticipantStatusUpdate status-update)
-        registration_id (Integer. id_str)
-        update-res (jdbc/update!
-                    (config/get-db-spec) :abhimata_registration
-                    status-update
-                    ["registration_id = ?" registration_id])]
-    (if (> (first update-res) 0)
-      {:status 200}
-      {:status 500})))
+  (jdbc/with-db-transaction [tr-con (config/get-db-spec) :isolation :serializable]
+    (let [_ (sc/validate ParticipantStatusUpdate status-update)
+          registration_id (Integer. id_str)
+          event_id (:event_id (jdbc/query tr-con 
+                               [(str "select event_id from abhimata_registration "
+                                     "where registration_id = ?") registration_id]
+                               :result-set-fn first))
+          update-res (jdbc/update!
+                      tr-con :abhimata_registration
+                      status-update
+                      ["registration_id = ?" registration_id])]
+      (fill-empty-slots-from-waiting-list! event_id :connection tr-con)
+      (if (> (first update-res) 0)
+        {:status 200}
+        {:status 500}))))

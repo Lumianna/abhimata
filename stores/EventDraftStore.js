@@ -167,7 +167,7 @@ EventDraftStore.prototype.handleParticipantStatus =
 function(payload) {
   var draft = _eventDrafts[payload.eventId];
   if(draft) {
-    var participant = _.find(draft.registrations.participants, function(p) {
+    var participant = _.find(draft.registrations, function(p) {
       return p.registration_id === payload.participantId;
     });
     participant[payload.property] = payload.value;

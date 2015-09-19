@@ -2,6 +2,7 @@ var $ = require('jquery');
 var _ = require('lodash');
 
 var alt = require('../alt.js');
+var EventActions = require('./EventActions.js');
 
 function RegistrationActions() {
   this.generateActions(
@@ -42,8 +43,6 @@ RegistrationActions.prototype.submit = function(event_id) {
     event_id: event_id,
     submitted_form: answers,
   };
-
-  console.log(data);
 
   var that = this;
 
@@ -94,8 +93,8 @@ RegistrationActions.prototype.requestCancellationEmail = function (uuid) {
 };
 
 
-RegistrationActions.prototype.cancel = function(uuid) {
-  this.dispatch(uuid);
+RegistrationActions.prototype.cancel = function(uuid, eventId) {
+  this.dispatch({ uuid: uuid, eventId: eventId });
   var that = this;
   
   $.ajax({ 
@@ -104,6 +103,7 @@ RegistrationActions.prototype.cancel = function(uuid) {
     success: function() { 
       that.actions.cancelRegistrationSucceeded({
         uuid: uuid,
+        eventId: eventId,
       });
 
       that.actions.getRegistrationStatusByCancellationUUID(uuid);
@@ -111,6 +111,7 @@ RegistrationActions.prototype.cancel = function(uuid) {
     error: function(data, textStatus) { 
       that.actions.cancelRegistrationFailed({
         uuid: uuid,
+        eventId: eventId,
         errorMessage: data,
         statusCode: textStatus, 
       });
@@ -166,46 +167,45 @@ RegistrationActions.prototype.getRegistrationStatusByCancellationUUID = function
   });
 };
 
-
 RegistrationActions.prototype.updateParticipantStatus =
-function (eventId, participantId, property, value) {
-  var that = this;
-  var data = {};
-  data[property] = value;
+  function (eventId, participantId, property, value) {
+    var that = this;
+    var data = {};
+    data[property] = value;
 
-  var payload = {
-    eventId: eventId,
-    participantId: participantId,
-    property: property,
-    value: value
+    var payload = {
+      eventId: eventId,
+      participantId: participantId,
+      property: property,
+      value: value
+    };
+
+    var draft = require('../stores/EventDraftStore.js').getEventDraft(eventId);
+    var originalValue = _.find(draft.registrations, function(p) {
+      return p.registration_id === participantId;
+    })[property];
+    
+    this.dispatch(payload);
+    
+    $.ajax({ 
+      type: "POST",
+      url: "events-private/" + eventId + "/participants/" + participantId,
+      data: JSON.stringify(data),
+      success: function(data) { 
+        that.actions.updateParticipantStatusSucceeded(payload);
+
+        EventActions.requestEventDetails(eventId);
+      },
+      error: function(data, textStatus) { 
+        var errorPayload = _.merge({}, payload, {
+          value: originalValue
+        });
+        that.actions.updateParticipantStatusFailed(errorPayload);
+      },
+      dataType: "text",
+      contentType: "application/json; charset=utf-8",
+    });
   };
-
-  var draft = require('../stores/EventDraftStore.js').getEventDraft(eventId);
-  var originalValue = _.find(draft.registrations.participants, function(p) {
-    return p.registration_id === participantId;
-  })[property];
-                               
-  this.dispatch(payload);
-  
-  $.ajax({ 
-    type: "POST",
-    url: "events-private/" + eventId + "/participants/" + participantId,
-    data: JSON.stringify(data),
-    success: function(data) { 
-      console.log(payload);
-      that.actions.updateParticipantStatusSucceeded(payload);
-    },
-    error: function(data, textStatus) { 
-      console.log(textStatus);
-      var errorPayload = _.merge({}, payload, {
-        value: originalValue
-      });
-      that.actions.updateParticipantStatusFailed(errorPayload);
-    },
-    dataType: "text",
-    contentType: "application/json; charset=utf-8",
-  });
-};
 
 
 module.exports = alt.createActions(RegistrationActions);

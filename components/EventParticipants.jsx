@@ -40,9 +40,28 @@ function updateParticipantStatus(eventId, participantId, property, event) {
 }
 
 function renderParticipants(participants, event, emptyMessage) {
+  // These should be the same for every object in participants, so we can just
+  // take the first
+  var onWaitingList = _.first(_.pluck(participants, 'on_waiting_list'));
+  var cancelled = _.first(_.pluck(participants, 'cancelled'));
   if(_.isEmpty(participants)) {
     return (<em>{emptyMessage}</em>);
   }
+
+  var buttonHeaders = [];
+
+  if (onWaitingList) {
+    buttonHeaders.push((
+      <th key='promoteHeader'> Promote </th>
+    ));
+  }
+
+  if (!cancelled) {
+    buttonHeaders.push((
+      <th key='rejectHeader'> Reject application </th>
+    ));
+  }
+
 
   var relevantStatuses = getRelevantStatuses(event);
 
@@ -57,6 +76,44 @@ function renderParticipants(participants, event, emptyMessage) {
       registrationId: participant.registration_id,
       eventId: participant.event_id
     };
+
+    var buttons = [];
+
+    if (onWaitingList) {
+      var wlClickHandler = function() {
+        RegistrationActions.updateParticipantStatus(participant.event_id,
+                                                    participant.registration_id,
+                                                    'on_waiting_list',
+                                                    false);
+      };
+
+      buttons.push((
+        <td key='promoteButton'>
+          <Bootstrap.Button bsStyle='primary'
+                            onClick={wlClickHandler}>
+            Promote
+          </Bootstrap.Button>
+        </td>
+      ));
+    }
+
+    if (!cancelled) {
+      var clickHandler = function() {
+        RegistrationActions.updateParticipantStatus(participant.event_id,
+                                                    participant.registration_id,
+                                                    'cancelled',
+                                                    true);
+      };
+
+      buttons.push((
+        <td key='cancelButton'>
+          <Bootstrap.Button bsStyle='danger'
+                            onClick={clickHandler}>
+            Reject
+          </Bootstrap.Button>
+        </td>
+      ));
+    }
 
     var statuses = _.map(relevantStatuses, function(status) {
       return (
@@ -89,6 +146,7 @@ function renderParticipants(participants, event, emptyMessage) {
           {moment(participant.submission_date).format("D.M YYYY HH:mm")}
         </td>
         {statuses}
+        {buttons}
       </tr>
     );
   });
@@ -108,6 +166,7 @@ function renderParticipants(participants, event, emptyMessage) {
           <th>Email verified?</th>
           <th>Submission time</th>
           {statusDescriptions}
+          {buttonHeaders}
         </tr>
       </thead>
       <tbody>
@@ -121,6 +180,13 @@ var EventParticipants = React.createClass({
   render: function() {
     var pdfUrl = 'events-private/' +
                  this.props.event.event_id + '/participants.pdf';
+
+    var groupedByCancellation = _.groupBy(this.props.event.registrations, 'cancelled');
+    var cancelled = groupedByCancellation[true];
+    var groupedByWaitingListStatus = _.groupBy(groupedByCancellation[false], 'on_waiting_list');
+
+    var waitingList = groupedByWaitingListStatus[true];
+    var participants = groupedByWaitingListStatus[false];
     return ( 
       <div>
         <a href={pdfUrl}
@@ -128,15 +194,15 @@ var EventParticipants = React.createClass({
           Download forms submitted by participants as a PDF.
         </a>
         <h2>Participants</h2>
-        {renderParticipants(this.props.event.registrations.participants,
+        {renderParticipants(participants,
                             this.props.event,
                             "No applications yet.")}
         <h2>Waiting list</h2>
-        {renderParticipants(this.props.event.registrations.waitingList,
+        {renderParticipants(waitingList,
                             this.props.event,
                             "The waiting list is currently empty.")}
         <h2>Cancelled</h2>
-        {renderParticipants(this.props.event.registrations.cancelled,
+        {renderParticipants(cancelled,
                             this.props.event,
                             "No cancellations yet.")}
       </div>);

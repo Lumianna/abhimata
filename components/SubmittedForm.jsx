@@ -77,10 +77,7 @@ function renderForm(registrationForm, submittedForm) {
 }
 
 function getParticipant(registrations, registration_id) {
-  var regs = registrations.participants.concat(registrations.waitingList,
-                                               registrations.cancelled);
-  
-  return _.find(regs, function(reg) {
+  return _.find(registrations, function(reg) {
     return reg.registration_id === registration_id;
   });
 

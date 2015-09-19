@@ -85,7 +85,8 @@
         (group-by :on_waiting_list not-cancelled)]
         
   (resp/response
-   {:participants (vec participants)
+   {:applications applications
+    :participants (vec participants)
     :waitingList (vec waiting-list)
     :cancelled (vec cancelled)})))
 
@@ -111,7 +112,7 @@
     (if event
       (resp/response
        (assoc (unstringify-json-field :registration_form event)
-              :registrations registrations))
+              :registrations (:applications registrations)))
       {:status 404, 
        :body (str "Event " id " does not exist.")})))
 
