@@ -128,6 +128,9 @@ function renderParticipants(participants, event, emptyMessage) {
       );
     });
 
+    var email = participant.email + ' ';
+    email += participant.email_verified ? '(verified)' : '(not verified)';
+
     return ( 
       <tr key={participant.registration_id}> 
         <td>
@@ -137,10 +140,7 @@ function renderParticipants(participants, event, emptyMessage) {
             </Link>
         </td>
         <td>
-          {participant.email}
-        </td>
-        <td>
-          {participant.email_verified ? "Yes" : "No"}
+          {email}
         </td>
         <td>
           {moment(participant.submission_date).format("D.M YYYY HH:mm")}
@@ -163,7 +163,6 @@ function renderParticipants(participants, event, emptyMessage) {
         <tr>
           <th>Name</th>
           <th>Email</th>
-          <th>Email verified?</th>
           <th>Submission time</th>
           {statusDescriptions}
           {buttonHeaders}
@@ -201,7 +200,7 @@ var EventParticipants = React.createClass({
         {renderParticipants(waitingList,
                             this.props.event,
                             "The waiting list is currently empty.")}
-        <h2>Cancelled</h2>
+        <h2>Cancelled or rejected</h2>
         {renderParticipants(cancelled,
                             this.props.event,
                             "No cancellations yet.")}
