@@ -11,6 +11,8 @@ var Bootstrap = require('react-bootstrap');
 var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
 var RegistrationActions = require('../actions/RegistrationActions.js');
 
+var SubmittedForm = require('./SubmittedForm.jsx');
+
 var statuses = {
   "deposit_paid": {
     eventProp: "has_deposit",
@@ -39,7 +41,26 @@ function updateParticipantStatus(eventId, participantId, property, event) {
                                               event.target.checked);
 }
 
-function renderParticipants(participants, event, emptyMessage) {
+var ParticipantModal = React.createClass({
+  render() {
+    return (
+      <Bootstrap.Modal show={this.props.visible} onHide={this.props.closeModal}>
+        <Bootstrap.Modal.Header closeButton>
+          <Bootstrap.Modal.Title>Participant details</Bootstrap.Modal.Title>
+        </Bootstrap.Modal.Header>
+        <Bootstrap.Modal.Body>
+          <SubmittedForm event={this.props.event}
+                         participantId={this.props.participantId}/>
+        </Bootstrap.Modal.Body>
+        <Bootstrap.Modal.Footer>
+          <Bootstrap.Button onClick={this.props.closeModal}>Close</Bootstrap.Button>
+          </Bootstrap.Modal.Footer>
+        </Bootstrap.Modal>
+    );
+  }
+});
+
+function renderParticipants(participants, event, showParticipantInfo, emptyMessage) {
   // These should be the same for every object in participants, so we can just
   // take the first
   var onWaitingList = _.first(_.pluck(participants, 'on_waiting_list'));
@@ -134,10 +155,13 @@ function renderParticipants(participants, event, emptyMessage) {
     return ( 
       <tr key={participant.registration_id}> 
         <td>
-          <Link to="participant-details"
+          <Bootstrap.Button onClick={showParticipantInfo.bind(null, participant.registration_id)}>
+            {participant.name}
+          </Bootstrap.Button>
+          {/*<Link to="participant-details"
                 params={linkParams}>
           {participant.name}
-            </Link>
+            </Link>*/}
         </td>
         <td>
           {email}
@@ -176,6 +200,26 @@ function renderParticipants(participants, event, emptyMessage) {
 }
 
 var EventParticipants = React.createClass({
+  getInitialState: function() {
+    return {
+      selectedParticipantId: null,
+      modalIsOpen: false
+    };
+  },
+
+  showParticipantInfo(participantId) {
+    this.setState({
+      selectedParticipantId: participantId,
+      modalIsOpen: true
+    });
+  },
+
+  closeModal() {
+    this.setState({
+      modalIsOpen:false
+    });
+  },
+
   render: function() {
     var pdfUrl = 'events-private/' +
                  this.props.event.event_id + '/participants.pdf';
@@ -195,15 +239,22 @@ var EventParticipants = React.createClass({
         <h2>Participants</h2>
         {renderParticipants(participants,
                             this.props.event,
+                            this.showParticipantInfo,
                             "No applications yet.")}
         <h2>Waiting list</h2>
         {renderParticipants(waitingList,
                             this.props.event,
+                            this.showParticipantInfo,
                             "The waiting list is currently empty.")}
         <h2>Cancelled or rejected</h2>
         {renderParticipants(cancelled,
                             this.props.event,
+                            this.showParticipantInfo,
                             "No cancellations yet.")}
+        <ParticipantModal event={this.props.event}
+                          participantId={this.state.selectedParticipantId}
+                          visible={this.state.modalIsOpen}
+                          closeModal={this.closeModal}/>
       </div>);
   },
 });

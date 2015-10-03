@@ -53,9 +53,6 @@ var routes = (
         <Route name="general" handler={es.EventGeneral}/>
         <Route name="registrationform" handler={es.RegistrationForm}/>
         <Route name="participants" handler={es.EventParticipants}/>
-        <Route name="participant-details"
-               path="participant-details/:registrationId"
-               handler={SubmittedForm}/>
         <Route name="delete" handler={es.DeleteData}/>
       </Route>
       <Redirect to="/admin/events"/>

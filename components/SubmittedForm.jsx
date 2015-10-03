@@ -84,24 +84,9 @@ function getParticipant(registrations, registration_id) {
 }
 
 var SubmittedForm = React.createClass({
-  mixins: [ Router.State ],
-
-  getInitialState: function() {
-    var registration_id = parseInt(this.getParams().registrationId, 10);
-    return { 
-      registration_id: registration_id,
-    };
-  },
-  
-  componentWillReceiveProps: function(nextProps) {
-    this.setState({ 
-      registration_id: parseInt(this.getParams().registrationId, 10) 
-    });
-  },
-  
   render: function() {
     var participant = getParticipant(this.props.event.registrations,
-                                     this.state.registration_id);
+                                     this.props.participantId);
 
     if(!participant) {
       return (
@@ -116,9 +101,6 @@ var SubmittedForm = React.createClass({
 
     return (
       <div className="submitted-form">
-        <Link to="participants" params={{eventId: this.props.event.event_id}}>
-          Back to list of participants
-        </Link>
         <h2>Application submitted by {participant.name}</h2>
         {renderForm(this.props.event.registration_form,
                     participant.submitted_form)}
