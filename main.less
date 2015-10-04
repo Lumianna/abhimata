@@ -3,9 +3,14 @@
 @error-color: red;
 @warning-color: orange;
 @ok-color: green;
+@font-family: 'Raleway', sans-serif;
+
+body.modal-open {
+  font-family: @font-family;
+}
 
 .container {
-  font-family: 'Raleway', sans-serif;
+  font-family: @font-family;
 
   .form-question {
     & > label {
