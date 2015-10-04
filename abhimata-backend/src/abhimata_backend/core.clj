@@ -75,17 +75,17 @@
            (registration/fill-empty-slots-from-waiting-list! event_id :connection tr-con)))
         (resp/response "event saved")))))
 
-(defn event-id-routes [id]
+(defn event-id-routes [event_id]
   (routes
-   (GET "/" [] (events/get-full-event-data id) )
-   (DELETE "/" [] (friend/authorize #{:root} (events/delete-event id)))
-   (POST "/" {event-data :json-params} (save-event id event-data))
-   (GET "/participants" [] (events/get-participants id))
+   (GET "/" [] (events/get-full-event-data event_id) )
+   (DELETE "/" [] (friend/authorize #{:root} (events/delete-event event_id)))
+   (POST "/" {event-data :json-params} (save-event event_id event-data))
+   (GET "/participants" [] (events/get-participants event_id))
    (POST "/participants/:registration_id"
        {{registration_id :registration_id} :params
         status-update :json-params}
-     (registration/update-participant-status registration_id status-update))
-   (GET "/participants.pdf" [] (events/get-participants-pdf id))))
+     (registration/update-participant-status event_id registration_id status-update))
+   (GET "/participants.pdf" [] (events/get-participants-pdf event_id))))
 
 (defroutes admin-routes
   (GET "/" req (events/get-events-private (friend/current-authentication req)))

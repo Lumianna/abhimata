@@ -3,7 +3,6 @@ var moment = require('moment');
 var React = require('react');
 
 var Router = require('react-router');
-var RouteHandler = Router.RouteHandler;
 var Link = Router.Link;
 
 var Bootstrap = require('react-bootstrap');
@@ -11,16 +10,19 @@ var Bootstrap = require('react-bootstrap');
 var AuthenticatedRoute = require('../mixins/AuthenticatedRoute.js');
 var RegistrationActions = require('../actions/RegistrationActions.js');
 
-var SubmittedForm = require('./SubmittedForm.jsx');
+var ParticipantDraftStore = require('../stores/ParticipantDraftStore.js');
+var ParticipantDraftActions = require('../actions/ParticipantDraftActions.js');
+
+var ParticipantDetails = require('./ParticipantDetails.jsx');
 
 var statuses = {
-  "deposit_paid": {
-    eventProp: "has_deposit",
-    text: "Deposit paid",
-  },
   "application_screened": {
     eventProp: "applications_need_screening",
     text: "Application screened",
+  },
+  "deposit_paid": {
+    eventProp: "has_deposit",
+    text: "Deposit paid",
   },
   "registration_fee_paid": {
     eventProp: "has_registration_fee",
@@ -29,31 +31,35 @@ var statuses = {
 };
 
 function getRelevantStatuses(event) {
-  return _.filter(_.keys(statuses), function(status) {
-    return event[statuses[status].eventProp];
+  return _.pick(statuses, function(status) {
+    return event[status.eventProp];
   });
 }
 
-function updateParticipantStatus(eventId, participantId, property, event) {
-  RegistrationActions.updateParticipantStatus(eventId,
-                                              participantId,
-                                              property,
-                                              event.target.checked);
-}
-
 var ParticipantModal = React.createClass({
+  saveAndClose() {
+    this.props.saveChanges();
+    this.props.closeModal();
+  },
   render() {
+    if(!this.props.participant) {
+      return null;
+    }
     return (
       <Bootstrap.Modal show={this.props.visible} onHide={this.props.closeModal}>
-        <Bootstrap.Modal.Header closeButton>
+        <Bootstrap.Modal.Header>
           <Bootstrap.Modal.Title>Participant details</Bootstrap.Modal.Title>
         </Bootstrap.Modal.Header>
         <Bootstrap.Modal.Body>
-          <SubmittedForm event={this.props.event}
-                         participantId={this.props.participantId}/>
+          <ParticipantDetails event={this.props.event}
+                              optionalStatuses={getRelevantStatuses(this.props.event)}
+                              participant={this.props.participant}/>
         </Bootstrap.Modal.Body>
         <Bootstrap.Modal.Footer>
-          <Bootstrap.Button onClick={this.props.closeModal}>Close</Bootstrap.Button>
+          <Bootstrap.Button onClick={this.saveAndClose}
+                            bsStyle='primary'>
+            Save changes
+          </Bootstrap.Button>
           </Bootstrap.Modal.Footer>
         </Bootstrap.Modal>
     );
@@ -69,21 +75,6 @@ function renderParticipants(participants, event, showParticipantInfo, emptyMessa
     return (<em>{emptyMessage}</em>);
   }
 
-  var buttonHeaders = [];
-
-  if (onWaitingList) {
-    buttonHeaders.push((
-      <th key='promoteHeader'> Promote </th>
-    ));
-  }
-
-  if (!cancelled) {
-    buttonHeaders.push((
-      <th key='rejectHeader'> Reject application </th>
-    ));
-  }
-
-
   var relevantStatuses = getRelevantStatuses(event);
 
   // Show latest applications first
@@ -98,53 +89,13 @@ function renderParticipants(participants, event, showParticipantInfo, emptyMessa
       eventId: participant.event_id
     };
 
-    var buttons = [];
-
-    if (onWaitingList) {
-      var wlClickHandler = function() {
-        RegistrationActions.updateParticipantStatus(participant.event_id,
-                                                    participant.registration_id,
-                                                    'on_waiting_list',
-                                                    false);
-      };
-
-      buttons.push((
-        <td key='promoteButton'>
-          <Bootstrap.Button bsStyle='primary'
-                            onClick={wlClickHandler}>
-            Promote
-          </Bootstrap.Button>
-        </td>
-      ));
-    }
-
-    if (!cancelled) {
-      var clickHandler = function() {
-        RegistrationActions.updateParticipantStatus(participant.event_id,
-                                                    participant.registration_id,
-                                                    'cancelled',
-                                                    true);
-      };
-
-      buttons.push((
-        <td key='cancelButton'>
-          <Bootstrap.Button bsStyle='danger'
-                            onClick={clickHandler}>
-            Reject
-          </Bootstrap.Button>
-        </td>
-      ));
-    }
-
-    var statuses = _.map(relevantStatuses, function(status) {
+    var statuses = _.map(relevantStatuses, function(status, statusKey) {
+      var className = participant[statusKey] ? 'ok' : 'error';
       return (
-        <td key={status}>
-          <input type="checkbox" 
-                 checked={participant[status]}
-                 onChange={updateParticipantStatus.bind(null,
-                                                        participant.event_id,
-                                                        participant.registration_id,
-                                                        status)}/>
+        <td key={statusKey}>
+          <span className={className}>
+            {participant[statusKey] ? "Yes" : "No"}
+          </span>
         </td>
       );
     });
@@ -155,13 +106,10 @@ function renderParticipants(participants, event, showParticipantInfo, emptyMessa
     return ( 
       <tr key={participant.registration_id}> 
         <td>
-          <Bootstrap.Button onClick={showParticipantInfo.bind(null, participant.registration_id)}>
+          <Bootstrap.Button onClick={showParticipantInfo.bind(null, participant)}
+                            bsStyle='primary'>
             {participant.name}
           </Bootstrap.Button>
-          {/*<Link to="participant-details"
-                params={linkParams}>
-          {participant.name}
-            </Link>*/}
         </td>
         <td>
           {email}
@@ -170,14 +118,18 @@ function renderParticipants(participants, event, showParticipantInfo, emptyMessa
           {moment(participant.submission_date).format("D.M YYYY HH:mm")}
         </td>
         {statuses}
-        {buttons}
+        <td>
+          <em>
+            {participant.notes}
+          </em>
+        </td>
       </tr>
     );
   });
 
-  var statusDescriptions = _.map(relevantStatuses, function(status) {
+  var statusDescriptions = _.map(relevantStatuses, function(status, statusKey) {
     return (
-      <th key={status}>{statuses[status].text}</th>
+      <th key={statusKey}>{status.text}</th>
     );
   });
 
@@ -189,7 +141,7 @@ function renderParticipants(participants, event, showParticipantInfo, emptyMessa
           <th>Email</th>
           <th>Submission time</th>
           {statusDescriptions}
-          {buttonHeaders}
+          <th>Notes</th>
         </tr>
       </thead>
       <tbody>
@@ -201,23 +153,32 @@ function renderParticipants(participants, event, showParticipantInfo, emptyMessa
 
 var EventParticipants = React.createClass({
   getInitialState: function() {
-    return {
-      selectedParticipantId: null,
-      modalIsOpen: false
-    };
+    return ParticipantDraftStore.getState();
+  },
+  
+  eventId: function() {
+    return parseInt(this.getParams().eventId, 10);
+  },
+  
+  _onChange: function(updated_event_id) {
+    this.setState(ParticipantDraftStore.getState());
+  },
+  
+  componentDidMount: function() {
+    ParticipantDraftStore.listen(this._onChange);
+  },
+  
+  componentWillUnmount: function() {
+    ParticipantDraftStore.unlisten(this._onChange);
   },
 
-  showParticipantInfo(participantId) {
-    this.setState({
-      selectedParticipantId: participantId,
-      modalIsOpen: true
-    });
+  showParticipantInfo(participant) {
+    ParticipantDraftActions.openModal(participant);
   },
 
-  closeModal() {
-    this.setState({
-      modalIsOpen:false
-    });
+  saveParticipantChanges() {
+    ParticipantDraftActions.saveDraft();
+    ParticipantDraftActions.closeModal();
   },
 
   render: function() {
@@ -252,9 +213,10 @@ var EventParticipants = React.createClass({
                             this.showParticipantInfo,
                             "No cancellations yet.")}
         <ParticipantModal event={this.props.event}
-                          participantId={this.state.selectedParticipantId}
+                          participant={this.state.draft}
                           visible={this.state.modalIsOpen}
-                          closeModal={this.closeModal}/>
+                          saveChanges={ParticipantDraftActions.saveDraft}
+                          closeModal={ParticipantDraftActions.closeModal}/>
       </div>);
   },
 });

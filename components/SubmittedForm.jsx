@@ -26,9 +26,9 @@ function renderForm(registrationForm, submittedForm) {
     var key = question.key;
     var isRequired = question.isResponseOptional ? "" : " (required)";
     var header = (
-        <h3>
+        <h4>
           {question.label + isRequired}
-        </h3> 
+        </h4> 
     );
 
     var noResponse = (<em>(no response)</em>);
@@ -76,34 +76,12 @@ function renderForm(registrationForm, submittedForm) {
   });
 }
 
-function getParticipant(registrations, registration_id) {
-  return _.find(registrations, function(reg) {
-    return reg.registration_id === registration_id;
-  });
-
-}
-
 var SubmittedForm = React.createClass({
   render: function() {
-    var participant = getParticipant(this.props.event.registrations,
-                                     this.props.participantId);
-
-    if(!participant) {
-      return (
-        <div>
-          <p>The registration you tried to access does not seem to exist.</p>
-          <Link to="participants" params={{eventId: this.props.event.event_id}}>
-            Back to list of participants
-          </Link>
-        </div>
-      );
-    }
-
     return (
       <div className="submitted-form">
-        <h2>Application submitted by {participant.name}</h2>
-        {renderForm(this.props.event.registration_form,
-                    participant.submitted_form)}
+        {renderForm(this.props.registrationForm,
+                    this.props.submittedForm)}
       </div>
     );
   }

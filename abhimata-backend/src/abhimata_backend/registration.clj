@@ -265,27 +265,11 @@ the event is configured for automatic waiting list handling)."
       {:status 404
        :body "No registration corresponding to that verification code was found."})))
 
-(sc/defschema ParticipantStatus
-  "A valid participant status"
-  (sc/pred #{"application_screened"
-             "registration_fee_paid"
-             "cancelled"
-             "on_waiting_list"
-             "notes"
-             "deposit_paid"}))
-
-(sc/defschema ParticipantStatusUpdate
-  "A status update should update a single field and set it to true or false"
-  { ParticipantStatus sc/Bool })
-
-(defn update-participant-status [id_str status-update]
+(defn update-participant-status [event_id_str registration_id_str status-update]
   (jdbc/with-db-transaction [tr-con (config/get-db-spec) :isolation :serializable]
-    (let [_ (sc/validate ParticipantStatusUpdate status-update)
-          registration_id (Integer. id_str)
-          event_id (:event_id (jdbc/query tr-con 
-                               [(str "select event_id from abhimata_registration "
-                                     "where registration_id = ?") registration_id]
-                               :result-set-fn first))
+    (let [_ (sc/validate schemas/ParticipantStatusUpdate status-update)
+          event_id (Integer. event_id_str)
+          registration_id (Integer. registration_id_str)
           update-res (jdbc/update!
                       tr-con :abhimata_registration
                       status-update

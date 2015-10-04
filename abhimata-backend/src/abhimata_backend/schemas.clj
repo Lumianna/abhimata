@@ -158,6 +158,19 @@
     RegistrationForm
     (sc/pred is-json-registration-form))})
 
+(sc/defschema ParticipantStatusUpdate
+  "Schema for a participant status update"
+
+  {
+   (sc/required-key "cancelled") sc/Bool
+   (sc/required-key "on_waiting_list") sc/Bool
+   (sc/required-key "application_screened") sc/Bool
+   (sc/required-key "deposit_paid") sc/Bool
+   (sc/required-key "registration_fee_paid") sc/Bool
+   (sc/required-key "notes") sc/Str
+   (sc/required-key "waiting_list_priority") NonNegInt
+   })
+
 
 (def default-email-field
   {"type" "text"

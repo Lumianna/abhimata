@@ -167,45 +167,4 @@ RegistrationActions.prototype.getRegistrationStatusByCancellationUUID = function
   });
 };
 
-RegistrationActions.prototype.updateParticipantStatus =
-  function (eventId, participantId, property, value) {
-    var that = this;
-    var data = {};
-    data[property] = value;
-
-    var payload = {
-      eventId: eventId,
-      participantId: participantId,
-      property: property,
-      value: value
-    };
-
-    var draft = require('../stores/EventDraftStore.js').getEventDraft(eventId);
-    var originalValue = _.find(draft.registrations, function(p) {
-      return p.registration_id === participantId;
-    })[property];
-    
-    this.dispatch(payload);
-    
-    $.ajax({ 
-      type: "POST",
-      url: "events-private/" + eventId + "/participants/" + participantId,
-      data: JSON.stringify(data),
-      success: function(data) { 
-        that.actions.updateParticipantStatusSucceeded(payload);
-
-        EventActions.requestEventDetails(eventId);
-      },
-      error: function(data, textStatus) { 
-        var errorPayload = _.merge({}, payload, {
-          value: originalValue
-        });
-        that.actions.updateParticipantStatusFailed(errorPayload);
-      },
-      dataType: "text",
-      contentType: "application/json; charset=utf-8",
-    });
-  };
-
-
 module.exports = alt.createActions(RegistrationActions);
