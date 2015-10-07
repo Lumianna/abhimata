@@ -37,11 +37,11 @@ function getRelevantStatuses(event) {
 }
 
 var ParticipantModal = React.createClass({
-  saveAndClose() {
+  saveAndClose: function() {
     this.props.saveChanges();
     this.props.closeModal();
   },
-  render() {
+  render: function() {
     if(!this.props.participant) {
       return null;
     }
@@ -172,11 +172,11 @@ var EventParticipants = React.createClass({
     ParticipantDraftStore.unlisten(this._onChange);
   },
 
-  showParticipantInfo(participant) {
+  showParticipantInfo: function(participant) {
     ParticipantDraftActions.openModal(participant);
   },
 
-  saveParticipantChanges() {
+  saveParticipantChanges: function() {
     ParticipantDraftActions.saveDraft();
     ParticipantDraftActions.closeModal();
   },
