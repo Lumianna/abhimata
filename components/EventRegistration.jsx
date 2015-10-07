@@ -310,8 +310,8 @@ var EventRegistration = React.createClass({
       );
     }
                     
-    var disabled = _.any(this.state.draft.questions, "error") ||
-                   this.state.draft.submitting;
+    var formHasErrors = _.any(this.state.draft.questions, "error");
+    var disabled = formHasErrors || this.state.draft.submitting;
     var content;
     var serverError = this.state.draft.serverError;
     var alreadySubmitted = this.state.draft.submissionComplete;
@@ -358,6 +358,16 @@ var EventRegistration = React.createClass({
       signup = "Join the waiting list for ";
     }
 
+    var frontendError = null;
+
+    if (formHasErrors) {
+      frontendError = (
+        <Bootstrap.Alert bsStyle="danger">
+          It looks like you forgot to answer one or more questions: check the questions marked red above.
+        </Bootstrap.Alert>
+      );
+    }
+
     return (
       <div className="event-registration">
         <Link to="/">Back to list of events</Link>
@@ -367,6 +377,7 @@ var EventRegistration = React.createClass({
         </h1> 
         {content}
         {serverError}
+        {frontendError}
         {this.state.draft.submissionComplete ? null : submissionButton}
       </div>
     );
