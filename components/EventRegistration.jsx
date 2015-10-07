@@ -85,7 +85,7 @@ var CheckboxGroup = React.createClass({
 
 var RadioGroup = React.createClass({
   render: function() {
-    var name = "radio_" + this.props.key;
+    var name = "radio_" + this.props.id;
     
     var radioButtons = _.map(
       this.props.alternatives, 
