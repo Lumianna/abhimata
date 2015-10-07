@@ -170,7 +170,7 @@ EventActions.prototype.saveEvent = function(event_id) {
       type: "POST",
       url: url,
       data: JSON.stringify(eventData),
-      dataType: "json",
+      dataType: "text",
       success: function() { 
         that.actions.saveEventSucceeded({ 
           event_id: event_id,
