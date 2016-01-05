@@ -1,3 +1,10 @@
+create table abhimata_admin
+(
+  username varchar(50) not null unique,
+  password char(60) not null,
+  constraint admin_pk primary key (username)
+);
+
 create table abhimata_event
 (
   event_id serial,
@@ -16,14 +23,6 @@ create table abhimata_event
   constraint event_owner_fk foreign key(owner) references abhimata_admin(username),
   constraint positive_max_participants CHECK (max_participants > 0),
   constraint positive_max_waiting_list_length CHECK (max_waiting_list_length > 0)
-);
-
-
-create table abhimata_admin
-(
-  username varchar(50) not null unique,
-  password char(60) not null,
-  constraint admin_pk primary key (username)
 );
 
 create table abhimata_registration
