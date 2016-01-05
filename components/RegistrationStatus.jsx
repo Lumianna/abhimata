@@ -30,6 +30,10 @@ var STATUSES = {
 };
 
 function renderStatuses(statusData) {
+  if(statusData.onWaitingList) {
+    return null;
+  }
+
   var statusItems = _.map(statusData, function(statusIsOk, status) {
     var statusConfig = STATUSES[status];
     if(!statusConfig || !statusData.event[statusConfig.showIf]) {
@@ -138,7 +142,7 @@ var RegistrationStatus = React.createClass({
     }
 
     var paymentInfo = null;
-    if (event.has_registration_fee || event.has_deposit) {
+    if (!this.state.status.onWaitingList && (event.has_registration_fee || event.has_deposit)) {
       paymentInfo = (
         <p>
           Please consult the event's webpage for details about payments
