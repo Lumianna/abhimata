@@ -19,10 +19,18 @@ function AuthStore() {
 
 AuthStore.prototype.loginSucceeded = function() {
   this.userIsAuthenticated = true;
+  this.error = null;
 };
 
-AuthStore.prototype.loginFailed = function() {
+AuthStore.prototype.loginFailed = function(statusCode) {
   this.userIsAuthenticated = false;
+  this.error = 'Login failed: ';
+
+  if(statusCode === 401) {
+    this.error += 'wrong user name or password';
+  } else {
+    this.error += 'unknown server error';
+  }
 };
 
 AuthStore.prototype.authenticationFailed = function() {

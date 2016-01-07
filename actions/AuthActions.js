@@ -23,8 +23,8 @@ AuthActions.prototype.login = function (username, password) {
     success: function() { 
       that.actions.loginSucceeded();
     },
-    error: function() { 
-      that.actions.loginFailed();
+    error: function(info) { 
+      that.actions.loginFailed(info.status);
     },
     contentType: "application/json; charset=utf-8"
   });

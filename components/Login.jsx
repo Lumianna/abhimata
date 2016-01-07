@@ -11,9 +11,10 @@ var Login = React.createClass({
 
   getInitialState: function() {
     return { 
-             username : "", 
-             password : "",
-             error : null };
+      username: "", 
+      password: "",
+      error: null
+    };
   },
   
   login: function() {
@@ -29,8 +30,9 @@ var Login = React.createClass({
     AuthStore.unlisten(this._onChange);
   },
 
-  _onChange : function() {
-    if(AuthStore.getState().userIsAuthenticated) {
+  _onChange: function() {
+    this.setState(AuthStore.getState());
+    if(this.state.userIsAuthenticated) {
       this.transitionTo('/admin/events');
     }
   },
@@ -50,7 +52,11 @@ var Login = React.createClass({
   render : function() {
     var errorMessage = null;
     if(this.state.error) {
-      errorMessage = <p className="error-message">{this.state.error}</p>;
+      errorMessage = (
+        <Bootstrap.Alert bsStyle='danger'>
+          {this.state.error}
+        </Bootstrap.Alert>
+      );
     }
     
     return (
