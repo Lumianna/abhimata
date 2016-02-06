@@ -330,7 +330,7 @@ var EventRegistration = React.createClass({
           Your application was successfully submitted, but you still need to verify
           your email address by clicking on a link. We have sent an email with
           the link to the address
-          <em>{ this.state.draft.questions[EMAIL_KEY].value }</em>.
+          <em>{ " " + this.state.draft.questions[EMAIL_KEY].value }</em>.
           If you don't receive the email soon (remember to check your spam folder),
         or if you accidentally gave the wrong address, please contact the event
           organizers.
