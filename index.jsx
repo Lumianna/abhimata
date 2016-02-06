@@ -20,6 +20,7 @@ var EditableForm = require('./components/EditableForm.jsx');
 var EventRegistration = require('./components/EventRegistration.jsx');
 var EventParticipants = require('./components/EventParticipants.jsx');
 var es = require('./components/EventSettings.jsx');
+var ExportData = require('./components/ExportData.jsx');
 var SubmittedForm = require('./components/SubmittedForm.jsx');
 var AdminEventList = require('./components/AdminEventList.jsx');
 var Cancellation = require('./components/Cancellation.jsx');
@@ -53,6 +54,7 @@ var routes = (
         <Route name="general" handler={es.EventGeneral}/>
         <Route name="registrationform" handler={es.RegistrationForm}/>
         <Route name="participants" handler={es.EventParticipants}/>
+        <Route name="exportdata" handler={ExportData}/>
         <Route name="delete" handler={es.DeleteData}/>
       </Route>
       <Redirect to="/admin/events"/>

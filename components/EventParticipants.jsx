@@ -182,9 +182,6 @@ var EventParticipants = React.createClass({
   },
 
   render: function() {
-    var pdfUrl = 'events-private/' +
-                 this.props.event.event_id + '/participants.pdf';
-
     var groupedByCancellation = _.groupBy(this.props.event.registrations, 'cancelled');
     var cancelled = groupedByCancellation[true];
     var groupedByWaitingListStatus = _.groupBy(groupedByCancellation[false], 'on_waiting_list');
@@ -193,10 +190,6 @@ var EventParticipants = React.createClass({
     var participants = groupedByWaitingListStatus[false];
     return ( 
       <div>
-        <a href={pdfUrl}
-           download="participants.pdf">
-          Download forms submitted by participants as a PDF.
-        </a>
         <h2>Participants</h2>
         {renderParticipants(participants,
                             this.props.event,
