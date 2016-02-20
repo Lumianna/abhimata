@@ -34,8 +34,11 @@ function makeEventDraft(event) {
                                             stringifyProp);
 
   draft.hasUnsavedChanges = false;
-  draft.errors = {};
-  
+  draft.uiState = {
+    errors: {},
+    questionExportStatuses: {},
+  };
+
   return draft;
 }
 
@@ -47,8 +50,8 @@ function validateEventDraft(event_id) {
     return null;
   }
 
-  delete event.errors;
   delete event.hasUnsavedChanges;
+  delete event.uiState;
   return event;
 }
 
@@ -83,9 +86,9 @@ EventDraftStore.prototype.onValidateEventProperty = function(payload) {
                                                  payload.property, value);
 
   if(parsedVal.error) {
-    util.setNestedPropSafely(eventDraft.errors, payload.property, parsedVal.error);
+    util.setNestedPropSafely(eventDraft.uiState.errors, payload.property, parsedVal.error);
   } else {
-    util.deleteNestedProp(eventDraft.errors, payload.property);
+    util.deleteNestedProp(eventDraft.uiState.errors, payload.property);
   }
 };
 
@@ -96,9 +99,9 @@ EventDraftStore.prototype.onUpdateEmailReminder = function(payload) {
   var error = _eventSchema[payload.property] &&
   _eventSchema[payload.property](payload.value).error;
   if(error) {
-    eventDraft.errors[payload.property] = error;
+    eventDraft.uiState.errors[payload.property] = error;
   } else {
-    delete eventDraft.errors[payload.property];
+    delete eventDraft.uiState.errors[payload.property];
     eventDraft.hasUnsavedChanges = true;
   }
 
@@ -152,6 +155,14 @@ EventDraftStore.prototype.onSaveEventSucceeded = function(payload) {
   var eventDraft = _eventDrafts[payload.event_id];
 
   eventDraft.hasUnsavedChanges = false;
+};
+
+EventDraftStore.prototype.onSetQuestionExportStatuses = function(payload) {
+  var eventDraft = _eventDrafts[payload.event_id];
+
+  _.each(payload.questions, function(selected, key) {
+    eventDraft.uiState.questionExportStatuses[key] = selected;
+  });
 };
 
 module.exports = alt.createStore(EventDraftStore, 'EventDraftStore');

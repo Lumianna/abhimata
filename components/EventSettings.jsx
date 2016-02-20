@@ -213,13 +213,13 @@ var EventGeneral = React.createClass({
         <ValidatedTextInput 
           label="Maximum number of participants"
           value={this.props.event.max_participants}
-          error={this.props.event.errors.max_participants}
+          error={this.props.event.uiState.errors.max_participants}
           onChange={this._onChange.bind(null, "max_participants")}
           onBlur={this._onBlur.bind(null, "max_participants")}/>
         <ValidatedTextInput 
           label="Maximum length of waiting list"
           value={this.props.event.max_waiting_list_length}
-          error={this.props.event.errors.max_waiting_list_length}
+          error={this.props.event.uiState.errors.max_waiting_list_length}
           onChange={this._onChange.bind(null, "max_waiting_list_length")}
           onBlur={this._onBlur.bind(null, "max_waiting_list_length")}/>
         {checkboxes}
