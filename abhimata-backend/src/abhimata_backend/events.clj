@@ -90,12 +90,32 @@
     :waitingList (vec waiting-list)
     :cancelled (vec cancelled)})))
 
-(defn get-participants-pdf [id]
+(defn filter-answers [selected-questions submitted-form]
+  (into {} (filter (fn [[key val]] (selected-questions key)) submitted-form)))
+
+(defn filter-registration-form [selected-questions form]
+  (let [filtered-questions (into {}
+                             (filter (fn [[key val]] (selected-questions key))
+                               (form "questions")))
+        filtered-order (filter (fn [key] (selected-questions (str key)))
+                               (form "order"))]
+    {"questions" filtered-questions
+     "order"     filtered-order}))
+
+(defn get-participants-pdf [id selected-questions]
   (let [participants (:participants (:body (get-participants id)))
-        submitted-forms (map :submitted_form participants)
+        ;; An empty selected-questions is equivalent to selecting all questions
+        answer-map-fn (if (empty? selected-questions)
+                        :submitted_form
+                        (comp (partial filter-answers selected-questions)
+                          :submitted_form))
+        submitted-forms (map answer-map-fn participants)
         event (unstringify-json-field :registration_form
                                       (get-event-by-id (Integer. id)))
         registration-form (:registration_form event)
+        registration-form (if (empty? selected-questions)
+                            registration-form
+                            (filter-registration-form selected-questions registration-form))
         pdf-doc (export/make-participant-pdf registration-form submitted-forms)]
     {:headers {"Content-Type" "application/pdf",
                "Content-Disposition" "attachment"}
