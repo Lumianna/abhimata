@@ -36,7 +36,11 @@ function makeEventDraft(event) {
   draft.hasUnsavedChanges = false;
   draft.uiState = {
     errors: {},
-    questionExportStatuses: {},
+    exportSettings: {
+      exportAllQuestions: true,
+      oneParticipantPerPage: true,
+      perQuestionToggles: {},
+    },
   };
 
   return draft;
@@ -161,8 +165,14 @@ EventDraftStore.prototype.onSetQuestionExportStatuses = function(payload) {
   var eventDraft = _eventDrafts[payload.event_id];
 
   _.each(payload.questions, function(selected, key) {
-    eventDraft.uiState.questionExportStatuses[key] = selected;
+    eventDraft.uiState.exportSettings.perQuestionToggles[key] = selected;
   });
+};
+
+EventDraftStore.prototype.onSetExportAllQuestions = function(payload) {
+  var eventDraft = _eventDrafts[payload.event_id];
+
+  eventDraft.uiState.exportSettings.exportAllQuestions = payload.value;
 };
 
 module.exports = alt.createStore(EventDraftStore, 'EventDraftStore');
