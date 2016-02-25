@@ -57,6 +57,27 @@ var QuestionPicker = React.createClass({
 
 var RADIO_ALTS = ['Export all questions', 'Select questions to export'];
 
+function makeQueryParameters(exportSettings) {
+  if (exportSettings.exportAllQuestions) {
+    return '';
+  }
+
+  var query = _.chain(exportSettings.perQuestionToggles)
+    .map(function(val, key) {
+      if (!val) {
+        return null;
+      } else {
+        return '' + key + '=true';
+      }
+    })
+    .compact()
+    .value();
+
+  var queryString = query.join('&');
+
+  return _.isEmpty(queryString) ? '' : '?' + queryString;
+}
+
 module.exports = React.createClass({
   handleRadioClick: function(index) {
     EventActions.setExportAllQuestions({
@@ -66,16 +87,16 @@ module.exports = React.createClass({
   },
 
   render: function() {
-    var pdfUrl = 'events-private/' +
-      this.props.event.event_id + '/participants.pdf';
+    var event = this.props.event;
+    var queryParams = makeQueryParameters(event.uiState.exportSettings);
+    var pdfUrl = 'events-private/' + event.event_id + '/participants.pdf' + queryParams;
 
-    var exportAllQuestions = this.props.event.uiState.exportSettings.exportAllQuestions;
+    var exportAllQuestions = event.uiState.exportSettings.exportAllQuestions;
 
     var radioValue = exportAllQuestions ? 0 : 1;
 
     return (
       <div>
-
         <RadioGroup alternatives={RADIO_ALTS}
                     value={radioValue}
                     id='toggleExportAll'

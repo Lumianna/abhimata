@@ -149,9 +149,16 @@ EventDraftStore.prototype.onDeleteEventSucceeded = function(payload) {
 };
 
 EventDraftStore.prototype.onRequestEventDetailsSucceeded = function(payload) {
-  if(!_eventDrafts[payload.event.event_id] || 
-     !_eventDrafts[payload.event.event_id].hasUnsavedChanges) {
-       _eventDrafts[payload.event.event_id] = makeEventDraft(payload.event);
+  var currentDraft = _eventDrafts[payload.event.event_id];
+  if(!currentDraft ||
+     !currentDraft.hasUnsavedChanges) {
+    var newDraft = makeEventDraft(payload.event);
+
+    if (currentDraft) {
+      newDraft.uiState.exportSettings = currentDraft.uiState.exportSettings;
+    }
+
+    _eventDrafts[payload.event.event_id] = newDraft;
   }
 };
 
