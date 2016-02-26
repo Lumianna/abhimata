@@ -14,7 +14,6 @@
 (defn pdf-radio-response [question response]
   (get (question "alternatives") response))
 
-
 (defn pdf-response [question response]
   (let [type (question "type")]
     (cond
@@ -63,18 +62,31 @@
       (map
        (fn [question-key]
          (let [str-key (str question-key)
-               question ((questions str-key) "label")]
+               question (or ((questions str-key) "label")
+                          ((questions str-key) "content"))]
            (replace-newlines-with-space question)))
        order))))
 
+(defn csv-response [question response]
+  (let [type (question "type")]
+    (cond
+      (= type "paragraph") ""
+      (= type "checkbox") (->> (pdf-checkbox-response question response)
+                            (drop 1)
+                            (str/join "; "))
+      (= type "radio") (pdf-radio-response question response)
+      :else response)))
+
 (defn make-csv-row [registration-form submission]
-  (let [order (registration-form "order")]
+  (let [order (registration-form "order")
+        questions (registration-form "questions")]
     (vec
       (map
        (fn [question-key]
          (let [str-key (str question-key)
+               question (questions str-key)
                response (submission str-key)]
-           (replace-newlines-with-space response)))
+           (replace-newlines-with-space (csv-response question response))))
        order))))
 
 (defn make-participant-csv [registration-form submissions]
