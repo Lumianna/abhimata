@@ -1,4 +1,5 @@
 (ns abhimata_backend.pdfexport
+  (:require [clojure.string :as str])
   (:gen-class))
 
 (defn pdf-checkbox-response [question response]
@@ -52,6 +53,9 @@
      (partial pdf-submitted-form registration-form)
      submissions))))
 
+(defn replace-newlines-with-space [s]
+  (str/join (str/split-lines s)))
+
 (defn make-csv-header-row [registration-form]
   (let [order (registration-form "order")
         questions (registration-form "questions")]
@@ -59,8 +63,8 @@
       (map
        (fn [question-key]
          (let [str-key (str question-key)
-               question (questions str-key)]
-           (question "label")))
+               question ((questions str-key) "label")]
+           (replace-newlines-with-space question)))
        order))))
 
 (defn make-csv-row [registration-form submission]
@@ -70,7 +74,7 @@
        (fn [question-key]
          (let [str-key (str question-key)
                response (submission str-key)]
-           response))
+           (replace-newlines-with-space response)))
        order))))
 
 (defn make-participant-csv [registration-form submissions]
