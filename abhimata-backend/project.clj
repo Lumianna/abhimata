@@ -8,6 +8,7 @@
                  [ch.qos.logback/logback-classic "1.1.3"]
                  [org.clojure/data.json "0.2.5"]
                  [clj-pdf "2.0.6"]
+                 [org.clojure/data.csv "0.1.3"]
                  [org.clojure/java.jdbc "0.3.6"]
                  [prismatic/schema "0.3.3"]
                  [clj-time "0.8.0"]

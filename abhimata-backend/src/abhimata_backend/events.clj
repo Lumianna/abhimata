@@ -1,16 +1,18 @@
 (ns abhimata_backend.events
   (:gen-class)
-  (:require [abhimata_backend.schemas :as schemas]
-            [abhimata_backend.config :as config]
-            [abhimata_backend.macros :as macros]
-            [abhimata_backend.pdfexport :as export]
-            [clojure.stacktrace]
-            [clojure.java.jdbc :as jdbc]
-            [clojure.data.json :as json]
-            [clj-pdf.core :as pdf]
-            [schema.core :as sc]
-            [ring.util.response :as resp]
-            [ring.util.io :as ring-io]))
+  (:require
+    [abhimata_backend.schemas :as schemas]
+    [abhimata_backend.config :as config]
+    [abhimata_backend.macros :as macros]
+    [abhimata_backend.pdfexport :as export]
+    [clojure.stacktrace]
+    [clojure.java.jdbc :as jdbc]
+    [clojure.data.json :as json]
+    [clj-pdf.core :as pdf]
+    [clojure.data.csv :as csv]
+    [schema.core :as sc]
+    [ring.util.response :as resp]
+    [ring.util.io :as ring-io]))
 
 (def max-transaction-attempts 5)
 
@@ -90,12 +92,32 @@
     :waitingList (vec waiting-list)
     :cancelled (vec cancelled)})))
 
-(defn get-participants-pdf [id]
+(defn filter-answers [selected-questions submitted-form]
+  (into {} (filter (fn [[key val]] (selected-questions key)) submitted-form)))
+
+(defn filter-registration-form [selected-questions form]
+  (let [filtered-questions (into {}
+                             (filter (fn [[key val]] (selected-questions key))
+                               (form "questions")))
+        filtered-order (filter (fn [key] (selected-questions (str key)))
+                               (form "order"))]
+    {"questions" filtered-questions
+     "order"     filtered-order}))
+
+(defn get-participants-pdf [id selected-questions]
   (let [participants (:participants (:body (get-participants id)))
-        submitted-forms (map :submitted_form participants)
+        ;; An empty selected-questions is equivalent to selecting all questions
+        answer-map-fn (if (empty? selected-questions)
+                        :submitted_form
+                        (comp (partial filter-answers selected-questions)
+                          :submitted_form))
+        submitted-forms (map answer-map-fn participants)
         event (unstringify-json-field :registration_form
                                       (get-event-by-id (Integer. id)))
         registration-form (:registration_form event)
+        registration-form (if (empty? selected-questions)
+                            registration-form
+                            (filter-registration-form selected-questions registration-form))
         pdf-doc (export/make-participant-pdf registration-form submitted-forms)]
     {:headers {"Content-Type" "application/pdf",
                "Content-Disposition" "attachment"}
@@ -103,7 +125,30 @@
      (ring-io/piped-input-stream
       (fn [out-stream]
         (pdf/pdf (vec (concat [{}] pdf-doc))
-                 out-stream)))})) 
+                 out-stream)))}))
+
+(defn get-participants-csv [id selected-questions]
+  (let [participants (:participants (:body (get-participants id)))
+        ;; An empty selected-questions is equivalent to selecting all questions
+        answer-map-fn (if (empty? selected-questions)
+                        :submitted_form
+                        (comp (partial filter-answers selected-questions)
+                          :submitted_form))
+        submitted-forms (map answer-map-fn participants)
+        event (unstringify-json-field :registration_form
+                                      (get-event-by-id (Integer. id)))
+        registration-form (:registration_form event)
+        registration-form (if (empty? selected-questions)
+                            registration-form
+                            (filter-registration-form selected-questions registration-form))
+        csv-doc (export/make-participant-csv registration-form submitted-forms)]
+    {:headers {"Content-Type" "text/csv",
+               "Content-Disposition" "attachment"}
+     :body
+     (ring-io/piped-input-stream
+      (fn [out-stream]
+        (with-open [w (clojure.java.io/writer out-stream)]
+          (csv/write-csv w csv-doc))))}))
 
 (defn get-full-event-data [id]
   (let [event_id (Integer. id)

@@ -107,15 +107,18 @@ var EventSettingsLinks = React.createClass({
           <RRBootstrap.NavItemLink to="participants" params={linkParams}>
             Participants
           </RRBootstrap.NavItemLink>
+          <RRBootstrap.NavItemLink to="exportdata" params={linkParams}>
+            Export data
+          </RRBootstrap.NavItemLink>
           {/*<RRBootstrap.NavItemLink to="emailreminders" params={linkParams}>
               Participants
               </RRBootstrap.NavItemLink>*/}
-              <RRBootstrap.NavItemLink to="delete" params={linkParams}>
-                Delete event 
-              </RRBootstrap.NavItemLink>
-              <Bootstrap.NavItem onSelect={AuthActions.logout}>
-                Log out
-              </Bootstrap.NavItem>
+          <RRBootstrap.NavItemLink to="delete" params={linkParams}>
+            Delete event 
+          </RRBootstrap.NavItemLink>
+          <Bootstrap.NavItem onSelect={AuthActions.logout}>
+            Log out
+          </Bootstrap.NavItem>
         </Bootstrap.Nav>
       </Bootstrap.Navbar> );
   }
@@ -210,13 +213,13 @@ var EventGeneral = React.createClass({
         <ValidatedTextInput 
           label="Maximum number of participants"
           value={this.props.event.max_participants}
-          error={this.props.event.errors.max_participants}
+          error={this.props.event.uiState.errors.max_participants}
           onChange={this._onChange.bind(null, "max_participants")}
           onBlur={this._onBlur.bind(null, "max_participants")}/>
         <ValidatedTextInput 
           label="Maximum length of waiting list"
           value={this.props.event.max_waiting_list_length}
-          error={this.props.event.errors.max_waiting_list_length}
+          error={this.props.event.uiState.errors.max_waiting_list_length}
           onChange={this._onChange.bind(null, "max_waiting_list_length")}
           onBlur={this._onBlur.bind(null, "max_waiting_list_length")}/>
         {checkboxes}
@@ -270,7 +273,7 @@ var RegistrationForm = React.createClass({
       );
     }
 
-    if(this.props.event.registration_open) {
+    if(this.props.event.registration_open || !_.isEmpty(this.props.event.registrations)) {
       return (
         <p>
           You can't edit the registration form while registration is open. As long as no one has registered for the event, you can make the form editable again by closing registration.

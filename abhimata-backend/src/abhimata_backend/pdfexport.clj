@@ -51,3 +51,31 @@
     (map
      (partial pdf-submitted-form registration-form)
      submissions))))
+
+(defn make-csv-header-row [registration-form]
+  (let [order (registration-form "order")
+        questions (registration-form "questions")]
+    (vec
+      (map
+       (fn [question-key]
+         (let [str-key (str question-key)
+               question (questions str-key)]
+           (question "label")))
+       order))))
+
+(defn make-csv-row [registration-form submission]
+  (let [order (registration-form "order")]
+    (vec
+      (map
+       (fn [question-key]
+         (let [str-key (str question-key)
+               response (submission str-key)]
+           response))
+       order))))
+
+(defn make-participant-csv [registration-form submissions]
+  (vec
+    (concat
+      [(make-csv-header-row registration-form)]
+      (map (partial make-csv-row registration-form) submissions))))
+

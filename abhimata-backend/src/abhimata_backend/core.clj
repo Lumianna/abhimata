@@ -77,18 +77,20 @@
 
 (defn event-id-routes [event_id]
   (routes
-   (GET "/" [] (events/get-full-event-data event_id) )
-   (DELETE "/" [] (friend/authorize #{:root} (events/delete-event event_id)))
-   (POST "/" {event-data :json-params} (save-event event_id event-data))
-   (GET "/participants" [] (events/get-participants event_id))
-   (POST "/participants/:registration_id"
-       {{registration_id :registration_id} :params
-        status-update :json-params}
-     (registration/update-participant-status event_id registration_id status-update))
-   (GET "/participants.pdf" [] (events/get-participants-pdf event_id))))
+    (GET "/" [] (events/get-full-event-data event_id) )
+    (DELETE "/" [] (friend/authorize #{:root} (events/delete-event event_id)))
+    (POST "/" {event-data :json-params} (save-event event_id event-data))
+    (GET "/participants" [] (events/get-participants event_id))
+    (POST "/participants/:registration_id"
+      {{registration_id :registration_id} :params
+       status-update :json-params}
+      (registration/update-participant-status event_id registration_id status-update))
+    (GET "/participants.pdf" {selected-questions :query-params}
+      (events/get-participants-pdf event_id selected-questions))
+    (GET "/participants.csv" {selected-questions :query-params}
+      (events/get-participants-csv event_id selected-questions))))
 
-(defroutes admin-routes
-  (GET "/" req (events/get-events-private (friend/current-authentication req)))
+(defroutes admin-routes (GET "/" req (events/get-events-private (friend/current-authentication req)))
   (POST "/" req (events/make-event (friend/current-authentication req)))
   (context "/:id" [id] 
     (friend/wrap-authorize (event-id-routes id)
@@ -96,6 +98,7 @@
 
 (defroutes app-routes
   (GET "/logout" [] (friend/logout* (resp/response "logout ok")))
+  (GET "/query-test" {params :query-params} (do (prn params) (resp/response params)))
   (POST "/login" [] (resp/response "login ok"))
   (GET "/secret" req
        (friend/authorize #{:admin} (resp/response "auth ok")))

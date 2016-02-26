@@ -9,6 +9,7 @@ var EventActions = require('../actions/EventActions.js');
 var PublicEventStore = require('../stores/PublicEventStore.js');
 var EventApplicationStore = require('../stores/EventApplicationStore.js');
 var RegistrationActions = require('../actions/RegistrationActions.js');
+var RadioGroup = require('./RadioGroup.jsx');
 
 var Bootstrap = require('react-bootstrap');
 
@@ -81,40 +82,6 @@ var CheckboxGroup = React.createClass({
     this.props.onChange(newValue);
   },
 });
-
-
-var RadioGroup = React.createClass({
-  render: function() {
-    var name = "radio_" + this.props.id;
-    
-    var radioButtons = _.map(
-      this.props.alternatives, 
-      function(alternative, index) {
-        return ( 
-          <Bootstrap.Input type="radio" 
-                           value={alternative} 
-                           name={name}
-                           key={index}
-                           label={alternative}
-                           checked={index === this.props.value ? true : null}
-                           onChange={this.onChange.bind(this, index)}/> 
-        );
-      }.bind(this));
-
-    return(  
-      <div id={this.props.id} className="radio-group">
-        {radioButtons}
-      </div>
-    );
-  },
-  
-  onChange: function(index, event) {
-    if(this.props.value !== index) {
-      this.props.onChange(index);
-    }
-  },
-});
-
 
 function renderForm(state, updateFunc, validateFunc, clearErrorFunc) {
   if(!state.draft.questions) {

@@ -24,7 +24,9 @@ function EventActions() {
     'deleteEventSucceeded',
     'deleteEventFailed',
     'saveEventSucceeded',
-    'saveEventFailed'
+    'saveEventFailed',
+    'setQuestionExportStatuses',
+    'setExportAllQuestions'
   );
 }
 
