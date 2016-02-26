@@ -90,6 +90,7 @@ module.exports = React.createClass({
     var event = this.props.event;
     var queryParams = makeQueryParameters(event.uiState.exportSettings);
     var pdfUrl = 'events-private/' + event.event_id + '/participants.pdf' + queryParams;
+    var csvUrl = 'events-private/' + event.event_id + '/participants.csv' + queryParams;
 
     var exportAllQuestions = event.uiState.exportSettings.exportAllQuestions;
 
@@ -107,6 +108,10 @@ module.exports = React.createClass({
         <a href={pdfUrl}
            download="participants.pdf">
           Download forms submitted by participants as a PDF.
+        </a><br/>
+        <a href={csvUrl}
+           download="participants.csv">
+          Download forms submitted by participants as a CSV file.
         </a>
       </div>
     );
