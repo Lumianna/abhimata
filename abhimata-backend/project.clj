@@ -11,6 +11,7 @@
                  [org.clojure/data.csv "0.1.3"]
                  [org.clojure/java.jdbc "0.3.6"]
                  [prismatic/schema "0.3.3"]
+                 [crypto-random "1.2.0"]
                  [clj-time "0.8.0"]
                  [hiccup "1.0.5"]
                  [postgresql/postgresql "9.1-901.jdbc4"]

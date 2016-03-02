@@ -5,7 +5,9 @@
     [abhimata_backend.config :as config]
     [abhimata_backend.macros :as macros]
     [abhimata_backend.pdfexport :as export]
+    (cemerick.friend [credentials :as creds])
     [clojure.stacktrace]
+    [crypto.random]
     [clojure.java.jdbc :as jdbc]
     [clojure.data.json :as json]
     [clj-pdf.core :as pdf]
@@ -64,12 +66,16 @@
 
 (defn get-events-private [current-auth]
   (let [owner (:username current-auth)
-        query-str (if (= owner "root")
+        roles (:roles current-auth)
+        query-str (if (:root roles)
                     ["select * from abhimata_event"]
-                    [(str "select * from abhimata_event "
-                          "where owner = ?") owner])]
+                    (if (:guest roles)
+                     ["select * from abhimata_event where guest_user = ?" owner]
+                     ["select * from abhimata_event where owner = ?" owner]))]
     (resp/response
-     (map (partial unstringify-json-field :registration_form)
+     (map (comp
+            (fn [event] (dissoc event :guest_password))
+            (partial unstringify-json-field :registration_form))
           (jdbc/query (config/get-db-spec)
                       query-str)))))
 
@@ -152,12 +158,13 @@
 
 (defn get-full-event-data [id]
   (let [event_id (Integer. id)
-        event (get-event-by-id event_id)
+        event (unstringify-json-field :registration_form (get-event-by-id event_id))
         {registrations :body} (get-participants event_id)]
     (if event
       (resp/response
-       (assoc (unstringify-json-field :registration_form event)
-              :registrations (:applications registrations)))
+        (dissoc
+          (assoc event :registrations (:applications registrations))
+          :guest_password))
       {:status 404, 
        :body (str "Event " id " does not exist.")})))
 
@@ -173,5 +180,13 @@
 
 (defn make-event [current-auth]
   (let [owner (:username current-auth)
-        event (assoc schemas/default-event :owner owner)]
+        randstr (crypto.random/url-part 5)
+        event (assoc schemas/default-event :owner owner :guest_user randstr)]
   (resp/response (jdbc/insert! (config/get-db-spec) :abhimata_event event))))
+
+(defn set-guest-password [event_id password]
+  (let [hash (creds/hash-bcrypt password)]
+    (resp/response
+      (jdbc/update! (config/get-db-spec) :abhimata_event
+        {:guest_password hash}
+        ["event_id = ?" event_id]))))

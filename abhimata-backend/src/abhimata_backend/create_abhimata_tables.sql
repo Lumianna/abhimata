@@ -19,6 +19,8 @@ create table abhimata_event
   has_registration_fee boolean not null,
   has_deposit boolean not null,
   registration_form text not null,
+  guest_user varchar(50) unique not null,
+  guest_password char(60),
   constraint event_pk primary key (event_id),
   constraint event_owner_fk foreign key(owner) references abhimata_admin(username),
   constraint positive_max_participants CHECK (max_participants > 0),
