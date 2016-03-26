@@ -55,7 +55,7 @@ function validateEventDraft(event_id) {
   }
 
   delete event.hasUnsavedChanges;
-  delete event.guestPasswordIsSet;
+  delete event.guest_password_is_set;
   delete event.uiState;
   return event;
 }
