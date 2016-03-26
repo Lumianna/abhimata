@@ -113,6 +113,9 @@ var EventSettingsLinks = React.createClass({
           {/*<RRBootstrap.NavItemLink to="emailreminders" params={linkParams}>
               Participants
               </RRBootstrap.NavItemLink>*/}
+          <RRBootstrap.NavItemLink to="guestaccount" params={linkParams}>
+            Guest account
+          </RRBootstrap.NavItemLink>
           <RRBootstrap.NavItemLink to="delete" params={linkParams}>
             Delete event 
           </RRBootstrap.NavItemLink>

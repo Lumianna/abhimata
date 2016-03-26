@@ -6,6 +6,7 @@ var $ = require('jquery');
 function EventActions() {
   this.generateActions(
     'updateEventProperty',
+    'updateUiStateProperty',
     'validateEventProperty',
     'updateQuestionProperty',
     'addQuestion',
