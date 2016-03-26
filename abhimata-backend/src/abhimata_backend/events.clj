@@ -196,10 +196,10 @@
     (resp/response
       (jdbc/update! (config/get-db-spec) :abhimata_event
         {:guest_password hash}
-        ["event_id = ?" event_id]))))
+        ["event_id = ?" (Integer. event_id)]))))
 
 (defn clear-guest-password [event_id]
   (resp/response
       (jdbc/update! (config/get-db-spec) :abhimata_event
         {:guest_password nil}
-        ["event_id = ?" event_id])))
+        ["event_id = ?" (Integer. event_id)])))
