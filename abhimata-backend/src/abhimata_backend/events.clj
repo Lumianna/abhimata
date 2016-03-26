@@ -31,10 +31,10 @@
 
 (defn get-event-by-id [id & {:keys [connection]
                               :or {connection (config/get-db-spec)}}]
-  (jdbc/query 
-   connection
-   ["select * from abhimata_event where event_id = ?" id]
-   :result-set-fn first))
+  (let [event (jdbc/query
+                connection ["select * from abhimata_event where event_id = ?" id]
+                :result-set-fn first)]
+    (unstringify-json-field :registration_form event)))
 
 (defn get-event-owner [event-id]
   (:owner (get-event-by-id (Integer. event-id))))
@@ -62,6 +62,12 @@
     {:status 404
      :body "Event does not exist."}))
 
+(defn process-event-for-frontend [event]
+  "Process event (remove password hashes etc.) before returning it to the frontend"
+  (let [guest-password-is-set (not (nil? (:guest_password event)))
+        processed-event (dissoc event :guest_password)
+        processed-event (assoc processed-event :guest_password_is_set guest-password-is-set)]
+    processed-event))
 
 (defn get-events-private [current-auth]
   (let [owner (:username current-auth)
@@ -73,7 +79,7 @@
                      ["select * from abhimata_event where owner = ?" owner]))]
     (resp/response
      (map (comp
-            (fn [event] (dissoc event :guest_password))
+            process-event-for-frontend
             (partial unstringify-json-field :registration_form))
           (jdbc/query (config/get-db-spec)
                       query-str)))))
@@ -140,8 +146,7 @@
                         (comp (partial filter-answers selected-questions)
                           :submitted_form))
         submitted-forms (map answer-map-fn participants)
-        event (unstringify-json-field :registration_form
-                                      (get-event-by-id (Integer. id)))
+        event (get-event-by-id (Integer. id))
         registration-form (:registration_form event)
         registration-form (if (empty? selected-questions)
                             registration-form
@@ -157,13 +162,12 @@
 
 (defn get-full-event-data [id]
   (let [event_id (Integer. id)
-        event (unstringify-json-field :registration_form (get-event-by-id event_id))
+        event (get-event-by-id event_id)
         {registrations :body} (get-participants event_id)]
     (if event
       (resp/response
-        (dissoc
-          (assoc event :registrations (:applications registrations))
-          :guest_password))
+        (process-event-for-frontend
+          (assoc event :registrations (:applications registrations))))
       {:status 404, 
        :body (str "Event " id " does not exist.")})))
 
@@ -193,3 +197,9 @@
       (jdbc/update! (config/get-db-spec) :abhimata_event
         {:guest_password hash}
         ["event_id = ?" event_id]))))
+
+(defn clear-guest-password [event_id]
+  (resp/response
+      (jdbc/update! (config/get-db-spec) :abhimata_event
+        {:guest_password nil}
+        ["event_id = ?" event_id])))

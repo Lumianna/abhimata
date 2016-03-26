@@ -116,6 +116,8 @@
       (friend/authorize #{:admin} (save-event event_id event-data)))
     (POST "/guest-password" {{:keys [password]} :json-params}
       (friend/authorize #{:admin} (events/set-guest-password event_id password)))
+    (POST "/clear-guest-password" []
+      (friend/authorize #{:admin} (events/clear-guest-password event_id)))
     (GET "/participants" [] (events/get-participants event_id))
     (POST "/participants/:registration_id"
       {{registration_id :registration_id} :params
