@@ -82,8 +82,9 @@ var EventSettings = React.createClass({
 
     return (
       <div className="event-settings">
-        <Link to="/admin/events">Back to list of events</Link>
-        <h1>{this.state.title}</h1> 
+        <h1>
+          <Link to="/admin/events">Events</Link> / {this.state.title}
+        </h1>
         <EventSettingsLinks eventId={this.getParams().eventId}/>
         <RouteHandler event={this.state}/>
         {saveButton}
