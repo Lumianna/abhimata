@@ -22,6 +22,17 @@ module.exports = React.createClass({
     var password1 = this.props.event.uiState.guestAccountSettings.password1;
     var password2 = this.props.event.uiState.guestAccountSettings.password2;
 
+    var clearPasswordButton = null;
+
+    if (this.props.event.guest_password_is_set) {
+      clearPasswordButton = (
+        <Bootstrap.Button onClick={this.disableGuestAccount}
+                          bsStyle='primary'>
+          Disable guest account
+        </Bootstrap.Button>
+      );
+    }
+
     return (
       <div>
         <h2>Guest account <span className={this.getGuestAccountStatusColor()}>{this.getGuestAccountStatus()}</span></h2>
@@ -44,6 +55,7 @@ module.exports = React.createClass({
                             disabled={!this.isPasswordValid(password1, password2)}>
             Reset password
           </Bootstrap.Button>
+          {clearPasswordButton}
         </form>
       </div>
     );
@@ -85,6 +97,10 @@ module.exports = React.createClass({
 
   getGuestUserName() {
     return this.props.event.guest_user;
+  },
+
+  disableGuestAccount() {
+    EventActions.clearGuestPassword(this.props.event.event_id);
   }
 
 });
