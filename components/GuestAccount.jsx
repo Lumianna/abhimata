@@ -58,8 +58,7 @@ module.exports = React.createClass({
   },
 
   resetPassword: function () {
-    console.log("Reset password. " + this.props.event.uiState.guestAccountSettings.password1);
-    console.log("Reset password. " + this.props.event.uiState.guestAccountSettings.password2);
+    EventActions.setGuestPassword(this.props.event.event_id, this.props.event.uiState.guestAccountSettings.password1);
   },
 
   isPasswordValid(password1, password2) {
@@ -67,34 +66,25 @@ module.exports = React.createClass({
   },
 
   getGuestAccountStatus() {
-    return "Enabled";
-    //return this.props.event.guestAccountEnabled ? "Enabled" : "Disabled";
+    return this.props.event.guest_password_is_set ? "Enabled" : "Disabled";
   },
 
   getGuestAccountStatusColor() {
-    return "guest-account-enabled";
-    //return this.props.event.guestAccountEnabled ? "guest-account-enabled" : "guest-account-disabled";
+    return this.props.event.guest_password_is_set ? "guest-account-enabled" : "guest-account-disabled";
   },
 
   getDescription() {
-    return "To grant someone read-only access to this event, give them the guest username and password. " +
-      "They will be able to read but not modify event settings and participant information.";
-
-    /*if (!this.props.event.isGuestAccountPasswordSet) {
+    if (!this.props.event.guest_password_is_set) {
       return "To enable guest account, set a password.";
-    }
-    else if (!this.props.event.guestAccountEnabled) {
-      return "Guest account is currently disabled. To enable guest account, click the button below.";
     }
     else {
       return "To grant someone read-only access to this event, give them the guest username and password. " +
         "They will be able to read but not modify event settings and participant information.";
-    }*/
+    }
   },
 
   getGuestUserName() {
-    return "guest12345";
-    // return this.props.event.guestUserName;
+    return this.props.event.guest_user;
   }
 
 });
