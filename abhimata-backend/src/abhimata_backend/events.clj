@@ -7,7 +7,6 @@
     [abhimata_backend.pdfexport :as export]
     (cemerick.friend [credentials :as creds])
     [clojure.stacktrace]
-    [crypto.random]
     [clojure.java.jdbc :as jdbc]
     [clojure.data.json :as json]
     [clj-pdf.core :as pdf]
@@ -178,10 +177,14 @@
        (resp/response
         (jdbc/delete! tr-con :abhimata_event ["event_id = ?" event_id]))))))
 
+(def alphanumeric "abcdefghijklmnopqrstuvwxyz1234567890")
+(defn rand-alphanum [length]
+  (apply str (repeatedly length #(rand-nth alphanumeric))))
+
 (defn make-event [current-auth]
   (let [owner (:username current-auth)
-        randstr (crypto.random/url-part 5)
-        event (assoc schemas/default-event :owner owner :guest_user randstr)]
+        randstr (rand-alphanum 5)
+        event (assoc schemas/default-event :owner owner :guest_user (str "guest_" randstr))]
   (resp/response (jdbc/insert! (config/get-db-spec) :abhimata_event event))))
 
 (defn set-guest-password [event_id password]
