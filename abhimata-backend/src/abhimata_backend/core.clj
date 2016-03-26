@@ -114,8 +114,8 @@
     (DELETE "/" [] (friend/authorize #{:root} (events/delete-event event_id)))
     (POST "/" {event-data :json-params}
       (friend/authorize #{:admin} (save-event event_id event-data)))
-    (POST "/guest-password" {{:keys [password]} :json-params}
-      (friend/authorize #{:admin} (events/set-guest-password event_id password)))
+    (POST "/guest-password" {params :json-params}
+      (friend/authorize #{:admin} (events/set-guest-password event_id (params "password"))))
     (POST "/clear-guest-password" []
       (friend/authorize #{:admin} (events/clear-guest-password event_id)))
     (GET "/participants" [] (events/get-participants event_id))
