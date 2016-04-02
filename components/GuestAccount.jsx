@@ -26,10 +26,13 @@ module.exports = React.createClass({
 
     if (this.props.event.guest_password_is_set) {
       clearPasswordButton = (
-        <Bootstrap.Button onClick={this.disableGuestAccount}
-                          bsStyle='primary'>
-          Disable guest account
-        </Bootstrap.Button>
+        <div>
+          <hr/>
+          <Bootstrap.Button onClick={this.disableGuestAccount}
+                            bsStyle='primary'>
+            Disable guest account
+          </Bootstrap.Button>
+        </div>
       );
     }
 
@@ -39,7 +42,9 @@ module.exports = React.createClass({
 
         <p>{this.getDescription()}</p>
 
-        <p>Username: {this.getGuestUserName()}</p>
+        <p className="bold-text">Username: {this.getGuestUserName()}</p>
+
+        <hr/>
 
         <form>
           <Bootstrap.Input type="password"
