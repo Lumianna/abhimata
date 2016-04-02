@@ -203,6 +203,7 @@ corresponding to that code (or a 404 if no such registration is found)."
    :abhimata_registration
    {:on_waiting_list false}
    ["registration_id = ?" (:registration_id participant)])
+  (log/info (str "Promoting participant " (:registration_id participant) " from waiting list"))
   (send-waiting-list-promotion-email! participant connection)
   (email/flush-emails!))
 
@@ -213,13 +214,14 @@ corresponding to that code (or a 404 if no such registration is found)."
   (let [sorted-waiting-list (jdbc/query
                              connection
                              [(str "select * from abhimata_registration"
-                                   " where on_waiting_list = true"
-                                   " order by submission_date, registration_id")])
+                                   " where on_waiting_list = true and event_id = ?"
+                                   " order by submission_date, registration_id") event_id])
         { :keys [max_participants automate_waiting_list] } (events/get-event-by-id
                                                             event_id :connection connection)
         participants (:body (events/get-participants event_id :connection connection))
         number-to-be-promoted (- max_participants (count (:participants participants)))]
     (when automate_waiting_list
+      (log/info (str "Automatically promoting " number-to-be-promoted " people from the waiting list of event " event_id))
       (doseq [participant (take number-to-be-promoted sorted-waiting-list)]
         (promote-person-on-waiting-list! participant :connection connection))
       (email/flush-emails!))))
@@ -266,6 +268,7 @@ the event is configured for automatic waiting list handling)."
        :body "No registration corresponding to that verification code was found."})))
 
 (defn update-participant-status [event_id_str registration_id_str status-update]
+  (log/info (str "Applying status update " status-update " to participant " registration_id_str " in event " event_id_str))
   (jdbc/with-db-transaction [tr-con (config/get-db-spec) :isolation :serializable]
     (let [_ (sc/validate schemas/ParticipantStatusUpdate status-update)
           event_id (Integer. event_id_str)
