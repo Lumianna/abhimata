@@ -41,6 +41,10 @@ function makeEventDraft(event) {
       oneParticipantPerPage: true,
       perQuestionToggles: {},
     },
+    guestAccountSettings: {
+      password1: "",
+      password2: ""
+    }
   };
 
   return draft;
@@ -81,6 +85,12 @@ EventDraftStore.prototype.onUpdateEventProperty = function(payload) {
 
   util.setNestedProp(eventDraft, payload.property, payload.value);
   eventDraft.hasUnsavedChanges = true;
+};
+
+EventDraftStore.prototype.onUpdateUiStateProperty = function(payload) {
+  var eventDraftUiState = _eventDrafts[payload.event_id].uiState;
+
+  util.setNestedProp(eventDraftUiState, payload.property, payload.value);
 };
 
 EventDraftStore.prototype.onValidateEventProperty = function(payload) {

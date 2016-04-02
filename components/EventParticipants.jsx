@@ -100,8 +100,12 @@ function renderParticipants(participants, event, showParticipantInfo, emptyMessa
       );
     });
 
+    var isEmailVerified = participant.email_verified;
+
     var email = participant.email + ' ';
-    email += participant.email_verified ? '(verified)' : '(not verified)';
+    email += isEmailVerified ? '(verified)' : '(not verified)';
+
+    var verificationStatusColor = isEmailVerified ? 'email-verified' : 'email-unverified';
 
     return ( 
       <tr key={participant.registration_id}> 
@@ -111,7 +115,7 @@ function renderParticipants(participants, event, showParticipantInfo, emptyMessa
             {participant.name}
           </Bootstrap.Button>
         </td>
-        <td>
+        <td className={verificationStatusColor}>
           {email}
         </td>
         <td>

@@ -6,6 +6,7 @@ var $ = require('jquery');
 function EventActions() {
   this.generateActions(
     'updateEventProperty',
+    'updateUiStateProperty',
     'validateEventProperty',
     'updateQuestionProperty',
     'addQuestion',
@@ -23,6 +24,10 @@ function EventActions() {
     'createEventFailed',
     'deleteEventSucceeded',
     'deleteEventFailed',
+    'clearGuestPasswordSucceeded',
+    'clearGuestPasswordFailed',
+    'setGuestPasswordSucceeded',
+    'setGuestPasswordFailed',
     'saveEventSucceeded',
     'saveEventFailed',
     'setQuestionExportStatuses',
@@ -203,6 +208,54 @@ EventActions.prototype.deleteEvent = function(event_id) {
     },
     error: function() { 
       that.actions.deleteEventFailed();
+    },
+    contentType: "application/json; charset=utf-8"
+  });
+};
+
+EventActions.prototype.setGuestPassword = function(event_id, password) {
+  this.dispatch(event_id);
+  var that = this;
+
+  var url = "events-private/" + event_id + "/guest-password";
+  $.ajax({
+    type: "POST",
+    url: url,
+    data: JSON.stringify({
+      password: password
+    }),
+    dataType: "json",
+    success: function() {
+      that.actions.setGuestPasswordSucceeded({
+        event_id: event_id
+      });
+      that.actions.requestEventDetails(event_id);
+    },
+    error: function() {
+      that.actions.setGuestPasswordFailed();
+    },
+    contentType: "application/json; charset=utf-8"
+  });
+};
+
+EventActions.prototype.clearGuestPassword = function(event_id, password) {
+  this.dispatch(event_id);
+  var that = this;
+
+  var url = "events-private/" + event_id + "/clear-guest-password";
+  $.ajax({
+    type: "POST",
+    url: url,
+    data: JSON.stringify({}),
+    dataType: "json",
+    success: function() {
+      that.actions.clearGuestPasswordSucceeded({
+        event_id: event_id
+      });
+      that.actions.requestEventDetails(event_id);
+    },
+    error: function() {
+      that.actions.clearGuestPasswordFailed();
     },
     contentType: "application/json; charset=utf-8"
   });

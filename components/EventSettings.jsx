@@ -82,8 +82,9 @@ var EventSettings = React.createClass({
 
     return (
       <div className="event-settings">
-        <Link to="/admin/events">Back to list of events</Link>
-        <h1>{this.state.title}</h1> 
+        <h1>
+          <Link to="/admin/events">Events</Link> / {this.state.title}
+        </h1>
         <EventSettingsLinks eventId={this.getParams().eventId}/>
         <RouteHandler event={this.state}/>
         {saveButton}
@@ -113,6 +114,9 @@ var EventSettingsLinks = React.createClass({
           {/*<RRBootstrap.NavItemLink to="emailreminders" params={linkParams}>
               Participants
               </RRBootstrap.NavItemLink>*/}
+          <RRBootstrap.NavItemLink to="guestaccount" params={linkParams}>
+            Guest account
+          </RRBootstrap.NavItemLink>
           <RRBootstrap.NavItemLink to="delete" params={linkParams}>
             Delete event 
           </RRBootstrap.NavItemLink>
