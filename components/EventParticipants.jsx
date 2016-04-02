@@ -194,17 +194,17 @@ var EventParticipants = React.createClass({
     var participants = groupedByWaitingListStatus[false];
     return ( 
       <div>
-        <h2>Participants</h2>
+        <h2>Participants ({participants.length}/{this.props.event.max_participants})</h2>
         {renderParticipants(participants,
                             this.props.event,
                             this.showParticipantInfo,
                             "No applications yet.")}
-        <h2>Waiting list</h2>
+        <h2>Waiting list ({waitingList.length}/{this.props.event.max_waiting_list_length})</h2>
         {renderParticipants(waitingList,
                             this.props.event,
                             this.showParticipantInfo,
                             "The waiting list is currently empty.")}
-        <h2>Cancelled or rejected</h2>
+        <h2>Cancelled or rejected ({cancelled.length})</h2>
         {renderParticipants(cancelled,
                             this.props.event,
                             this.showParticipantInfo,
