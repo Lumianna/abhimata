@@ -53,7 +53,7 @@ module.exports = React.createClass({
           <Bootstrap.Button onClick={this.resetPassword}
                             bsStyle='primary'
                             disabled={!this.isPasswordValid(password1, password2)}>
-            Reset password
+            {this.getResetPasswordButtonText()}
           </Bootstrap.Button>
           {clearPasswordButton}
         </form>
@@ -101,6 +101,10 @@ module.exports = React.createClass({
 
   disableGuestAccount() {
     EventActions.clearGuestPassword(this.props.event.event_id);
+  },
+
+  getResetPasswordButtonText() {
+    return this.props.event.guest_password_is_set ? "Reset password" : "Set password";
   }
 
 });
