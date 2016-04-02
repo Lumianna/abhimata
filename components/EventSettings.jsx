@@ -82,6 +82,12 @@ var EventSettings = React.createClass({
 
     return (
       <div className="event-settings">
+        <Bootstrap.Button onClick={AuthActions.logout}
+                          bsStyle="primary"
+                          className="logout-button">
+          Logout
+        </Bootstrap.Button>
+
         <h1>
           <Link to="/admin/events">Events</Link> / {this.state.title}
         </h1>
@@ -120,9 +126,6 @@ var EventSettingsLinks = React.createClass({
           <RRBootstrap.NavItemLink to="delete" params={linkParams}>
             Delete event 
           </RRBootstrap.NavItemLink>
-          <Bootstrap.NavItem onSelect={AuthActions.logout}>
-            Log out
-          </Bootstrap.NavItem>
         </Bootstrap.Nav>
       </Bootstrap.Navbar> );
   }

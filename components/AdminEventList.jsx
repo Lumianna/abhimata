@@ -54,6 +54,12 @@ var AdminEventList = React.createClass({
 
     return ( 
       <div>
+        <Bootstrap.Button onClick={AuthActions.logout}
+                          bsStyle="primary"
+                          className="logout-button">
+          Logout
+        </Bootstrap.Button>
+
         <h1>Events</h1>
         <Bootstrap.ListGroup>
           {eventTitles}
@@ -61,9 +67,6 @@ var AdminEventList = React.createClass({
         <Bootstrap.Button onClick={this.createNewEvent}
                           bsStyle="primary">
           Create new event
-        </Bootstrap.Button>
-        <Bootstrap.Button onClick={AuthActions.logout}>
-          Log out
         </Bootstrap.Button>
       </div>
     );
